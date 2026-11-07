@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benevolent House Training Portal</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--brown:#7B4B2A;--brown-dk:#5E3920;--green:#2E7D4F;--green-dk:#226040;--cream:#FBF7F2;--sand:#F1E8DD;--ink:#2B2320;--muted:#6B5F58;--line:#E3D7C9;--white:#fff;--red:#B23A3A;--gold:#C9A227}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.55}
+a{color:var(--green)}
+button{font-family:inherit;font-size:1rem;cursor:pointer}
+.btn{display:inline-flex;align-items:center;gap:.5rem;border:0;border-radius:10px;padding:.8rem 1.25rem;font-weight:700;background:var(--green);color:#fff;transition:background .15s}
+.btn:hover{background:var(--green-dk)}
+.btn.brown{background:var(--brown)}.btn.brown:hover{background:var(--brown-dk)}
+.btn.ghost{background:#fff;color:var(--brown);border:2px solid var(--brown)}
+.btn.ghost:hover{background:var(--sand)}
+.btn.sm{padding:.5rem .85rem;font-size:.9rem;border-radius:8px}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+header.top{background:#fff;border-bottom:4px solid var(--brown);position:sticky;top:0;z-index:20}
+.wrap{max-width:1040px;margin:0 auto;padding:0 16px}
+.topbar{display:flex;align-items:center;gap:14px;padding:10px 0;flex-wrap:wrap}
+.topbar img{height:54px;width:auto}
+@media(max-width:640px){.topbar img{height:40px}.topbar{padding:6px 0;gap:8px}.brand{font-size:1rem}.brand small{display:none}.user-chip{font-size:.78rem;padding:.25rem .6rem;max-width:55vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pmeta span:first-child{display:none}}
+.brand{font-weight:700;color:var(--brown);font-size:1.15rem;line-height:1.1}
+.brand small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:3px}
+.topbar .spacer{flex:1}
+.user-chip{background:var(--sand);border-radius:999px;padding:.35rem .85rem;font-size:.9rem;color:var(--brown-dk)}
+main{padding:28px 0 60px}
+h1{font-size:1.9rem;color:var(--brown);margin:.2rem 0 .5rem;line-height:1.2}
+h2{font-size:1.4rem;color:var(--brown);margin:1.6rem 0 .6rem}
+h3{font-size:1.1rem;color:var(--green-dk);margin:1.2rem 0 .4rem}
+p.lead{font-size:1.1rem;color:var(--muted);margin-top:0}
+.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:20px 22px;margin:14px 0;box-shadow:0 1px 2px rgba(60,40,20,.04)}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.tcard{background:#fff;border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:8px;position:relative}
+.tcard .code{font-size:.75rem;letter-spacing:.06em;color:var(--muted);text-transform:uppercase}
+.tcard h3{margin:0;font-size:1.05rem;color:var(--brown)}
+.tcard .meta{font-size:.85rem;color:var(--muted)}
+.tcard .foot{margin-top:auto;display:flex;align-items:center;justify-content:space-between;gap:8px;padding-top:6px}
+.pill{display:inline-block;border-radius:999px;padding:.2rem .65rem;font-size:.75rem;font-weight:700}
+.pill.live{background:#E3F3E9;color:var(--green-dk)}
+.pill.soon{background:var(--sand);color:var(--brown-dk)}
+.pill.done{background:var(--green);color:#fff}
+.pill.req{background:#FFF4D6;color:#7A5A00}
+.pill.ext{background:#EAF0FB;color:#2B4C8C}
+.section-title{display:flex;align-items:baseline;gap:12px;margin-top:2rem}
+.section-title span{color:var(--muted);font-size:.9rem}
+/* module */
+.progress{height:10px;background:var(--sand);border-radius:999px;overflow:hidden;margin:10px 0 4px}
+.progress i{display:block;height:100%;background:var(--green);width:0;transition:width .3s}
+.pmeta{display:flex;justify-content:space-between;font-size:.85rem;color:var(--muted)}
+.slide{background:#fff;border:1px solid var(--line);border-radius:14px;padding:26px 28px;margin-top:14px;min-height:300px}
+.slide h2{margin-top:0}
+.slide .kicker{font-size:.8rem;letter-spacing:.08em;text-transform:uppercase;color:var(--green-dk);font-weight:700}
+.slide ul{padding-left:1.25rem}.slide li{margin:.35rem 0}
+.ref{display:inline-block;background:var(--sand);color:var(--brown-dk);border-radius:6px;padding:.1rem .45rem;font-size:.8rem;font-weight:700;margin-left:.3rem;vertical-align:middle}
+.callout{border-left:5px solid var(--green);background:#F3FAF5;padding:12px 16px;border-radius:0 10px 10px 0;margin:14px 0}
+.callout.brown{border-color:var(--brown);background:#FBF3EC}
+.callout.red{border-color:var(--red);background:#FCF1F1}
+.nav{display:flex;align-items:center;gap:10px;margin-top:16px;flex-wrap:wrap}
+.nav .spacer{flex:1}
+.timer{font-size:.85rem;color:var(--muted)}
+table.t{width:100%;border-collapse:collapse;margin:10px 0;font-size:.95rem}
+table.t th,table.t td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+table.t th{background:var(--sand);color:var(--brown-dk)}
+/* interactives */
+.flips{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:12px 0}
+.flip{perspective:900px;min-height:150px;cursor:pointer}
+.flip .in{position:relative;width:100%;height:100%;min-height:150px;transition:transform .5s;transform-style:preserve-3d}
+.flip.on .in{transform:rotateY(180deg)}
+.flip .f,.flip .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:center;text-align:center;font-weight:700}
+.flip .f{background:var(--brown);color:#fff}
+.flip .b{background:#fff;border:2px solid var(--green);color:var(--ink);transform:rotateY(180deg);font-weight:400;font-size:.85rem;line-height:1.35;overflow:auto}
+.acc{border:1px solid var(--line);border-radius:10px;margin:8px 0;background:#fff}
+.acc>button{width:100%;text-align:left;background:none;border:0;padding:12px 14px;font-weight:700;color:var(--brown);display:flex;justify-content:space-between}
+.acc>div{display:none;padding:0 14px 14px;color:var(--ink)}
+.acc.open>div{display:block}
+.check{background:#FFFBF2;border:1px solid #EBDDB4;border-radius:12px;padding:16px;margin:14px 0}
+.check .q{font-weight:700;margin-bottom:8px}
+.opt{display:block;width:100%;text-align:left;background:#fff;border:2px solid var(--line);border-radius:10px;padding:10px 12px;margin:6px 0}
+.opt:hover{border-color:var(--brown)}
+.opt.right{border-color:var(--green);background:#E3F3E9}
+.opt.wrong{border-color:var(--red);background:#FCECEC}
+.opt:disabled{cursor:default}
+.fb{margin-top:8px;font-size:.95rem}
+.sort{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.sort button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:.4rem .9rem}
+.sort button.sel{border-color:var(--brown);background:var(--sand)}
+.bins{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.bin{border:2px dashed var(--line);border-radius:10px;padding:10px;min-height:80px}
+.bin h4{margin:0 0 6px;font-size:.9rem;color:var(--brown)}
+.bin .chip{display:inline-block;background:var(--sand);border-radius:999px;padding:.2rem .6rem;margin:3px;font-size:.85rem}
+.bin .chip.ok{background:#E3F3E9}.bin .chip.bad{background:#FCECEC}
+/* forms */
+label{display:block;font-weight:700;margin:12px 0 4px;color:var(--brown-dk)}
+input[type=text],input[type=email],select,textarea{width:100%;padding:.7rem .8rem;border:2px solid var(--line);border-radius:10px;font-size:1rem;font-family:inherit;background:#fff}
+input:focus,select:focus,textarea:focus{outline:none;border-color:var(--green)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media(max-width:640px){.row{grid-template-columns:1fr}.bins{grid-template-columns:1fr}.slide{padding:18px}}
+.sig{border:2px solid var(--line);border-radius:10px;background:#fff;touch-action:none;width:100%;height:160px;display:block}
+.small{font-size:.85rem;color:var(--muted)}
+.score{font-size:2.4rem;font-weight:700;color:var(--green);margin:0}
+.score.fail{color:var(--red)}
+.hidden{display:none!important}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.7rem 1.1rem;border-radius:10px;z-index:50;font-size:.95rem;opacity:0;transition:opacity .2s;pointer-events:none}
+.toast.show{opacity:1}
+/* certificate */
+#cert{background:#fff;border:10px double var(--brown);padding:34px 40px;max-width:820px;margin:16px auto;text-align:center;color:var(--ink)}
+#cert img{height:80px}
+#cert h1{font-size:2rem;color:var(--brown);margin:14px 0 4px}
+#cert .name{font-size:1.7rem;font-weight:700;color:var(--green-dk);margin:14px 0 4px;border-bottom:2px solid var(--line);display:inline-block;padding:0 30px 4px}
+#cert .sigs{display:flex;justify-content:space-around;margin-top:30px;gap:20px;flex-wrap:wrap}
+#cert .sigs div{min-width:200px;border-top:1px solid var(--ink);padding-top:6px;font-size:.9rem}
+#cert .sigs img{height:50px;display:block;margin:0 auto 2px}
+#cert .sigs div{border-top:0}#cert .sigs div b{display:block;border-top:1px solid var(--ink);padding-top:6px}
+@media print{header.top,.noprint,footer,.stepper,.progress,.pmeta{display:none!important}body{background:#fff}#cert{border-width:8px;margin:0;max-width:none}.slide{border:0;padding:0}}
+footer{border-top:1px solid var(--line);padding:18px 0;color:var(--muted);font-size:.85rem;text-align:center}
+.stepper{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 2px}
+.stepper b{width:28px;height:28px;border-radius:50%;background:var(--sand);color:var(--brown-dk);display:inline-flex;align-items:center;justify-content:center;font-size:.8rem}
+.stepper b.done{background:var(--green);color:#fff}
+.stepper b.cur{background:var(--brown);color:#fff}
+.readbtn{background:#fff;border:2px solid var(--green);color:var(--green-dk);border-radius:999px;padding:.4rem .9rem;font-weight:700}
+.readbtn.on{background:var(--green);color:#fff}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap topbar">
+  <img src="bh-logo.png" alt="Benevolent House" onerror="this.style.display='none'">
+  <div class="brand">Benevolent House<small>Training Portal · Foster, Kinship &amp; Staff Training</small></div>
+  <div class="spacer"></div>
+  <span class="user-chip" id="userChip">Not signed in</span>
+  <button class="btn ghost sm noprint" id="homeBtn">Home</button>
+</div></header>
+<main class="wrap" id="app">
+  <section id="view-home"></section>
+  <section id="view-start" class="hidden"></section>
+  <section id="view-module" class="hidden"></section>
+  <section id="view-quiz" class="hidden"></section>
+  <section id="view-ack" class="hidden"></section>
+  <section id="view-cert" class="hidden"></section>
+</main>
+<footer class="wrap">Benevolent House · Training records are kept by Benevolent House for licensing and T3C credentialing. Questions: call your case manager or the Benevolent House office at (214) 774-4871.</footer>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>
+/* ===================== Benevolent House Training Portal: content ===================== */
+const PORTAL_VERSION = "1.0 (Nov 2026)";
+const JOTFORM_ID = "263097317610052";
+const JOTFORM_SUBMIT_URL = "https://submit.jotform.com/submit/" + JOTFORM_ID;
+const STORE_KEY = "bh_portal_v1";
+
+/* Catalog: every Benevolent House training. status: live = can be taken here now,
+   record = completed live/outside and recorded here, soon = online version in progress. */
+const CATALOG = [
+ {code:"T3C-PP", title:"T3C Policy and Procedure Training (Core Session)", hours:2, who:"All caregivers, all staff, contracted providers", freq:"Once, then annual 1-hour refresher", status:"live", group:"T3C Credential", module:"t3c_core", req:true,
+  blurb:"What changes and what stays the same under Texas Child-Centered Care. Required before Benevolent House operates under its Active Full Credential."},
+ {code:"T3C-PP-S", title:"T3C Policy and Procedure Training (Staff Session)", hours:1, who:"Directors and case managers", freq:"Once, then annual", status:"live", group:"T3C Credential", module:"t3c_staff", req:true,
+  blurb:"The procedures staff carry out: referrals, reviews and confirmations, documenting engagement, aftercare, credentialing homes, and CQI data."},
+ {code:"TST-8", title:"Trauma Systems Therapy for Foster Care (TST-FC) Pre-Service", hours:8, who:"All caregivers and staff", freq:"Once, before serving a child under T3C", status:"record", group:"T3C Credential", req:true,
+  blurb:"Benevolent House's Treatment Model. Four modules: The Alarm System, Find the Pattern, In the Moment, Safe and Responsive."},
+ {code:"TST-Q", title:"TST-FC Ongoing Training (Quarterly Sessions)", hours:1, who:"All caregivers and staff", freq:"Four 1-hour sessions a year, one each quarter", status:"soon", group:"T3C Credential", req:true,
+  blurb:"Q1 The Alarm System · Q2 Find the Pattern · Q3 In the Moment · Q4 Safe and Responsive. Session 4 is the current session (October to December 2026)."},
+ {code:"HT", title:"Human Trafficking Prevention (DFPS Universal)", hours:1, who:"All caregivers and staff", freq:"Pre-service or orientation, then every 12 months", status:"record", group:"Required Annual", req:true,
+  blurb:"Delivered by a Benevolent House trainer who completed the DFPS Train-the-Trainer course. Recorded here after the live session."},
+ {code:"LT-OR", title:"Licensed Therapist Orientation", hours:2, who:"Contracted Licensed Therapist", freq:"Once, then annual refresher", status:"soon", group:"T3C Credential",
+  blurb:"Orientation to the oversight role for the Mental & Behavioral Health Support Services Package."},
+ {code:"ORI", title:"Benevolent House Orientation", hours:2, who:"New caregivers and staff", freq:"Once", status:"soon", group:"Pre-Service",
+  blurb:"Who we are, how we work, who to call, and what the first 30 days look like."},
+ {code:"PAPH", title:"Preventing and Addressing Physical Harm (PAPH)", hours:2, who:"All caregivers and staff", freq:"Pre-service, then as required", status:"soon", group:"Required Annual",
+  blurb:"Safe responses in the moment, in TST-FC language."},
+ {code:"SP", title:"Suicide Prevention and Screening", hours:1, who:"All caregivers and staff", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Warning signs, how to ask, and what to do next."},
+ {code:"ASK", title:"AS+K (Ask about Suicide to Save a Life)", hours:3, who:"Staff", freq:"As required", status:"record", group:"Required Annual",
+  blurb:"Outside training. Upload your certificate to record it."},
+ {code:"CC", title:"Cultural Competence", hours:1, who:"All caregivers and staff", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Serving every child and family with respect for culture, language, faith, and identity."},
+ {code:"CYB", title:"Cybersecurity Awareness", hours:1, who:"All caregivers and staff", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Protecting children's information on phones, email, and shared computers."},
+ {code:"DFPS-CYB", title:"DFPS Cybersecurity Training Certification (Form 4530)", hours:1, who:"Staff with DFPS system access", freq:"Annual, by June 30", status:"record", group:"Required Annual",
+  blurb:"Taken on the DFPS site. Record the completion date here and keep Form 4530 on file."},
+ {code:"DOC", title:"Documentation and STAR Health", hours:1, who:"Caregivers and staff", freq:"Pre-service, then as needed", status:"soon", group:"Pre-Service",
+  blurb:"What to write down, where it goes, and how STAR Health services are arranged."},
+ {code:"EDP", title:"Emergency and Disaster Preparedness and Water Safety", hours:1, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Your home's plan for fire, weather, and water, and what Benevolent House needs on file."},
+ {code:"EC", title:"Empowering Care", hours:1, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Normalcy, voice, and choice for children in care."},
+ {code:"SIS", title:"Safe Infant Sleep", hours:1, who:"Caregivers of infants", freq:"Before caring for an infant", status:"soon", group:"Pre-Service",
+  blurb:"Safe sleep practices required for every infant in care."},
+ {code:"SIR", title:"Serious Incident Reporting", hours:1, who:"All caregivers and staff", freq:"Pre-service, then annual", status:"soon", group:"Required Annual",
+  blurb:"What counts as a serious incident, who to call, and the timeframes."},
+ {code:"SCPC", title:"Supporting Children Through Purposeful Care", hours:1, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Purposeful, trauma-informed daily care."},
+ {code:"MC", title:"Medical Consent (Form 2759)", hours:1, who:"Caregivers who are medical consenters", freq:"Before serving as medical consenter", status:"record", group:"Pre-Service",
+  blurb:"DFPS medical consent training. Record the completion date here."},
+ {code:"CPR", title:"CPR and First Aid", hours:4, who:"All caregivers", freq:"Per certificate expiration", status:"record", group:"Outside Certificates",
+  blurb:"Outside hands-on certification. Record the completion and expiration dates."},
+];
+
+/* ============ T3C Core Session slides ============ */
+const T3C_CORE = {
+ title:"T3C at Benevolent House: What Changes and What Stays the Same",
+ code:"T3C-PP", hours:2, trainer:"Tanya Orr, LCPAA",
+ slides:[
+ {k:"Welcome", ref:"T3C-1", h:"Why T3C, and what this training is",
+  html:`<p>Texas is replacing the old service levels with <b>Service Packages</b> that are matched to what each child needs. This system is called <b>Texas Child-Centered Care</b>, or T3C.</p>
+  <p>Benevolent House applied for, and has been approved for, a T3C Full Credential. Before we operate under the Active credential, every caregiver and staff member completes this training.</p>
+  <div class="callout"><b>What stays the same:</b> Minimum Standards, the Benevolent House Policy and Operations Manual, and the way Benevolent House supports its families.</div>
+  <div class="callout brown"><b>What is added:</b> the <b>T3C Service Delivery Addendum</b>, policies T3C-1 through T3C-13. Where the addendum and the manual differ for a child served under T3C, the addendum controls.</div>
+  <p>This session takes about two hours. You can stop and come back; your place is saved on this device. At the end there is a 10-question Knowledge Check (8 of 10 to pass, retakes allowed) and an Acknowledgment to sign.</p>`},
+ {k:"Welcome", ref:"T3C-1", h:"How to use this training",
+  html:`<ul><li>Each page has a short reading time before <b>Next</b> turns on. Use <b>Read aloud</b> if you prefer to listen.</li>
+  <li>Tap the cards and the questions as you go. They are practice, not the test.</li>
+  <li>The policy number in the corner tells you where to look in the addendum.</li>
+  <li>Keep the <b>Caregiver Quick Reference</b> (near the end) in your foster home binder.</li></ul>
+  <p>Have a question while you work? Write it down. Your case manager will go over questions at your next visit, and you can also call or text at any time.</p>`},
+ {k:"The packages", ref:"T3C-1, T3C-4", h:"The packages Benevolent House provides",
+  html:`<p>Benevolent House holds the credential for two Service Packages and one Add-On Service. Tap each card.</p>
+  <div class="flips">
+   <div class="flip"><div class="in"><div class="f">T3C Basic Foster Family Home Support Services</div><div class="b">A trauma-informed foster home with community-based services, routine therapy as the Service Planning team decides, and coordination of medical, dental, educational, and behavioral health care.</div></div></div>
+   <div class="flip"><div class="in"><div class="f">Mental &amp; Behavioral Health Support Services</div><div class="b">For a child who has, or is being evaluated for, an emotional, conduct, or behavioral disorder and needs routine clinical support such as therapy, education, or medication.</div></div></div>
+   <div class="flip"><div class="in"><div class="f">Kinship Caregiver Support Services Add-On</div><div class="b">Added support for a relative or fictive kin caregiver whose home Benevolent House has verified. It is added on top of the child's primary package.</div></div></div>
+  </div>
+  <div class="callout"><b>Key rule:</b> a child is served under a package only in a home that holds the <b>credential</b> for that package. A home serving Mental &amp; Behavioral Health also holds the Basic credential, so the child can step down without changing homes.</div>`},
+ {k:"The packages", ref:"T3C-4", h:"How a child is admitted",
+  html:`<p>Every admission follows the same guidelines:</p>
+  <ul><li>The package fits the child's needs and strengths, shown by the CANS 3.0 Assessment (when done), the Application for Placement, and the judgment of the child's team.</li>
+  <li>A pre-placement visit happened when it was appropriate, and it went well.</li>
+  <li>Admissions staff reviewed the child's information and matched the child to a credentialed home.</li>
+  <li>The Program Director approves each admission. For Mental &amp; Behavioral Health, the Treatment Director is consulted.</li></ul>
+  <p><b>Before or at placement</b>, your case manager tells you the child's known triggers, early warning signs, and what has helped the child calm in the past.</p>
+  <div class="check" data-q="1"><div class="q">Self-check: A child placed in your home under Mental &amp; Behavioral Health later needs less support. What happens?</div>
+   <button class="opt" data-ok="0">The child must move to a different home that holds the Basic credential.</button>
+   <button class="opt" data-ok="1">The child can move to the Basic package and stay in your home, because your home holds both credentials.</button>
+   <button class="opt" data-ok="0">The child is discharged from Benevolent House.</button><div class="fb"></div></div>`},
+ {k:"Treatment Model", ref:"T3C-2", h:"TST-FC in daily practice",
+  html:`<p><b>Trauma Systems Therapy for Foster Care (TST-FC)</b> is the Treatment Model for every child Benevolent House serves under T3C. It is not a program we add on; it is the basis for the Service Plan and for what you do at home.</p>
+  <p>Every Service Plan is written in TST-FC terms:</p>
+  <div class="flips">
+   <div class="flip"><div class="in"><div class="f">Priority problem</div><div class="b">The one pattern the team is working on first.</div></div></div>
+   <div class="flip"><div class="in"><div class="f">Known triggers</div><div class="b">What tends to set off the child's alarm, in the child's own words where possible.</div></div></div>
+   <div class="flip"><div class="in"><div class="f">Signals of safety</div><div class="b">What tells the child "you are safe here": a tone, a routine, a phrase, a place.</div></div></div>
+   <div class="flip"><div class="in"><div class="f">Four stages of behavior</div><div class="b">A strategy for each stage: regulating, revving, re-experiencing, reconstituting. Many children name them calm, getting upset, alarm is on, coming back.</div></div></div>
+  </div>
+  <p><b>What we ask of caregivers every day:</b> predictability, pre-teaching, staying neutral, time-in, and restorative discipline. Punishment that shames, isolates, or repeats a child's experience of harm is not used.</p>`},
+ {k:"Treatment Model", ref:"T3C-2, T3C-3", h:"The child knows the plan too",
+  html:`<p>Children are partners in their own care. Each child is told about the model in words that fit the child's age, and builds a <b>Managing Emotions Guide</b> with the caregiver.</p>
+  <table class="t"><tr><th>Age</th><th>How awareness is built</th></tr>
+  <tr><td>Birth through 4</td><td>Through experience: predictable routines, naming feelings out loud, signals of safety. No explanation needed.</td></tr>
+  <tr><td>5 through 11</td><td>Simple words: big feelings are the body's alarm, and the adults have a plan to help. The child builds the Managing Emotions Guide with you.</td></tr>
+  <tr><td>12 through 17</td><td>How stress and trauma affect the brain and body, the four stages, and how the Service Plan uses them. The youth builds the guide and takes part in reviews.</td></tr>
+  <tr><td>Young adults</td><td>The model as skills for adult life. The young adult leads updates to their own guide and goals.</td></tr></table>
+  <div class="callout"><b>Keep it alive in the ordinary day:</b> use the child's own words for the stages, name feelings out loud, pre-teach what is coming, keep the routines the child helped set, and offer a do-over instead of a lecture. The child's guide, <i>What Helps Me Feel Safe</i>, stays where the child can reach it.</div>`},
+ {k:"Treatment Model", ref:"T3C-3", h:"Practice: explain it to a child",
+  html:`<p>Read <i>What Helps Me Feel Safe</i> (Attachment A in the addendum) the way you would read it with a child in your home. Then open each line below and compare.</p>
+  <div class="acc"><button>"Big feelings are my body's alarm." <span>+</span></button><div>The alarm is not bad and the child is not bad. It goes off because of what happened before. Our job is to help it turn off sooner.</div></div>
+  <div class="acc"><button>"The grown-ups in my house have a plan." <span>+</span></button><div>The plan is the Managing Emotions Guide. The child helped write it, so the child knows what the adults will do.</div></div>
+  <div class="acc"><button>"I can say what helps and what does not." <span>+</span></button><div>At every monthly visit the case manager asks the child what is helping. Youth and young adults can say so at any time, not only at the visit.</div></div>
+  <div class="check" data-q="2"><div class="q">Self-check: Who builds the Managing Emotions Guide?</div>
+   <button class="opt" data-ok="0">The case manager, alone, from the file.</button>
+   <button class="opt" data-ok="1">The caregiver and the child together.</button>
+   <button class="opt" data-ok="0">The therapist, after the first serious incident.</button><div class="fb"></div></div>`},
+ {k:"Assessment and plans", ref:"T3C-5", h:"The schedule you should know by heart",
+  html:`<table class="t"><tr><th></th><th>Basic</th><th>Mental &amp; Behavioral Health</th></tr>
+  <tr><td><b>CANS 3.0 Assessment</b> (over age 3)</td><td>At least every <b>12 months</b></td><td>At least every <b>90 days</b></td></tr>
+  <tr><td><b>Service Plan review</b></td><td>At least every <b>6 months</b></td><td>At least every <b>90 days</b></td></tr>
+  <tr><td><b>Therapy</b></td><td>As set by the Service Planning team</td><td>Individual, family, and group as set by the team and the Licensed Therapist. You take part as needed.</td></tr>
+  <tr><td><b>Crisis response</b></td><td>On-call staff 24/7</td><td>Case manager level or above responds 24/7, in person, by phone, or by video</td></tr></table>
+  <p>A child with the Kinship Add-On follows the schedule of the child's primary package.</p>
+  <div class="check" data-q="3"><div class="q">Self-check: How often is the Service Plan reviewed for a child in the Mental &amp; Behavioral Health package?</div>
+   <button class="opt" data-ok="1">At least every 90 days.</button>
+   <button class="opt" data-ok="0">At least every six months.</button>
+   <button class="opt" data-ok="0">Once a year.</button><div class="fb"></div></div>`},
+ {k:"Assessment and plans", ref:"T3C-5", h:"Therapy, services, and your part",
+  html:`<ul><li>Therapy and other Medicaid-covered services are arranged through <b>STAR Health</b>. The case manager sends authorization requests.</li>
+  <li>For Mental &amp; Behavioral Health, therapy is provided by a Licensed Therapist with experience treating children with emotional, behavioral, and conduct disorders. Caregivers take part in therapy as the therapist asks.</li>
+  <li>The case manager is the child's education liaison: enrollment, testing requests, ARD and Section 504 meetings.</li>
+  <li><b>Caregivers</b> provide transportation, logistical support, and keep a record of each service.</li></ul>
+  <div class="callout red"><b>When a service is denied, delayed, or cannot be found:</b> tell your case manager <b>right away</b>. The case manager documents it and notifies the caseworker within <b>3 business days</b>, and looks for community resources. Nobody waits for the next review.</div>
+  <p><b>Safety and crisis plans.</b> Every child in Mental &amp; Behavioral Health has a written safety and crisis plan tied to the four stages. It is shared with you, the therapist, and on-call staff, and reviewed at each 90-day review and after any serious incident.</p>
+  <p><b>Normalcy.</b> Clothing, hygiene products, hair care, birthdays, holidays, and graduations are part of the plan, not extras.</p>`},
+ {k:"Continued stay", ref:"T3C-6, T3C-7", h:"Continued stay and length of service",
+  html:`<p>At each review, the directors confirm <b>in writing</b> that the package still fits the child and that the child is benefitting from the Treatment Model. The signed confirmation goes to the caseworker within 15 business days.</p>
+  <table class="t"><tr><th>Package</th><th>Anticipated length of service</th></tr>
+  <tr><td>Basic</td><td>12 to 18 months, until permanency</td></tr>
+  <tr><td>Mental &amp; Behavioral Health</td><td>6 to 12 months, reviewed every 90 days; then the child moves to Basic in the same home</td></tr>
+  <tr><td>Kinship Add-On</td><td>6 to 12 months after verification, then 6 months of Aftercare</td></tr></table>
+  <div class="callout"><b>No child is moved because a number of months has passed.</b> Length of service is individualized. These are planning numbers, not deadlines.</div>`},
+ {k:"Engagement", ref:"T3C-8", h:"Engaging the child, family, and support network",
+  html:`<p>To the extent it is safe and appropriate, and in collaboration with the caseworker, we reach out to and include the people who matter to the child: parents, siblings, relatives, former caregivers, teachers, coaches, mentors, friends.</p>
+  <ul><li><b>Ask the child</b> who matters to them. When a child names a relative or supportive person, <b>tell your case manager</b>, who shares it with the caseworker promptly, and no later than the next monthly visit.</li>
+  <li>The caseworker confirms who may safely be contacted. Court orders and the visitation plan are followed.</li>
+  <li>Approved people are invited to Service Plan meetings in person, by phone, or by video, scheduled around their availability.</li>
+  <li>Caregivers support approved contact, including sibling contact, and share news about school, health, and daily life as approved.</li></ul>
+  <div class="check" data-q="4"><div class="q">Self-check: A child tells you about an aunt the child would like to see. You:</div>
+   <button class="opt" data-ok="0">Arrange a visit yourself that weekend.</button>
+   <button class="opt" data-ok="1">Tell the case manager, who shares it with the caseworker.</button>
+   <button class="opt" data-ok="0">Tell the child that contact is not allowed.</button><div class="fb"></div></div>`},
+ {k:"Break", ref:"", h:"Take a break",
+  html:`<p>You are about halfway. Stand up, get some water, and come back when you are ready. Your place is saved.</p><p class="small">The break is not counted toward the two hours of instruction.</p>`},
+ {k:"Home credentialing", ref:"T3C-10", h:"How your home is credentialed",
+  html:`<p>A child is served under a T3C package only in a home Benevolent House has <b>credentialed</b> for that package. Credentialing is in addition to verification under Minimum Standards.</p>
+  <table class="t"><tr><th>Credential</th><th>What the home needs</th></tr>
+  <tr><td>Basic</td><td>Current verification in good standing, with all pre-service or annual training, background checks, and home documents current. Each caregiver completed the 8-hour TST-FC training, passed the Final Knowledge Check, and is current on the quarterly TST-FC sessions. Each caregiver completed this T3C policy training and the Universal Human Trafficking Prevention Training. The most recent quarterly foster home evaluation shows the caregiver understands and uses the Treatment Model.</td></tr>
+  <tr><td>Mental &amp; Behavioral Health</td><td>Everything for Basic, plus the home is verified to provide treatment services for emotional disorders and holds both credentials. Caregivers have completed the emergency behavior intervention training required by Minimum Standards for treatment services, suicide prevention training, and psychotropic medication training, and are able to take part in therapy with the child, attend multiple meetings, and respond immediately.</td></tr>
+  <tr><td>Kinship Add-On</td><td>The caregiver is a relative or fictive kin of the child, the home is verified, and it holds the credential for the child's primary package.</td></tr></table>
+  <p>The case manager completes the <b>Foster Family Home T3C Credential Record</b> (Attachment D), the Case Manager Supervisor reviews it, and the Program Director approves. If something is missing, you receive a written list and your case manager helps you finish it.</p>`},
+ {k:"Home credentialing", ref:"T3C-10", h:"Keeping it current",
+  html:`<ul><li><b>Re-credentialing every 12 months</b>, in the month of the original credential, using the last four quarterly evaluations, the annual training record (including the four quarterly TST-FC sessions), and outcomes for children served.</li>
+  <li><b>Changes during the year</b> (a move, someone joins or leaves the household, a training lapses, a corrective action plan, an investigation finding) trigger a review.</li>
+  <li>If a home no longer meets the requirements, the credential is suspended and a written plan is made to restore it.</li></ul>
+  <div class="callout"><b>Keeping your training current keeps your home credentialed.</b> That is the single most important thing you control.</div>
+  <div class="check" data-q="5"><div class="q">Self-check: A foster family home is re-credentialed for T3C:</div>
+   <button class="opt" data-ok="1">Every 12 months.</button>
+   <button class="opt" data-ok="0">Every five years.</button>
+   <button class="opt" data-ok="0">Only when a problem comes up.</button><div class="fb"></div></div>`},
+ {k:"Paid alternate care", ref:"T3C-12", h:"Paid Intermittent Alternate Care (respite)",
+  html:`<p>Intermittent Alternate Care is planned 24-hour care for a child by another verified Benevolent House home, lasting <b>more than 72 consecutive hours</b>. Under T3C, Benevolent House pays for it.</p>
+  <ul><li>Up to <b>7 paid days per child each fiscal year</b> (September through August).</li>
+  <li><b>How to ask:</b> request it from your case manager, at least <b>10 days ahead</b> when you can. The case manager approves and notifies the caseworker.</li>
+  <li><b>Who can provide it:</b> a verified Benevolent House home whose caregivers completed TST-FC. For a Mental &amp; Behavioral Health child, a home verified for treatment services.</li>
+  <li><b>What goes with the child:</b> the Managing Emotions Guide, the safety and crisis plan, medication and medical information, and the schedule.</li>
+  <li><b>Payment:</b> the alternate caregiver is paid the daily rate for the child's package, <b>and you keep receiving your rate for the same days</b>. Both are paid on the regular payment date.</li></ul>
+  <p class="small">Exceptions: the 7 days are used up; the stay is 72 hours or less; or the child was moved from the home because of an investigation, a safety plan, or a caregiver's request for discharge. In those cases the caregiver who provides the care is still paid for the days of care provided.</p>
+  <div class="check" data-q="6"><div class="q">Self-check: When a caregiver uses approved paid Intermittent Alternate Care:</div>
+   <button class="opt" data-ok="0">Only the caregiver providing the care is paid.</button>
+   <button class="opt" data-ok="0">The two families settle payment between themselves.</button>
+   <button class="opt" data-ok="1">Both caregivers are paid by Benevolent House for the same days.</button><div class="fb"></div></div>`},
+ {k:"Aftercare and kinship", ref:"T3C-9, T3C-11", h:"Aftercare Services",
+  html:`<p>Every child leaving the Mental &amp; Behavioral Health package, and every kinship caregiver at permanency, leaves with an Aftercare plan. The Basic package does not include Aftercare Services; discharge planning for those children follows the Service Plan and the Policy and Operations Manual.</p>
+  <table class="t"><tr><th></th><th>Mental &amp; Behavioral Health</th><th>Kinship Add-On</th></tr>
+  <tr><td>When</td><td>Before every discharge from the package, successful or not. Planning starts at admission.</td><td>When the child reaches permanency with the kinship caregiver.</td></tr>
+  <tr><td>Follow-up</td><td>Calls or meetings <b>twice a month for 6 months</b></td><td><b>Weekly</b> the first month, then twice a month, for 6 months, plus a kinship support group</td></tr></table>
+  <p>The plan (Attachment C) lists the STAR Health Service Coordinator and Aftercare Case Manager contacts, referrals for continued services, the child's Education Portfolio, and first appointments. A copy goes to the child when appropriate, the receiving family, and the caseworker.</p>`},
+ {k:"Aftercare and kinship", ref:"T3C-11", h:"Kinship caregiver support",
+  html:`<p>Kinship caregivers step in for a child they know and love, often with little notice. Benevolent House adapts to the caregiver, not the other way around.</p>
+  <ul><li>Staff meet you in your home promptly after the referral and give you a written list of each verification step, who helps, and target dates.</li>
+  <li>Staff help with background checks, the home study, inspections, pre-service training, and finding resources for what the home needs.</li>
+  <li>Meetings and training are scheduled around work and family, including <b>evenings and weekends</b>.</li>
+  <li>Staff know the state and federal benefits a kinship caregiver may qualify for and help with the applications.</li>
+  <li>A <b>kinship support plan</b> is reviewed at every monthly visit.</li>
+  <li><b>24-hour response.</b> You receive the on-call number at the first visit.</li></ul>`},
+ {k:"Safety topics", ref:"T3C-13", h:"Human trafficking prevention",
+  html:`<p>All staff and caregivers complete the DFPS Universal Human Trafficking Prevention Training, delivered live by a Benevolent House trainer, during orientation (staff) or pre-service (caregivers), and then every 12 months. Every child also receives prevention information in a way that fits the child's age:</p>
+  <table class="t"><tr><th>Age</th><th>What the child is taught</th></tr>
+  <tr><td>Under 5</td><td>Body safety and safe adults, taught by the caregiver through everyday routines.</td></tr>
+  <tr><td>5 through 11</td><td>Body safety, safe and unsafe secrets, trusted adults, and safety online and with phones.</td></tr>
+  <tr><td>12 and older</td><td>What trafficking is, how people are recruited in person and online, healthy and unhealthy relationships, the added risk when a youth leaves placement without permission, and how to get help, including the National Human Trafficking Hotline at 1-888-373-7888 or by text at 233733.</td></tr></table>
+  <div class="callout red"><b>Any concern</b> that a child has been or is being recruited or trafficked is reported <b>immediately</b> to the Texas Abuse Hotline (1-800-252-5400) and the caseworker, and handled as a serious incident. Call your case manager or the on-call line too.</div>`},
+ {k:"Safety topics", ref:"Quick Reference", h:"Call right away when",
+  html:`<p>Sort each situation: does it need a call <b>right away</b>, or can it wait for the <b>next visit</b>? Tap a situation, then tap the box it belongs in.</p>
+  <div class="sorter" data-q="7">
+   <div class="sort">
+    <button data-bin="now">A child is missing</button><button data-bin="later">The child made the honor roll</button><button data-bin="now">You used an emergency behavior intervention</button><button data-bin="now">An adult relative moved into your home</button><button data-bin="later">You want to request respite for next month</button><button data-bin="now">A child mentions a new online "boyfriend" who sends money</button>
+   </div>
+   <div class="bins"><div class="bin" data-bin="now"><h4>Call right away</h4></div><div class="bin" data-bin="later"><h4>Share at the next visit or by message</h4></div></div>
+   <div class="fb"></div>
+  </div>
+  <p class="small">Note: a respite request is not an emergency, but ask at least 10 days ahead when you can.</p>`},
+ {k:"Quick Reference", ref:"Section 5", h:"Caregiver Quick Reference",
+  html:`<p>Print this page or save it for your foster home binder. The full T3C Service Delivery Addendum is in your foster home binder and available from your case manager at any time.</p>
+  <h3>What we ask of you</h3>
+  <ul><li>Use TST-FC every day: routines, pre-teaching, staying neutral, time-in, and signals of safety.</li><li>Build the Managing Emotions Guide with the child and keep it up to date.</li><li>Take the child to every appointment and keep a record of each service.</li><li>Tell your case manager right away if a service is denied, delayed, or cannot be found.</li><li>Support Normalcy and approved contact with parents, siblings, and relatives.</li><li>Tell your case manager when a child names a relative or another person who matters to them.</li><li>Come to Service Plan meetings and share what you see at home.</li><li>Keep your training current. It keeps your home credentialed.</li></ul>
+  <h3>What you can count on from Benevolent House</h3>
+  <ul><li>A case manager who visits every month and coaches you in the model.</li><li>On-call staff 24 hours a day, 7 days a week.</li><li>Up to 7 days of paid Intermittent Alternate Care per child each fiscal year. Ask at least 10 days ahead when you can.</li><li>For kinship caregivers: help with verification and benefits, and meetings on evenings and weekends.</li></ul>
+  <h3>Call your case manager or the on-call line right away when</h3>
+  <ul><li>A child is in crisis, is hurt, or is missing.</li><li>There is a serious incident or you use an emergency behavior intervention.</li><li>You have any concern that a child is being recruited or trafficked.</li><li>Something changes in your household.</li></ul>
+  <p><button class="btn ghost sm" onclick="window.print()">Print this page</button></p>`},
+ {k:"Knowledge Check", ref:"Section 6", h:"Ready for the Knowledge Check",
+  html:`<p>You have completed the instruction. Next is the 10-question Knowledge Check. You need <b>8 of 10</b> to pass. If you score below 8, you will see which items you missed, review them, and take the check again.</p>
+  <p>After you pass, you will sign the Acknowledgment and your certificate will be ready to print or save. Benevolent House receives your completion record automatically.</p>`}
+ ],
+ quiz:[
+  {q:"Under T3C, the Treatment Model Benevolent House uses for every child is:", a:["A level system with points","Trauma Systems Therapy for Foster Care","Chosen by each foster home"], k:1, ref:"T3C-2"},
+  {q:"A child in the Mental & Behavioral Health Support Services Package has a Service Plan review at least every:", a:["90 days","Six months","12 months"], k:0, ref:"T3C-5"},
+  {q:"A child over age 3 in the Basic package receives a CANS 3.0 Assessment at least every:", a:["90 days","Six months","12 months"], k:2, ref:"T3C-5"},
+  {q:"The Managing Emotions Guide is built:", a:["By the case manager alone","By the caregiver and the child together","Only after a serious incident"], k:1, ref:"T3C-3"},
+  {q:"When a service in the Service Plan is denied or cannot be found, the caregiver:", a:["Waits for the next Service Plan review","Tells the case manager right away","Stops asking for the service"], k:1, ref:"T3C-5"},
+  {q:"A child in the Mental & Behavioral Health package who no longer needs that level of service:", a:["Must move to a new home","Can move to the Basic package and stay in the same home","Is discharged from Benevolent House"], k:1, ref:"T3C-6"},
+  {q:"A foster family home is re-credentialed for T3C:", a:["Every 12 months","Every five years","Only when a problem comes up"], k:0, ref:"T3C-10"},
+  {q:"When a caregiver uses approved paid Intermittent Alternate Care:", a:["Only the caregiver providing the care is paid","The two families settle payment between themselves","Both caregivers are paid by Benevolent House for the same days"], k:2, ref:"T3C-12"},
+  {q:"After a child leaves the Mental & Behavioral Health package, aftercare follow-up continues for:", a:["30 days","Six months","There is no follow-up"], k:1, ref:"T3C-9"},
+  {q:"A child tells you about an aunt the child would like to see. You:", a:["Arrange a visit yourself that weekend","Tell the case manager, who shares it with the caseworker","Tell the child that contact is not allowed"], k:1, ref:"T3C-8"}
+ ],
+ ack:"I attended the T3C Policy and Procedure Training. I received the T3C Service Delivery Addendum and the Caregiver Quick Reference, I had the opportunity to ask questions, and I agree to follow these policies and procedures."
+};
+</script>
+<script>
+const T3C_STAFF = {
+ title:"T3C Policy and Procedure Training: Staff Session",
+ code:"T3C-PP-S", hours:1, trainer:"Tanya Orr, LCPAA",
+ slides:[
+ {k:"Welcome", ref:"Section 4", h:"The procedures staff carry out",
+  html:`<p>This one-hour session follows the core session. It covers what directors and case managers do, step by step, under the T3C Service Delivery Addendum. The Knowledge Check at the end is the same 10 questions as the core session, with 8 of 10 to pass.</p>
+  <ul><li>Referrals and admissions</li><li>Reviews, confirmations, and notices</li><li>Documenting engagement</li><li>Aftercare</li><li>Credentialing homes and paid Intermittent Alternate Care</li><li>Data and Continuous Quality Improvement</li></ul>`},
+ {k:"Referrals and admissions", ref:"T3C-4", h:"Every referral, the day it arrives",
+  html:`<ul><li>Admissions and placement staff are on call 24 hours a day, 365 days a year.</li>
+  <li>Record <b>every</b> referral in the <b>T3C Referral, Admission, and Discharge Tracker</b> on the day it is received: source and Service Package requested.</li>
+  <li>Apply the Admission Guidelines (Sections A and B) and identify a caregiver under Policy T3C-2, Section A.</li>
+  <li>When a child may fit more than one package, the primary package is agreed with the SSCC or DFPS.</li>
+  <li>Give an answer on every referral. When a child is not admitted, <b>state the reason</b> in the response and record it in the tracker.</li>
+  <li>The Program Director approves each admission; the Treatment Director is consulted for Mental &amp; Behavioral Health. For a child on the Program Director's own caseload, the Executive Director approves.</li>
+  <li>Document the decision, the package, and the basis in the case record.</li></ul>
+  <div class="check" data-q="s1"><div class="q">Self-check: A referral comes in at 9 p.m. Saturday and is declined. What is recorded, and when?</div>
+   <button class="opt" data-ok="0">Nothing; only admissions are tracked.</button>
+   <button class="opt" data-ok="1">The referral, the source, the package requested, and the reason for declining, entered the same day.</button>
+   <button class="opt" data-ok="0">The referral, entered on Monday with the week's referrals.</button><div class="fb"></div></div>`},
+ {k:"Reviews and notices", ref:"T3C-5, T3C-6", h:"Due dates and written confirmations",
+  html:`<table class="t"><tr><th>Item</th><th>Basic</th><th>Mental &amp; Behavioral Health</th></tr>
+  <tr><td>CANS 3.0 (over age 3)</td><td>Every 12 months</td><td>Every 90 days</td></tr>
+  <tr><td>Service Plan review</td><td>Every 6 months</td><td>Every 90 days</td></tr>
+  <tr><td>Continued Stay Written Confirmation (Attachment B)</td><td>With each 6-month review, signed by the Program Director</td><td>With each 90-day review, signed by the Program Director and the Treatment Director</td></tr>
+  <tr><td>Copy to the caseworker</td><td colspan="2">Within <b>15 business days</b> of the review; record the date sent on the form</td></tr></table>
+  <ul><li>The Case Manager Supervisor tracks every due date and confirms at each review that the CANS is current.</li>
+  <li>Each review states which CANS results were considered and what changed because of them, and documents progress on each goal.</li>
+  <li>When the child no longer meets the guidelines: notify the caseworker, plan the transition, and record the change and reason in the tracker.</li></ul>`},
+ {k:"Reviews and notices", ref:"T3C-5 E", h:"Service requests and denials",
+  html:`<p>When a service in the Service Plan is not readily available, or the child is found ineligible, document:</p>
+  <ul><li>the date of the request, application, or referral</li><li>the type of service</li><li>the status of the request</li><li>the reason given for any denial</li><li>the status of any appeal</li></ul>
+  <div class="callout red">Notify the SSCC or DFPS caseworker within <b>3 business days</b> of any difficulty obtaining a service or any denial.</div>
+  <p>When a needed service is consistent with the package and is not available through STAR Health or the community, bring it to the Program Director; Benevolent House makes sure the service is provided.</p>
+  <div class="check" data-q="s2"><div class="q">Self-check: STAR Health denies a therapy authorization on Tuesday. By when is the caseworker notified?</div>
+   <button class="opt" data-ok="1">Within 3 business days, so by Friday.</button>
+   <button class="opt" data-ok="0">At the next 90-day review.</button>
+   <button class="opt" data-ok="0">Only if the appeal also fails.</button><div class="fb"></div></div>`},
+ {k:"Documenting engagement", ref:"T3C-8", h:"Where inclusion is written down",
+  html:`<table class="t"><tr><th>Record</th><th>What is documented</th></tr>
+  <tr><td>Service Plan, Family and Support Network section</td><td>Each person identified, relationship, date shared with the caseworker, whether contact is approved</td></tr>
+  <tr><td>Service Plan and review, participants section</td><td>Who was invited, how, who took part and how, and the input of anyone who did not attend</td></tr>
+  <tr><td>Monthly visit notes</td><td>Outreach and contacts since the last visit, and the caregiver's support of those contacts</td></tr>
+  <tr><td>Aftercare contact log</td><td>Family and supportive persons involved during aftercare</td></tr></table>
+  <ul><li>Share each newly identified relative or supportive person with the caseworker promptly, and <b>no later than the next monthly visit</b>; record the date shared.</li>
+  <li>When a person is not included, the Service Plan states the reason (court order, safety concern identified by the caseworker, or the person's own choice).</li></ul>`},
+ {k:"Aftercare", ref:"T3C-9", h:"Writing and working the aftercare plan",
+  html:`<ul><li>Write the plan on the <b>Aftercare Services Plan (Attachment C)</b> or within the Service Plan. Mental &amp; Behavioral Health: before every discharge from the package, planning begins at admission and is updated at each 90-day review. Kinship: when the child reaches permanency with the caregiver.</li>
+  <li>Contacts: Mental &amp; Behavioral Health, twice a month for 6 months. Kinship, weekly the first month, then twice a month, for 6 months, plus a support group.</li>
+  <li>Record every contact, attempted contact, and referral in the <b>aftercare contact log</b>. When a contact cannot be completed, document the attempt and try again.</li>
+  <li>Send a copy of that month's documentation to the caseworker at the end of each month of the aftercare period.</li></ul>`},
+ {k:"Credentialing and alternate care", ref:"T3C-10, T3C-12", h:"The Credential Record and the respite calendar",
+  html:`<p><b>Credentialing a home.</b> Review the foster home record against Section A, visit the home, talk with the caregivers, complete the <b>Foster Family Home T3C Credential Record (Attachment D)</b>, and make a recommendation. Supervisor reviews, Program Director approves. File the signed record in the foster home record and enter the renewal date in the compliance tracker. Homes verified before the Active credential are assessed before the first T3C child is placed.</p>
+  <p><b>Re-credentialing.</b> Every 12 months in the month of the original credential, using the last four quarterly evaluations, the annual training record including the four quarterly TST-FC sessions, and outcomes. Changes during the year trigger a review.</p>
+  <p><b>Paid Intermittent Alternate Care.</b> Approve the request, notify the caseworker, confirm the receiving home qualifies, send the Managing Emotions Guide, safety and crisis plan, medication and medical information, and schedule. Record each approved day by child, by home, and by date so <b>both caregivers are paid correctly</b> on the regular payment date. Track the 7-day limit per child per fiscal year.</p>
+  <div class="check" data-q="s3"><div class="q">Self-check: Which record do you complete to credential a home for a Service Package?</div>
+   <button class="opt" data-ok="0">The Continued Stay Written Confirmation (Attachment B)</button>
+   <button class="opt" data-ok="0">The Aftercare Services Plan (Attachment C)</button>
+   <button class="opt" data-ok="1">The Foster Family Home T3C Credential Record (Attachment D)</button><div class="fb"></div></div>`},
+ {k:"Data and CQI", ref:"T3C-6 D, T3C-7, T3C-10, T3C-11", h:"What is reported each quarter",
+  html:`<p>The Continuous Quality Improvement process reviews these each quarter. Know which ones you feed.</p>
+  <ul><li>On-time completion of Service Plan reviews, CANS assessments, and written confirmations (Case Manager Supervisor)</li>
+  <li>Average length of service by package, from the tracker (admissions)</li>
+  <li>Use of the Treatment Model, from visit notes and quarterly evaluations (Treatment Director, Program Director)</li>
+  <li>Number of credentialed homes and on-time re-credentialing (case managers)</li>
+  <li>Use of Intermittent Alternate Care by home, as a measure of caregiver support</li>
+  <li>Kinship: time from referral to verification, placement stability, and permanency exits</li>
+  <li>Aftercare outcomes: placement stability and continued services</li>
+  <li>Training completion for staff and caregivers</li></ul>
+  <p>Next: the Knowledge Check.</p>`}
+ ],
+ quiz:T3C_CORE.quiz,
+ ack:T3C_CORE.ack
+};
+</script>
+<script>
+/* ===================== Portal app ===================== */
+const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
+function loadStore(){try{return JSON.parse(localStorage.getItem(STORE_KEY))||{}}catch(e){return {}}}
+function saveStore(d){try{localStorage.setItem(STORE_KEY,JSON.stringify(d))}catch(e){}}
+let S=loadStore(); S.done=S.done||{}; S.progress=S.progress||{};
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
+function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function show(id){$$("main>section").forEach(s=>s.classList.add("hidden"));$("#view-"+id).classList.remove("hidden");window.scrollTo(0,0);stopRead()}
+function fmtDate(d){return d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}
+function fmtTime(d){return d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}
+function userLabel(){return S.user?S.user.name+(S.user.home?" · "+S.user.home:""):"Not signed in"}
+
+/* ---------- read aloud ---------- */
+let reading=false;
+function stopRead(){if(window.speechSynthesis){try{speechSynthesis.cancel()}catch(e){}}reading=false;$$(".readbtn").forEach(b=>{b.classList.remove("on");b.textContent="Read aloud"})}
+function toggleRead(btn,el){if(reading){stopRead();return}if(!window.speechSynthesis){toast("Read aloud is not available on this device");return}
+ const text=el.innerText.replace(/\s+/g," ");const u=new SpeechSynthesisUtterance(text);u.rate=.95;u.onend=()=>stopRead();reading=true;btn.classList.add("on");btn.textContent="Stop reading";speechSynthesis.speak(u)}
+
+/* ---------- home ---------- */
+function renderHome(){
+ $("#userChip").textContent=userLabel();
+ const groups=[...new Set(CATALOG.map(c=>c.group))];
+ let h=`<h1>Benevolent House Training Portal</h1><p class="lead">Every Benevolent House training in one place. Complete a training here, or record one you completed live, and your training log stays current automatically.</p>`;
+ if(!S.user){h+=`<div class="card"><h3 style="margin-top:0">Start by telling us who you are</h3><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div>
+ <div class="row"><div><label>Foster home or staff role</label><input type="text" id="uHome" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label>I am a</label><select id="uRole"><option>Foster Caregiver</option><option>Kinship Caregiver</option><option>Adoptive Parent</option><option>Foster and Adoptive Caregiver</option><option>Staff</option><option>Contracted Provider</option></select></div></div>
+ <p><button class="btn" onclick="signIn()">Continue</button></p><p class="small">Your name and completion records are kept by Benevolent House for licensing and T3C credentialing. No child information is ever entered here.</p></div>`;}
+ else{h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><b>${esc(S.user.name)}</b><br><span class="small">${esc(S.user.role)} · ${esc(S.user.home||"")} · ${esc(S.user.email)}</span></div><button class="btn ghost sm" onclick="signOut()">Not you? Switch</button></div>`;}
+ groups.forEach(g=>{h+=`<div class="section-title"><h2>${g}</h2></div><div class="grid">`;
+  CATALOG.filter(c=>c.group===g).forEach(c=>{const d=S.done[c.code];
+   let pill=d?`<span class="pill done">Completed ${esc(d.date)}</span>`:c.status==="live"?`<span class="pill live">Available now</span>`:c.status==="record"?`<span class="pill ext">Record a completion</span>`:`<span class="pill soon">Online version coming</span>`;
+   let btn=c.status==="live"?(c.module==="t3c_core"?`<a class="btn sm" href="t3c/" style="text-decoration:none">${d?"Review again":"Start the course"}</a>`:`<button class="btn sm" onclick="startModule('${c.module}')" ${S.user?"":"disabled"}>${d?"Review again":"Start"}</button>`):c.status==="record"?`<button class="btn ghost sm" onclick="recordLive('${c.code}')" ${S.user?"":"disabled"}>Record</button>`:`<button class="btn ghost sm" disabled>Soon</button>`;
+   h+=`<div class="tcard"><div class="code">${c.code}${c.req?' · <span class="pill req">Required</span>':''}</div><h3>${esc(c.title)}</h3><div class="meta">${c.hours} hr · ${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p><div class="foot">${pill}${btn}</div></div>`});
+  h+=`</div>`});
+ h+=`<div class="card" style="margin-top:24px"><h3 style="margin-top:0">Questions?</h3><p>Call or text your case manager, or the Benevolent House on-call line, any hour. If a page will not load, try another browser or ask your case manager to help you complete the training one-on-one.</p></div>`;
+ $("#view-home").innerHTML=h;show("home")}
+function signIn(){const n=$("#uName").value.trim(),e=$("#uEmail").value.trim(),hm=$("#uHome").value.trim(),r=$("#uRole").value;
+ if(!n||!e||!hm){toast("Please fill in your name, email, and home or role");return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){toast("Please enter a valid email address");return}
+ S.user={name:n,email:e,home:hm,role:r};saveStore(S);renderHome()}
+function signOut(){S.user=null;saveStore(S);renderHome()}
+
+/* ---------- record a live / outside completion ---------- */
+function recordLive(code){const c=CATALOG.find(x=>x.code===code);
+ $("#view-start").innerHTML=`<h1>Record a completion</h1><div class="card"><h3 style="margin-top:0">${esc(c.title)}</h3><p class="small">Use this when you completed the training live with a Benevolent House trainer or with an outside provider. Benevolent House checks the record against the sign-in sheet or certificate.</p>
+ <div class="row"><div><label>Date completed</label><input type="date" id="rDate" max="2099-12-31"></div><div><label>Hours</label><input type="text" id="rHours" value="${c.hours}"></div></div>
+ <label>Trainer or provider</label><input type="text" id="rTrainer" placeholder="e.g., Haddie Mashburn, or American Red Cross">
+ <label>Certificate or expiration note (optional)</label><input type="text" id="rNote" placeholder="e.g., CPR card expires 05/2028">
+ <p><button class="btn" onclick="submitLive('${code}')">Submit record</button> <button class="btn ghost" onclick="renderHome()">Cancel</button></p></div>`;show("start")}
+async function submitLive(code){const c=CATALOG.find(x=>x.code===code);const d=$("#rDate").value.trim(),h=$("#rHours").value.trim(),t=$("#rTrainer").value.trim();
+ if(!d||!t){toast("Date and trainer are required");return}if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||new Date(d)>new Date()){toast("Please enter a valid date that is not in the future");return}if(!(parseFloat(h)>0)){toast("Please enter the hours as a number");return}
+ const now=new Date();const dd=d.split("-");const dUS=dd[1]+"/"+dd[2]+"/"+dd[0];
+ await logToForms({title:c.title,code:c.code,score:"",pass:"Pass",date:dUS,time:fmtTime(now),hours:h,answers:"Recorded by participant: live/outside completion. "+($("#rNote").value.trim()),ack:"",sig:"",trainer:t});
+ S.done[c.code]={date:dUS,hours:h,trainer:t};saveStore(S);toast("Recorded. Thank you.");renderHome()}
+
+/* ---------- module ---------- */
+let M=null, idx=0, timer=null, remain=0;
+const SLIDE_SECONDS=15;
+function startModule(key){M=key==="t3c_core"?T3C_CORE:T3C_STAFF;M.key=key;attempt=0;idx=(S.progress[key]||0);if(idx>=M.slides.length){idx=M.slides.length-1;renderQuiz();return}renderSlide()}
+function renderSlide(){const s=M.slides[idx],n=M.slides.length;
+ const steps=M.slides.map((x,i)=>`<b class="${i<idx?'done':i===idx?'cur':''}" title="${esc(x.h)}">${i+1}</b>`).join("");
+ $("#view-module").innerHTML=`<div class="pmeta"><span>${esc(M.title)}</span><span>Page ${idx+1} of ${n}</span></div><div class="progress"><i style="width:${Math.round(idx/n*100)}%"></i></div><div class="stepper">${steps}</div>
+ <div class="slide" id="slideBody"><div class="kicker">${esc(s.k)}${s.ref?` <span class="ref">${esc(s.ref)}</span>`:""}</div><h2>${esc(s.h)}</h2>${s.html}</div>
+ <div class="nav noprint"><button class="btn ghost" onclick="prevSlide()" ${idx===0?"disabled":""}>Back</button><button class="readbtn" onclick="toggleRead(this,document.getElementById('slideBody'))">Read aloud</button><span class="timer" id="timerTxt" aria-live="polite"></span><span class="spacer"></span><button class="btn" id="nextBtn" onclick="nextSlide()" disabled>${idx===n-1?"Go to Knowledge Check":"Next"}</button></div>`;
+ wireInteractives($("#slideBody"));show("module");startTimer()}
+function startTimer(){clearInterval(timer);remain=SLIDE_SECONDS;const b=$("#nextBtn"),t=$("#timerTxt");
+ const needs=$$("#slideBody .check, #slideBody .sorter").filter(e=>!e.dataset.answered);
+ const tick=()=>{const needs2=$$("#slideBody .check, #slideBody .sorter").filter(e=>!e.dataset.answered);
+  if(remain>0){t.textContent="Next available in "+remain+"s";remain--;return}
+  if(needs2.length){t.textContent="Answer the self-check to continue";b.disabled=true;return}
+  t.textContent="";b.disabled=false;clearInterval(timer)};tick();timer=setInterval(tick,1000)}
+function nextSlide(){S.progress[M.key]=idx+1;saveStore(S);if(idx>=M.slides.length-1){renderQuiz();return}idx++;renderSlide()}
+function prevSlide(){if(idx>0){idx--;renderSlide()}}
+function wireInteractives(root){
+ root.querySelectorAll(".flip").forEach(f=>{f.tabIndex=0;f.setAttribute("role","button");const t=()=>f.classList.toggle("on");f.addEventListener("click",t);f.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();t()}})});
+ root.querySelectorAll(".acc>button").forEach(b=>{b.setAttribute("aria-expanded","false");b.addEventListener("click",()=>{const o=b.parentElement.classList.toggle("open");b.setAttribute("aria-expanded",o?"true":"false")})});
+ root.querySelectorAll(".check").forEach(c=>{c.querySelectorAll(".opt").forEach(o=>o.addEventListener("click",()=>{if(c.dataset.answered)return;
+   const ok=o.dataset.ok==="1";o.classList.add(ok?"right":"wrong");if(!ok){c.querySelector('.opt[data-ok="1"]').classList.add("right")}
+   c.querySelectorAll(".opt").forEach(x=>x.disabled=true);c.dataset.answered="1";c.querySelector(".fb").innerHTML=ok?"<b>That's right.</b>":"<b>Not quite.</b> The highlighted answer is the policy. Take a moment to reread it."}))});
+ root.querySelectorAll(".sorter").forEach(sr=>{let sel=null;const chips=sr.querySelectorAll(".sort button");
+  chips.forEach(ch=>ch.addEventListener("click",()=>{chips.forEach(x=>x.classList.remove("sel"));ch.classList.add("sel");sel=ch}));
+  sr.querySelectorAll(".bin").forEach(bn=>{bn.tabIndex=0;bn.setAttribute("role","button");const drop=()=>{if(!sel)return;const ok=sel.dataset.bin===bn.dataset.bin;const chip=document.createElement("span");chip.className="chip "+(ok?"ok":"bad");chip.textContent=sel.textContent+(ok?" ✓":" ✗");bn.appendChild(chip);
+   if(!ok){const right=sr.querySelector('.bin[data-bin="'+sel.dataset.bin+'"]');const c2=document.createElement("span");c2.className="chip ok";c2.textContent=sel.textContent+" (belongs here)";right.appendChild(c2)}
+   sel.remove();sel=null;if(!sr.querySelectorAll(".sort button").length){sr.dataset.answered="1";sr.querySelector(".fb").innerHTML="<b>Done.</b> When in doubt, call. Nobody at Benevolent House will ever mind a call that turns out to be nothing."}};bn.addEventListener("click",drop);bn.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();drop()}})})})}
+
+/* ---------- quiz ---------- */
+let attempt=0;
+function renderQuiz(){attempt++;const q=M.quiz;
+ let h=`<h1>Knowledge Check</h1><p class="lead">${q.length} questions. You need 8 of 10 to pass. Attempt ${attempt}.</p>`;
+ q.forEach((x,i)=>{h+=`<div class="card" data-qi="${i}"><div class="q"><b>${i+1}.</b> ${esc(x.q)}</div>${x.a.map((a,j)=>`<label style="font-weight:400;display:flex;gap:8px;align-items:flex-start;margin:6px 0"><input type="radio" name="q${i}" value="${j}" style="margin-top:4px"> <span>${esc(a)}</span></label>`).join("")}</div>`});
+ h+=`<p class="noprint"><button class="btn" onclick="gradeQuiz()">Submit answers</button></p>`;
+ $("#view-quiz").innerHTML=h;show("quiz")}
+function gradeQuiz(){const q=M.quiz;let ans=[],score=0,missed=[];
+ for(let i=0;i<q.length;i++){const r=document.querySelector(`input[name=q${i}]:checked`);if(!r){toast("Please answer question "+(i+1));return}const v=+r.value;ans.push("abc"[v]);if(v===q[i].k)score++;else missed.push(i)}
+ const pass=score>=8;M.result={score,answers:ans.join(""),pass,attempt};
+ let h=`<h1>Knowledge Check results</h1><div class="card" style="text-align:center"><p class="score ${pass?"":"fail"}">${score} / ${q.length}</p><p>${pass?"<b>You passed.</b> Next, sign the Acknowledgment.":"<b>Not yet.</b> Review the items below, then take the check again. A retake is expected and is not held against you."}</p></div>`;
+ if(missed.length){h+=`<h2>Items to review</h2>`;missed.forEach(i=>{h+=`<div class="card"><div class="q"><b>${i+1}.</b> ${esc(q[i].q)}</div><p>Correct answer: <b>${esc(q[i].a[q[i].k])}</b> <span class="ref">${esc(q[i].ref)}</span></p></div>`})}
+ h+=`<p>${pass?`<button class="btn" onclick="renderAck()">Continue to Acknowledgment</button>`:`<button class="btn" onclick="renderQuiz()">Retake the Knowledge Check</button> <button class="btn ghost" onclick="idx=0;renderSlide()">Review the training first</button>`}</p>`;
+ $("#view-quiz").innerHTML=h;show("quiz")}
+
+/* ---------- acknowledgment + signature ---------- */
+function renderAck(){$("#view-ack").innerHTML=`<h1>Acknowledgment</h1><div class="card"><p style="font-size:1.1rem">${esc(M.ack)}</p>
+ <div class="row"><div><label>Type your full name</label><input type="text" id="aName" value="${esc(S.user.name)}"></div><div><label>Date</label><input type="text" id="aDate" value="${fmtDate(new Date())}" readonly></div></div>
+ <label>Sign with your finger or mouse</label><canvas class="sig" id="sigPad" aria-label="Signature pad"></canvas><p><button class="btn ghost sm" onclick="clearSig()">Clear signature</button> <button class="btn ghost sm" onclick="typedSig()">I cannot draw: use my typed name as my signature</button></p>
+ <label style="font-weight:400"><input type="checkbox" id="aAgree"> I agree to the statement above and confirm that I completed this training myself.</label>
+ <p><button class="btn" id="ackSubmit" onclick="finish()">Submit and get my certificate</button></p></div>`;show("ack");initSig()}
+let sigCtx,sigDrawn=false;
+function initSig(){const c=$("#sigPad");c.width=c.offsetWidth*2;c.height=320;sigCtx=c.getContext("2d");sigCtx.scale(2,2);sigCtx.lineWidth=2.2;sigCtx.lineCap="round";sigCtx.strokeStyle="#1b2a4a";let d=false;const pos=e=>{const r=c.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return[p.clientX-r.left,p.clientY-r.top]};
+ const st=e=>{d=true;const[x,y]=pos(e);sigCtx.beginPath();sigCtx.moveTo(x,y);e.preventDefault()},mv=e=>{if(!d)return;const[x,y]=pos(e);sigCtx.lineTo(x,y);sigCtx.stroke();sigDrawn=true;e.preventDefault()},en=()=>{d=false};
+ c.addEventListener("mousedown",st);c.addEventListener("mousemove",mv);window.addEventListener("mouseup",en);c.addEventListener("touchstart",st,{passive:false});c.addEventListener("touchmove",mv,{passive:false});c.addEventListener("touchend",en)}
+function typedSig(){const n=$("#aName").value.trim();if(!n){toast("Type your name first");return}clearSig();sigCtx.font="italic 34px Georgia, serif";sigCtx.fillStyle="#1b2a4a";sigCtx.fillText(n,16,90);sigDrawn=true;toast("Typed signature applied")}
+function clearSig(){const c=$("#sigPad");sigCtx.clearRect(0,0,c.width,c.height);sigDrawn=false}
+let finishing=false;
+async function finish(){if(finishing)return;const n=$("#aName").value.trim();if(!n){toast("Please type your name");return}if(!sigDrawn){toast("Please sign in the box");return}if(!$("#aAgree").checked){toast("Please check the agreement box");return}
+ const now=new Date();const sig=$("#sigPad").toDataURL("image/png");const c=CATALOG.find(x=>x.module===M.key);
+ finishing=true;const b=$("#ackSubmit");b.disabled=true;b.textContent="Submitting...";
+ const rec={title:M.title,code:M.code,score:M.result.score,pass:"Pass",date:fmtDate(now),time:fmtTime(now),hours:M.hours,answers:"Attempt "+M.result.attempt+": "+M.result.answers,ack:M.ack+" Signed by "+n,sig:sig,trainer:M.trainer};
+ const ok=await logToForms(rec);
+ S.done[c.code]={date:fmtDate(now),hours:M.hours,trainer:M.trainer,score:M.result.score};S.progress[M.key]=0;saveStore(S);
+ finishing=false;renderCert(n,now,sig,ok)}
+async function logToForms(r){const fd=new FormData();fd.append("formID",JOTFORM_ID);
+ fd.append("q3_q3_textbox1",S.user.name);fd.append("q4_q4_email2",S.user.email);fd.append("q5_q5_textbox3",S.user.home||"");fd.append("q6_q6_dropdown4",S.user.role);
+ fd.append("q8_q8_textbox6",r.title);fd.append("q9_q9_textbox7",r.code);fd.append("q11_q11_number9",r.score);fd.append("q12_q12_dropdown10",r.pass);fd.append("q13_q13_textbox11",r.date);fd.append("q14_q14_textbox12",r.time);fd.append("q15_q15_number13",r.hours);fd.append("q16_q16_textarea14",r.answers);fd.append("q17_q17_textarea15",r.ack);fd.append("q18_q18_textarea16",r.sig);fd.append("q20_q20_textbox18",r.trainer);fd.append("q21_q21_textbox19",PORTAL_VERSION);
+ try{await fetch(JOTFORM_SUBMIT_URL,{method:"POST",body:fd,mode:"no-cors"});return true}catch(e){try{const q=JSON.parse(localStorage.getItem(STORE_KEY+"_queue")||"[]");q.push({r,u:S.user});localStorage.setItem(STORE_KEY+"_queue",JSON.stringify(q))}catch(x){}return false}}
+
+/* ---------- certificate ---------- */
+function renderCert(name,now,sig,ok){
+ $("#view-cert").innerHTML=`<p class="noprint">${ok?"Your completion record has been sent to Benevolent House.":"Your record is saved on this device and will be sent when you are back online. Please also tell your case manager you finished."} <b>Print or save this certificate for your records.</b></p>
+ <div id="cert"><img src="bh-logo.png" alt="" onerror="this.style.display='none'"><div style="font-weight:700;color:var(--brown);font-size:1.2rem">Benevolent House</div><div class="small">Foster Care and Adoption</div>
+ <h1>Certificate of Completion</h1><p>This certifies that</p><div class="name">${esc(name)}</div><p>${esc(S.user.role)}${S.user.home?" · "+esc(S.user.home):""}</p>
+ <p>has completed</p><p style="font-size:1.25rem;font-weight:700;color:var(--brown)">${esc(M.title)}</p><p>Training code ${esc(M.code)} · ${M.hours} training hour${M.hours==1?"":"s"} · Knowledge Check ${M.result.score} of ${M.quiz.length}<br>${fmtDate(now)}</p>
+ <div class="sigs"><div><img src="${sig}" alt=""><b>${esc(name)}</b><br>Participant</div><div style="padding-top:56px"><b>${esc(M.trainer)}</b><br>Trainer of Record (electronic record on file)</div></div>
+ <p class="small" style="margin-top:26px">Self-paced online module with Knowledge Check and signed Acknowledgment. Record on file with Benevolent House. Portal version ${PORTAL_VERSION}.</p></div>
+ <p class="noprint" style="text-align:center"><button class="btn" onclick="window.print()">Print or save as PDF</button> <button class="btn ghost" onclick="renderHome()">Back to all trainings</button></p>`;show("cert")}
+
+/* ---------- init ---------- */
+$("#homeBtn").addEventListener("click",()=>{if(M&&!$("#view-module").classList.contains("hidden")){S.progress[M.key]=idx;saveStore(S)}renderHome()});
+window.addEventListener("resize",()=>{if(!$("#view-ack").classList.contains("hidden")&&!sigDrawn)initSig()});
+window.addEventListener("online",async()=>{try{const q=JSON.parse(localStorage.getItem(STORE_KEY+"_queue")||"[]");if(!q.length)return;localStorage.removeItem(STORE_KEY+"_queue");const u=S.user;for(const it of q){S.user=it.u;await logToForms(it.r)}S.user=u}catch(e){}});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.activeElement&&["uName","uEmail","uHome"].includes(document.activeElement.id))signIn()});
+renderHome();
+</script>
+</body></html>
