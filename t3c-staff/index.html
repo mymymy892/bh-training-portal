@@ -1,0 +1,344 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>T3C Staff Session</title><meta name="robots" content="noindex">
+<style>:root{--brown:#7B4B2A;--brown-dk:#5E3920;--green:#2E7D4F;--green-dk:#226040;--cream:#FBF7F2;--sand:#F1E8DD;--ink:#2B2320;--muted:#6B5F58;--line:#E3D7C9;--gold:#C9A227;--night:#141010;--night2:#1f1816;--red:#B23A3A}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--night);color:#f5efe8;font-family:Arial,Helvetica,sans-serif;font-size:17px;line-height:1.55;-webkit-font-smoothing:antialiased}
+button{font-family:inherit;font-size:1rem;cursor:pointer}
+a{color:#f3d98b}
+.hidden{display:none!important}
+.wrap{max-width:1100px;margin:0 auto;padding:0 16px}
+/* top bar */
+.top{position:sticky;top:0;z-index:30;background:rgba(20,16,16,.82);backdrop-filter:blur(10px);border-bottom:1px solid rgba(255,255,255,.08)}
+.top .wrap{display:flex;align-items:center;gap:12px;padding:8px 16px}
+.top img{height:38px}
+.top .brand{font-weight:700;color:#fff;font-size:.95rem;line-height:1.1}.top .brand small{display:block;font-weight:400;color:#bdb0a6;font-size:.72rem}
+.top .sp{flex:1}
+.top .user{font-size:.8rem;color:#e8dccf;background:rgba(255,255,255,.08);border-radius:999px;padding:.3rem .8rem;max-width:50vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.btn{display:inline-flex;align-items:center;gap:.5rem;border:0;border-radius:12px;padding:.85rem 1.3rem;font-weight:700;background:var(--green);color:#fff;transition:transform .12s,background .15s,box-shadow .15s;box-shadow:0 8px 24px rgba(46,125,79,.35)}
+.btn:hover{background:var(--green-dk);transform:translateY(-1px)}
+.btn:disabled{opacity:.4;cursor:not-allowed;transform:none;box-shadow:none}
+.btn.ghost{background:rgba(255,255,255,.08);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,.18)}
+.btn.ghost:hover{background:rgba(255,255,255,.14)}
+.btn.gold{background:var(--gold);color:#2b1d00;box-shadow:0 8px 24px rgba(201,162,39,.3)}
+.btn.sm{padding:.5rem .9rem;font-size:.88rem;border-radius:9px}
+/* home / map */
+.hero-home{position:relative;border-radius:22px;overflow:hidden;margin:18px 0;min-height:360px;display:flex;align-items:flex-end}
+.hero-home img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transform:scale(1.03);animation:kb 30s ease-in-out infinite alternate}
+.hero-home:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(20,16,16,.1) 0%,rgba(20,16,16,.35) 45%,rgba(20,16,16,.92) 100%)}
+.hero-home .t{position:relative;z-index:2;padding:30px 30px 28px;max-width:720px}
+.hero-home small{display:block;color:#f3d98b;letter-spacing:.16em;text-transform:uppercase;font-size:.72rem;margin-bottom:8px}
+.hero-home h1{margin:0 0 10px;font-size:clamp(1.8rem,4.5vw,3rem);line-height:1.05;text-shadow:0 2px 14px rgba(0,0,0,.5)}
+.hero-home p{margin:0 0 16px;color:#e8dccf;font-size:1.05rem;max-width:560px}
+@keyframes kb{from{transform:scale(1.03) translate(0,0)}to{transform:scale(1.1) translate(-1.5%,-1%)}}
+.chapters{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px;margin:10px 0 40px}
+.ch{position:relative;border-radius:16px;overflow:hidden;background:var(--night2);border:1px solid rgba(255,255,255,.08);min-height:170px;cursor:pointer;transition:transform .15s,border-color .15s}
+.ch:hover{transform:translateY(-3px);border-color:rgba(243,217,139,.5)}
+.ch img{width:100%;height:110px;object-fit:cover;display:block;filter:saturate(.9)}
+.ch .b{padding:10px 12px 12px}
+.ch .n{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:#f3d98b}
+.ch h3{margin:2px 0 4px;font-size:1rem;color:#fff}
+.ch .m{font-size:.78rem;color:#bdb0a6}
+.ch .ring{position:absolute;top:8px;right:8px;width:38px;height:38px;border-radius:50%;background:conic-gradient(var(--gold) var(--p,0%),rgba(255,255,255,.18) 0);display:flex;align-items:center;justify-content:center}
+.ch .ring i{width:28px;height:28px;border-radius:50%;background:var(--night2);display:flex;align-items:center;justify-content:center;font-style:normal;font-size:.68rem;color:#fff}
+.ch.done .ring{background:var(--green)}.ch.done .ring i{background:var(--green);color:#fff}
+.ch.locked{opacity:.55}
+.sec{margin:26px 0 8px;display:flex;align-items:baseline;gap:10px}
+.sec h2{margin:0;font-size:1.25rem;color:#fff}.sec span{color:#bdb0a6;font-size:.85rem}
+/* scene */
+.scene{margin:12px 0 40px}
+.hero{position:relative;aspect-ratio:16/9;overflow:hidden;border-radius:18px;background:#000}
+.hero img{width:100%;height:100%;object-fit:cover;display:block;transform:scale(1.04);animation:kb 28s ease-in-out infinite alternate}
+.hero:after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,.3) 0%,rgba(0,0,0,0) 40%,rgba(20,16,16,.85) 100%)}
+.chip{position:absolute;top:14px;left:14px;z-index:2;background:rgba(255,255,255,.14);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:.35rem .85rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase}
+.ref{position:absolute;top:14px;right:14px;z-index:2;background:var(--gold);color:#2b1d00;border-radius:8px;padding:.3rem .65rem;font-weight:700;font-size:.76rem}
+.title{position:absolute;left:22px;bottom:18px;z-index:2;max-width:85%}
+.title small{display:block;color:#f3d98b;letter-spacing:.14em;text-transform:uppercase;font-size:.7rem;margin-bottom:4px}
+.title h1{margin:0;font-size:clamp(1.3rem,3.6vw,2.3rem);line-height:1.1;text-shadow:0 2px 12px rgba(0,0,0,.55)}
+.cap{margin:0;padding:18px 6px 6px;font-size:1.12rem;line-height:1.6;color:#f5efe8;min-height:60px}
+.cap span{opacity:.32;transition:opacity .25s}.cap span.on{opacity:1}
+.bar{display:flex;align-items:center;gap:12px;padding:8px 6px 14px}
+.play{width:54px;height:54px;border-radius:50%;border:0;background:var(--green);color:#fff;font-size:1.2rem;flex:none;box-shadow:0 6px 20px rgba(46,125,79,.5)}
+.prog{flex:1;height:6px;background:rgba(255,255,255,.15);border-radius:999px;overflow:hidden}.prog i{display:block;height:100%;width:0;background:var(--gold)}
+.speed{background:none;border:1px solid rgba(255,255,255,.25);color:#fff;border-radius:8px;padding:.3rem .55rem;font-size:.78rem}
+/* interaction panel */
+.panel{background:#fff;color:var(--ink);border-radius:18px;padding:22px 22px 20px;margin:6px 0 16px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.panel h2{margin:0 0 6px;color:var(--brown);font-size:1.25rem}
+.panel .lead{margin:0 0 12px;color:var(--muted)}
+.panel .k{font-size:.72rem;letter-spacing:.1em;text-transform:uppercase;color:var(--green-dk);font-weight:700;margin-bottom:4px}
+.opt{display:block;width:100%;text-align:left;background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin:8px 0;color:var(--ink);transition:border-color .12s,transform .12s}
+.opt:hover{border-color:var(--brown);transform:translateX(2px)}
+.opt.right{border-color:var(--green);background:#E3F3E9}
+.opt.wrong{border-color:var(--red);background:#FCECEC}
+.opt:disabled{cursor:default;transform:none}
+.fb{margin-top:10px;padding:12px 14px;border-radius:10px;background:#F3FAF5;border-left:5px solid var(--green);font-size:.98rem}
+.fb.bad{background:#FCF1F1;border-color:var(--red)}
+.fb.neutral{background:var(--sand);border-color:var(--brown)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.chips button{border:2px solid var(--line);background:#fff;border-radius:999px;padding:.45rem .9rem;color:var(--ink)}
+.chips button.sel{border-color:var(--brown);background:var(--sand)}
+.bins{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:10px}
+.bin{border:2px dashed var(--line);border-radius:12px;padding:10px;min-height:84px;cursor:pointer;background:#fff}
+.bin:hover{border-color:var(--brown)}
+.bin h4{margin:0 0 6px;font-size:.85rem;color:var(--brown)}
+.bin .c{display:inline-block;background:var(--sand);border-radius:999px;padding:.2rem .6rem;margin:3px;font-size:.82rem}
+.bin .c.ok{background:#E3F3E9}.bin .c.bad{background:#FCECEC}
+.checks label{display:flex;gap:10px;align-items:flex-start;background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0;cursor:pointer;font-weight:400}
+.checks label.ok{border-color:var(--green);background:#E3F3E9}.checks label.miss{border-color:var(--gold);background:#FFF7DD}.checks label.bad{border-color:var(--red);background:#FCECEC}
+.checks input{margin-top:5px}
+table.t{width:100%;border-collapse:collapse;margin:10px 0;font-size:.95rem}
+table.t th,table.t td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+table.t th{background:var(--sand);color:var(--brown-dk)}
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin:10px 0}
+.card3{perspective:900px;min-height:160px;cursor:pointer}
+.card3 .in{position:relative;width:100%;height:100%;min-height:160px;transition:transform .5s;transform-style:preserve-3d}
+.card3.on .in{transform:rotateY(180deg)}
+.card3 .f,.card3 .b{position:absolute;inset:0;backface-visibility:hidden;border-radius:14px;padding:14px;display:flex;align-items:center;justify-content:center;text-align:center}
+.card3 .f{background:var(--brown);color:#fff;font-weight:700}
+.card3 .b{background:#fff;border:2px solid var(--green);transform:rotateY(180deg);font-size:.86rem;line-height:1.35;overflow:auto}
+.stage-row{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:center;background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+.stage-row select{padding:.45rem;border-radius:8px;border:2px solid var(--line);font-family:inherit}
+.stage-row.ok{border-color:var(--green)}.stage-row.bad{border-color:var(--red)}
+.wordbank{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.wb{background:var(--cream);border:2px solid var(--line);border-radius:12px;padding:10px}
+.wb h4{margin:0 0 6px;color:var(--brown);font-size:.9rem}
+.wb button{display:block;width:100%;text-align:left;background:#fff;border:1.5px solid var(--line);border-radius:8px;padding:.4rem .6rem;margin:4px 0;font-size:.86rem;color:var(--ink)}
+.wb button.sel{border-color:var(--green);background:#E3F3E9}
+.cal{display:grid;grid-template-columns:repeat(12,1fr);gap:4px;margin:8px 0}
+.cal div{aspect-ratio:1;border:1.5px solid var(--line);border-radius:7px;font-size:.68rem;display:flex;align-items:center;justify-content:center;cursor:pointer;background:#fff;color:var(--muted)}
+.cal div.sel{background:var(--green);color:#fff;border-color:var(--green)}
+.cal div.exp{box-shadow:inset 0 0 0 2px var(--gold)}
+.wheel{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:8px;margin:8px 0}
+.wheel button{border:2px solid var(--line);background:#fff;border-radius:12px;padding:10px;font-size:.88rem;color:var(--ink)}
+.wheel button.sel{border-color:var(--brown);background:var(--sand)}
+.wheel button.ok{border-color:var(--green);background:#E3F3E9}.wheel button.bad{border-color:var(--red);background:#FCECEC}
+.payline{background:var(--sand);border-radius:12px;padding:12px 14px;margin:10px 0;font-family:ui-monospace,Menlo,monospace;font-size:.9rem}
+.nav{display:flex;align-items:center;gap:10px;margin:6px 0 30px}.nav .sp{flex:1}
+.hint{color:#bdb0a6;font-size:.85rem}
+/* badges / cert */
+.badge-pop{position:fixed;inset:0;z-index:60;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:20px}
+.badge-pop .bx{background:#fff;color:var(--ink);border-radius:22px;padding:30px 28px;text-align:center;max-width:380px;animation:pop .4s cubic-bezier(.2,1.4,.4,1)}
+@keyframes pop{from{transform:scale(.6);opacity:0}to{transform:scale(1);opacity:1}}
+.badge-pop .ic{width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f3d98b,var(--gold) 60%,#8a6a10);margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:2.4rem;box-shadow:0 10px 30px rgba(201,162,39,.5)}
+.badge-pop h3{margin:4px 0;color:var(--brown)}
+.badges{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0}
+.badges span{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:.35rem .8rem;font-size:.82rem}
+.badges span.got{background:rgba(201,162,39,.2);border-color:var(--gold)}
+label{display:block;font-weight:700;margin:12px 0 4px;color:var(--brown-dk)}
+input[type=text],input[type=email],input[type=date],select{width:100%;padding:.7rem .8rem;border:2px solid var(--line);border-radius:10px;font-size:1rem;font-family:inherit;background:#fff;color:var(--ink)}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sig{border:2px solid var(--line);border-radius:10px;background:#fff;touch-action:none;width:100%;height:160px;display:block}
+.score{font-size:2.6rem;font-weight:700;color:var(--green);margin:0}.score.fail{color:var(--red)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#fff;color:var(--ink);padding:.7rem 1.1rem;border-radius:10px;z-index:70;font-size:.95rem;opacity:0;transition:opacity .2s;pointer-events:none;box-shadow:0 10px 30px rgba(0,0,0,.4)}
+.toast.show{opacity:1}
+#cert{background:#fff;color:var(--ink);border:10px double var(--brown);padding:34px 40px;max-width:820px;margin:16px auto;text-align:center;position:relative}
+#cert img.logo{height:76px}
+#cert h1{font-size:2rem;color:var(--brown);margin:12px 0 4px}
+#cert .name{font-size:1.7rem;font-weight:700;color:var(--green-dk);margin:14px 0 4px;border-bottom:2px solid var(--line);display:inline-block;padding:0 30px 4px}
+#cert .seal{position:absolute;right:28px;bottom:28px;width:92px;height:92px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f3d98b,var(--gold) 60%,#8a6a10);display:flex;align-items:center;justify-content:center;color:#2b1d00;font-size:.6rem;font-weight:700;text-align:center;line-height:1.1;box-shadow:0 6px 18px rgba(0,0,0,.25)}
+#cert .sigs{display:flex;justify-content:space-around;margin-top:30px;gap:20px;flex-wrap:wrap}
+#cert .sigs div{min-width:200px;font-size:.9rem}
+#cert .sigs img{height:50px;display:block;margin:0 auto 2px}
+#cert .sigs div b{display:block;border-top:1px solid var(--ink);padding-top:6px}
+.small{font-size:.85rem;color:var(--muted)}
+.qref{background:#fff;color:var(--ink);border-radius:14px;padding:20px 22px}
+.qref h3{color:var(--green-dk);margin:12px 0 4px;font-size:1rem}.qref ul{margin:4px 0;padding-left:1.2rem}
+@media print{.top,.nav,.bar,.hero,.noprint,.cap{display:none!important}body{background:#fff;color:#000}.panel,.qref,#cert{box-shadow:none}#cert{margin:0;max-width:none}}
+@media(max-width:640px){.top .brand small{display:none}.top img{height:32px}.top .user{max-width:34vw}.row{grid-template-columns:1fr}.panel{padding:16px}.cal{grid-template-columns:repeat(6,1fr)}.title{left:14px;bottom:12px}.cap{font-size:1.02rem}.hero-home .t{padding:20px 18px}}
+</style></head><body>
+<header class="top"><div class="wrap"><img src="bh-logo.png" alt="" onerror="this.style.display='none'"><div class="brand">Benevolent House<small>T3C Staff Session</small></div><span class="sp"></span><span class="user" id="user"></span><button class="btn ghost sm" id="homeBtn">Chapters</button></div></header>
+<main class="wrap"><section id="v-home"></section><section id="v-scene" class="hidden"></section><section id="v-qref" class="hidden"></section><section id="v-quiz" class="hidden"></section><section id="v-ack" class="hidden"></section><section id="v-cert" class="hidden"></section></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script>const SCENES=[{"id": "s1_1", "ch": 1, "chTitle": "The Referral", "ref": "T3C-4", "title": "Ms. Reyes's week", "narr": "Welcome back. This is the Staff Session, one hour for directors and case managers. You already know the Carters. Now you are Ms. Reyes, and this is her week: a referral at night, a review with a deadline, a denial letter, a relative nobody knew about, an aftercare call that did not connect, a home up for re-credentialing, and a respite request. Each one has a procedure. Let's work them."}, {"id": "s1_2", "ch": 1, "chTitle": "The Referral", "ref": "T3C-4 C", "title": "Tuesday, 9:40 p.m.", "narr": "The referral for Jada arrives at 9:40 on a Tuesday night. Ms. Reyes is on call. Before she matches a home, before she calls anyone, there is a first step that happens the day the referral arrives, whether or not the child is ever placed. What is it, and what goes in it?"}, {"id": "s1_3", "ch": 1, "chTitle": "The Referral", "ref": "T3C-4 C", "title": "The one we could not take", "narr": "Thursday, a second referral: a sibling group of three, and Benevolent House has no credentialed home with three open beds. Ms. Reyes has to decline. A declined referral is not a closed door; it is a record with a reason. Work through what she does."}, {"id": "s2_1", "ch": 2, "chTitle": "Reviews and Notices", "ref": "T3C-5, T3C-6", "title": "The ninety-day clock", "narr": "Jada was placed in January. Her first ninety-day review is due in April. The Case Manager Supervisor tracks every due date: the CANS, the Service Plan review, and the written confirmation. For a child in the Mental and Behavioral Health package, the confirmation is signed by two directors and a copy goes to the caseworker within fifteen business days. Build the review packet."}, {"id": "s2_2", "ch": 2, "chTitle": "Reviews and Notices", "ref": "T3C-5 E", "title": "The denial letter, from your side", "narr": "Denise called about the STAR Health denial. Now it is on your desk. There are five things the record has to show, and one clock that is already running: the caseworker is notified within three business days of the denial. Document it, then decide what happens next."}, {"id": "s3_1", "ch": 3, "chTitle": "Engagement and Aftercare", "ref": "T3C-8", "title": "Aunt Pruitt, on paper", "narr": "Denise reported that Jada named an aunt. Policy says the case manager records the person, shares the name with the caseworker promptly and no later than the next monthly visit, records the date shared, and documents whether contact is approved. Three records are involved for a child in placement; a fourth, the aftercare contact log, applies only during aftercare. Put each piece of information where it belongs."}, {"id": "s3_2", "ch": 3, "chTitle": "Engagement and Aftercare", "ref": "T3C-9 C", "title": "The call that did not connect", "narr": "Micah's aftercare is in its second month, and Ms. Reyes is serving as the Aftercare Kinship Support staff member for Gloria. She calls on Tuesday; no answer. She tries again Thursday and reaches her. At the end of the month, a copy of the month's documentation goes to the caseworker. What goes in the aftercare record this month?"}, {"id": "s4_1", "ch": 4, "chTitle": "Homes and Respite", "ref": "T3C-10 B, C", "title": "The Carters' credential month", "narr": "The Carters were credentialed twelve months ago, and this is their credential month. Ms. Reyes repeats the review: the foster home record against the requirements, a visit, a conversation, the last four quarterly evaluations, the annual training record including the four quarterly TST-FC sessions, and outcomes for the children served. Then a new Credential Record, reviewed by the supervisor, approved by the Program Director, filed, and the renewal date entered in the compliance tracker. Put the steps in order."}, {"id": "s4_2", "ch": 4, "chTitle": "Homes and Respite", "ref": "T3C-12", "title": "Approving the respite weekend", "narr": "Denise asked for Thursday evening through Monday evening with the Nguyens. From the staff side: approve the request, notify the caseworker, confirm the receiving home qualifies, send the Managing Emotions Guide, the safety and crisis plan, medication and medical information, and the schedule, and record each approved day by child, by home, and by date so both families are paid on the regular date. Check the record you would enter."}, {"id": "s5_1", "ch": 5, "chTitle": "Quality", "ref": "CQI", "title": "What you report each quarter", "narr": "The Continuous Quality Improvement review asks for specific measures, and each one comes from a record you already keep. Match each measure to where it comes from, and you are done with Ms. Reyes's week."}];
+const QUIZ=[{"q": "Under T3C, the Treatment Model Benevolent House uses for every child is:", "a": ["A level system with points", "Trauma Systems Therapy for Foster Care", "Chosen by each foster home"], "k": 1, "ref": "T3C-2"}, {"q": "A child in the Mental & Behavioral Health Support Services Package has a Service Plan review at least every:", "a": ["90 days", "Six months", "12 months"], "k": 0, "ref": "T3C-5"}, {"q": "A child over age 3 in the Basic package receives a CANS 3.0 Assessment at least every:", "a": ["90 days", "Six months", "12 months"], "k": 2, "ref": "T3C-5"}, {"q": "The Managing Emotions Guide is built:", "a": ["By the case manager alone", "By the caregiver and the child together", "Only after a serious incident"], "k": 1, "ref": "T3C-3"}, {"q": "When a service in the Service Plan is denied or cannot be found, the case manager notifies the SSCC or DFPS caseworker within:", "a": ["3 business days", "15 business days", "The next Service Plan review"], "k": 0, "ref": "T3C-5 E"}, {"q": "A child in the Mental & Behavioral Health package who no longer needs that level of service:", "a": ["Must move to a new home", "Can move to the Basic package and stay in the same home", "Is discharged from Benevolent House"], "k": 1, "ref": "T3C-6"}, {"q": "A foster family home is re-credentialed for T3C:", "a": ["Every 12 months", "Every five years", "Only when a problem comes up"], "k": 0, "ref": "T3C-10"}, {"q": "When a caregiver uses approved paid Intermittent Alternate Care:", "a": ["Only the caregiver providing the care is paid", "The two families settle payment between themselves", "Both caregivers are paid by Benevolent House for the same days"], "k": 2, "ref": "T3C-12"}, {"q": "After a child leaves the Mental & Behavioral Health package, aftercare follow-up continues for:", "a": ["30 days", "Six months", "There is no follow-up"], "k": 1, "ref": "T3C-9"}, {"q": "A child names an aunt the child would like to see. The case manager shares the name with the caseworker:", "a": ["At the next 90-day review", "Promptly, and no later than the next monthly visit", "Only if the caregiver asks"], "k": 1, "ref": "T3C-8 A"}];
+const ACK="I attended the T3C Policy and Procedure Training, Staff Session. I received the T3C Service Delivery Addendum and the Staff Quick Reference, I had the opportunity to ask questions, and I agree to follow these policies and procedures.";
+const COURSE={"title": "T3C Policy and Procedure Training (Staff Session)", "code": "T3C-PP-S", "hours": 1, "trainer": "Tanya Orr, LCPAA", "subtitle": "T3C Staff Session", "hero": "Ms. Reyes's Week", "blurb": "One hour for directors and case managers. Work the procedures behind the Carter family's story: referrals, reviews, denials, engagement records, aftercare, credentialing, respite, and what you report each quarter.", "heroImg": "s_s1_1", "qrefImg": "s_s5_1", "chapters": [["The Referral", "1"], ["Reviews and Notices", "2"], ["Engagement and Aftercare", "3"], ["Homes and Respite", "4"], ["Quality", "5"], ["Certified", "6"]], "icons": {"1": "\ud83d\udcde", "2": "\ud83d\uddd3\ufe0f", "3": "\ud83d\uddc2\ufe0f", "4": "\ud83c\udfe0", "5": "\ud83d\udcca", "6": "\ud83c\udfc5"}, "roles": ["Staff", "Contracted Provider", "Foster Caregiver", "Kinship Caregiver", "Adoptive Parent", "Foster and Adoptive Caregiver"], "qrefHtml": "<h3>Referrals and admissions</h3><ul><li>Record every referral in the T3C Referral, Admission, and Discharge Tracker the day it arrives: source and Service Package requested.</li><li>Give an answer on every referral. When a child is not admitted, state the reason in the response and record it in the tracker.</li><li>Program Director approves each admission; Treatment Director consulted for Mental &amp; Behavioral Health; Executive Director approves for the Program Director's own caseload.</li></ul>\n<h3>Clocks</h3><table class=\"t\"><tr><th>What</th><th>When</th></tr><tr><td>Service denied, delayed, or unavailable: notify the caseworker</td><td>Within 3 business days</td></tr><tr><td>Copy of the Continued Stay Written Confirmation to the caseworker</td><td>Within 15 business days of the review</td></tr><tr><td>Share a newly identified relative or supportive person with the caseworker</td><td>Promptly, no later than the next monthly visit</td></tr><tr><td>Mental &amp; Behavioral Health: CANS and Service Plan review</td><td>At least every 90 days</td></tr><tr><td>Basic: Service Plan review / CANS</td><td>Every 6 months / every 12 months</td></tr><tr><td>Home re-credentialing</td><td>Every 12 months, in the credential month</td></tr><tr><td>Aftercare monthly copy to the caseworker</td><td>End of each month of aftercare</td></tr></table>\n<h3>Written confirmation (Attachment B)</h3><ul><li>Basic: with each 6-month review, Program Director signs.</li><li>Mental &amp; Behavioral Health: with each 90-day review, Program Director and Treatment Director sign.</li><li>Filed in the case record; copy to the caseworker within 15 business days with the date sent on the form.</li></ul>\n<h3>Service denials: document five things</h3><ul><li>Date of the request, application, or referral; type of service; status of the request; reason for any denial; status of any appeal. Seek community resources; if still unavailable, bring it to the Program Director.</li></ul>\n<h3>Engagement records (T3C-8 C)</h3><ul><li>Service Plan, Family and Support Network section: each person, relationship, date shared with the caseworker, approval status.</li><li>Service Plan review, participants section: who was invited, how, who took part and how, input of anyone who did not attend.</li><li>Monthly visit notes: outreach and contacts since the last visit; the caregiver's support of those contacts.</li><li>Aftercare contact log: family and supportive persons involved during aftercare.</li></ul>\n<h3>Aftercare</h3><ul><li>Mental &amp; Behavioral Health: twice a month for 6 months. Kinship: weekly the first month, then twice a month, for 6 months, plus a support group.</li><li>Log every contact, attempted contact, and referral; try again after a missed contact; monthly copy to the caseworker.</li></ul>\n<h3>Credentialing a home</h3><ul><li>Review the record against Section A, visit, talk with the caregivers; complete Attachment D with a recommendation; Case Manager Supervisor reviews; Program Director approves; file and enter the renewal date in the compliance tracker.</li><li>Re-credential every 12 months using the last four quarterly evaluations, the annual training record with the four quarterly TST-FC sessions, and outcomes.</li></ul>\n<h3>Paid Intermittent Alternate Care</h3><ul><li>Request to the case manager 10 days ahead when possible; approve; notify the caseworker; qualifying home (verified, TST-FC trained; treatment-verified for Mental &amp; Behavioral Health); send the Managing Emotions Guide, safety and crisis plan, medication and medical information, schedule.</li><li>More than 72 consecutive hours; up to 7 days per child per fiscal year (September through August); record each day by child, by home, and by date; both caregivers paid on the regular payment date.</li></ul>\n<p class=\"small\">Benevolent House office: (214) 774-4871. The full T3C Service Delivery Addendum: <a href=\"addendum.pdf\" target=\"_blank\" style=\"color:var(--green-dk)\">open or download it here</a>.</p>"};
+</script>
+<script>const INTER = {
+"s1_1":{type:"none"},
+"s1_2":{type:"multi",k:"The day it arrives",q:"The referral goes into the T3C Referral, Admission, and Discharge Tracker. Check what the policy requires about the entry.",
+ items:[["The referral source",1],["The Service Package requested",1],["Entered the same day the referral is received",1],["The child's diagnosis and medication list",0],["Which home you think it will go to",0]],
+ fb:"Policy T3C-4 C: every referral is recorded the day it arrives, with the referral source and the Service Package requested. Matching, approval, and the child's clinical detail come later and live in the case record, not the tracker."},
+"s1_3":{type:"sort",k:"Declining a referral",q:"Sort each action: part of the procedure when Benevolent House does not admit, or not part of it.",
+ bins:[["yes","Part of the procedure"],["no","Not part of it"]],
+ items:[["Give the SSCC or DFPS an answer on the referral","yes"],["State the reason in the response","yes"],["Record the reason in the tracker","yes"],["Delete the referral from the tracker since no child was placed","no"],["Wait to respond until a home opens up","no"],["Record the referral even though it was declined","yes"]],
+ fb:"Admissions staff give an answer on every referral. When a child is not admitted, the reason is stated in the response and recorded in the tracker. Declined referrals stay in the tracker; it is the agency's record of every referral and every answer given."},
+"s2_1":{type:"multi",k:"Jada's 90-day review packet",q:"Check everything the review and written confirmation require for a child in the Mental & Behavioral Health package.",
+ items:[["The most recent CANS 3.0 results, completed by a certified assessor within the 90 days",1],["The Service Plan review stating which CANS results were considered and what changed because of them",1],["Progress recorded on each goal",1],["Continued Stay Written Confirmation (Attachment B) signed by the Program Director and the Treatment Director",1],["Copy of the signed confirmation to the SSCC or DFPS caseworker within 15 business days, with the date sent recorded on the form",1],["The Case Manager Supervisor's confirmation that the CANS is current",1],["A signature from the child's teacher",0],["A copy sent to the foster parents' neighbor",0]],
+ fb:"T3C-5 B and C, T3C-6 B. For a child on the Program Director's own caseload, the Executive Director signs in the Program Director's place. The signed confirmation is filed in the case record."},
+"s2_2":{type:"multi",k:"Documenting the denial",q:"Check what the case record must show for the denied therapy authorization.",
+ items:[["The date of the request, application, or referral",1],["The type of service requested",1],["The status of the request",1],["The reason given for the denial",1],["The status of any appeal",1],["Notification to the SSCC or DFPS caseworker within 3 business days",1],["A note that the family was told to wait for the next review",0]],
+ then:{q:"The appeal fails and no community provider can take Jada. What happens next?",a:["The service is dropped from the Service Plan","The case manager brings the need to the Program Director, and Benevolent House makes sure the service is provided","The caregiver finds a provider on her own"],k:1,fb:"T3C-5 E: when a service that fits the package is not available through STAR Health or community resources, the case manager brings it to the Program Director and Benevolent House makes sure it is provided."},
+ fb:"Five documented elements plus the 3-business-day notice. The case manager also seeks community resources for any needed service STAR Health does not cover."},
+"s3_1":{type:"sort",k:"Where each piece goes",q:"Tap each piece of information, then the record it belongs in.",
+ bins:[["sp","Service Plan, Family and Support Network section"],["part","Service Plan review, participants section"],["visit","Monthly visit note"]],
+ items:[["Aunt Pruitt, maternal aunt, date shared with the caseworker, contact approved: yes","sp"],["Aunt invited to the review by phone; took part by phone","part"],["Ms. Reyes's call to the caseworker about the aunt, made after the visit","visit"],["Jada's teacher invited by phone; could not attend; input gathered beforehand","part"],["Caregiver supported the approved Saturday hair appointment with the aunt","visit"]],
+ fb:"T3C-8 C. The Family and Support Network section holds each person, relationship, date shared, and approval status. The participants section holds who was invited, how, who took part, and the input of anyone who did not attend. Visit notes hold outreach and the caregiver's support of contacts since the last visit."},
+"s3_2":{type:"multi",k:"The aftercare contact log",q:"Check every entry that belongs in the aftercare record this month.",
+ items:[["Tuesday: call to Gloria, no answer, voicemail left (attempted contact)",1],["Thursday: call to Gloria, reached, topics discussed and any referral made",1],["At month end: copy of the month's documentation sent to the caseworker",1],["Nothing for Tuesday, since no one answered",0]],
+ fb:"T3C-9 C: for the Kinship Add-On, the Aftercare Kinship Support staff member makes each contact; Ms. Reyes is serving in that role for Micah. Every contact, attempted contact, and referral during aftercare is recorded. When a contact cannot be completed, the attempt is documented and tried again. Kinship aftercare is weekly the first month, then twice a month, for six months; Micah is in month two, so two contacts this month."},
+"s4_1":{type:"stages",k:"Re-credentialing, in order",q:"For each step, choose its position in the sequence.",
+ stages:["First","Second","Third","Fourth","Fifth"],
+ items:[["Review the foster home record against Section A requirements, visit the home, talk with the caregivers",0],["Complete a new Foster Family Home T3C Credential Record (Attachment D) and make a recommendation",1],["Case Manager Supervisor reviews the record",2],["Program Director approves",3],["File the signed record in the foster home record and enter the renewal date in the compliance tracker",4]],
+ fb:"T3C-10 B and C. The re-assessment uses the last four quarterly evaluations, the annual training record including the four quarterly TST-FC sessions, and outcomes for the children served. A home that does not yet meet a requirement gets a written list and help finishing it."},
+"s4_2":{type:"multi",k:"The respite record",q:"Check everything the policy requires for this respite.",
+ items:[["Request made to the case manager, at least 10 days ahead when possible, and approved by the case manager",1],["Notification to the SSCC or DFPS caseworker",1],["Receiving home: verified Benevolent House home, caregivers TST-FC trained, verified for treatment services (Jada is Mental & Behavioral Health)",1],["Items sent with Jada: Managing Emotions Guide, safety and crisis plan, medication and medical information, schedule",1],["Each approved day recorded by child, by home, and by date in the billing system",1],["Within Jada's limit of 7 paid days this fiscal year (September through August)",1],["Both caregivers paid the daily rate for Jada's package on the regular payment date",1],["A note that the Carters' payment pauses for the weekend",0]],
+ fb:"T3C-12. Both caregivers are paid for the same days. The exceptions: the 7 days are used up, the stay is 72 hours or less, or the child was moved from the home because of an investigation, a safety plan, or a caregiver's request for discharge; in those cases the providing caregiver is still paid."},
+"s5_1":{type:"wheel",k:"Where each measure comes from",q:"For each quarterly measure, tap the record or tracker that supplies it.",
+ who:["The Case Manager Supervisor's due-date tracking","The Referral, Admission, and Discharge Tracker","Visit notes and quarterly foster home evaluations","The compliance tracker","The billing system"],
+ items:[["On-time completion of Service Plan reviews, CANS assessments, and written confirmations",0],["Average length of service by Service Package, admission to discharge",1],["The caregiver's understanding and use of the Treatment Model",2],["Number of credentialed homes and on-time re-credentialing",3],["Use of Intermittent Alternate Care by home",4]],
+ fb:"T3C-6 D, T3C-7, T3C-2 H, T3C-10 C, T3C-12. Also reviewed through the Continuous Quality Improvement process: kinship time from referral to verification, placement stability, and permanency exits (T3C-11 C); aftercare outcomes (T3C-9 C); and completion of the child education documentation (T3C-3 C). The addendum names the measures; Benevolent House assigns who brings each one to the review."}
+};
+</script>
+<script>/* ===== Benevolent House course engine ===== */
+const $=s=>document.querySelector(s),$$=s=>Array.from(document.querySelectorAll(s));
+const PORTAL_VERSION="2.0 (Nov 2026)";const JOTFORM_ID="263097317610052";const JOTFORM_SUBMIT_URL="https://submit.jotform.com/submit/"+JOTFORM_ID;
+const KEY="bh_course_"+(typeof COURSE!=="undefined"?COURSE.code.replace(/[^A-Za-z0-9]/g,"_"):"t3c")+"_v2";
+function load(){try{return JSON.parse(localStorage.getItem(KEY))||{}}catch(e){return{}}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+let S=load();S.seen=S.seen||{};S.badges=S.badges||{};S.answers=S.answers||{};
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
+function show(id){$$("main>section").forEach(s=>s.classList.add("hidden"));$("#v-"+id).classList.remove("hidden");window.scrollTo({top:0});stopAudio()}
+function fmtDate(d){return d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}
+function fmtTime(d){return d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}
+const CH=(typeof COURSE!=="undefined"&&COURSE.chapters)||[["The Call","1"],["The First Night","2"],["The Plan","3"],["Credentialed","4"],["Weekend Off","5"],["Kinship","6"],["Safety","7"],["Going Home","8"],["Certified","9"]];
+const BADGE_ICON=(typeof COURSE!=="undefined"&&COURSE.icons)||{1:"📞",2:"🌙",3:"🗂️",4:"🏠",5:"☕",6:"🧓",7:"🛡️",8:"🎈",9:"🏅"};
+function scenesOf(ch){return SCENES.filter(s=>s.ch===ch)}
+function chProgress(ch){const sc=scenesOf(ch);const d=sc.filter(s=>S.seen[s.id]).length;return[d,sc.length]}
+function chUnlocked(ch){if(ch===1)return true;const[d,n]=chProgress(ch-1);return n?d>=n:true}
+
+/* ---------- user ---------- */
+function userLabel(){return S.user?S.user.name+(S.user.home?" · "+S.user.home:""):"Not signed in"}
+function renderHome(){
+ $("#user").textContent=userLabel();
+ let h=`<div class="hero-home"><img src="assets/${COURSE.heroImg||"s1_a"}.jpg" alt=""><div class="t"><small>Benevolent House · ${esc(COURSE.subtitle||"T3C Policy and Procedure Training")}</small><h1>${esc(COURSE.hero||"The Carter Family")}</h1><p>${esc(COURSE.blurb||"Follow one family through a placement and learn what Texas Child-Centered Care asks of you at each step. About two hours. Narrated, with captions. Stop any time; your place is saved.")}</p>${S.user?`<button class="btn gold" onclick="resume()">${Object.keys(S.seen).length?"Continue where I left off":"Begin Chapter 1"}</button>`:""}</div></div>`;
+ if(!S.user){h+=`<div class="panel"><div class="k">Before you begin</div><h2>Tell us who you are</h2><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div><div class="row"><div><label>Foster home or staff role</label><input type="text" id="uHome" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label>I am a</label><select id="uRole">${(COURSE.roles||["Foster Caregiver","Kinship Caregiver","Adoptive Parent","Foster and Adoptive Caregiver","Staff","Contracted Provider"]).map(r=>`<option>${r}</option>`).join("")}</select></div></div><p><button class="btn" onclick="signIn()">Continue</button></p><p class="small">Your name and completion record are kept by Benevolent House for licensing and T3C credentialing. No child information is ever entered here. All names in this course are fictional.</p></div>`}
+ else{
+  const got=Object.keys(S.badges).length;
+  h+=`<div class="sec"><h2>Your chapters</h2><span>${got} of ${CH.length} badges earned</span></div><div class="badges">${CH.map(([n,c])=>`<span class="${S.badges[c]?"got":""}">${BADGE_ICON[c]} ${n}</span>`).join("")}</div><div class="chapters">`;
+  CH.forEach(([name,c])=>{const ch=+c;let[d,n]=chProgress(ch);const first=scenesOf(ch)[0];const un=chUnlocked(ch);const final=ch===CH.length;if(!n){n=1;d=S.done?1:0}const pct=Math.round(d/n*100);const img=first?(first.img||('s_'+first.id)):(COURSE.qrefImg||"s_9_1");const go=first?`openChapter(${ch})`:`renderQuickRef()`;
+   h+=`<div class="ch ${d>=n?"done":""} ${un?"":"locked"}" onclick="${un?go:`toast('Finish the chapter before this one first')`}"><img src="assets/${img}.jpg" alt=""><div class="ring" style="--p:${pct}%"><i>${d>=n?"✓":d+"/"+n}</i></div><div class="b"><div class="n">Chapter ${ch}</div><h3>${name}</h3><div class="m">${first?n+" scene"+(n>1?"s":""):""}${final?(first?" · ":"")+"Quick Reference, Knowledge Check, certificate":""}</div></div></div>`});
+  h+=`</div><p class="hint">Signed in as ${esc(S.user.name)}. <a href="#" onclick="signOut();return false">Not you?</a></p>`}
+ $("#v-home").innerHTML=h;show("home")}
+function signIn(){const n=$("#uName").value.trim(),e=$("#uEmail").value.trim(),hm=$("#uHome").value.trim(),r=$("#uRole").value;
+ if(!n||!e||!hm){toast("Please fill in your name, email, and home or role");return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){toast("Please enter a valid email address");return}
+ S.user={name:n,email:e,home:hm,role:r};save();renderHome()}
+function signOut(){S.user=null;save();renderHome()}
+function resume(){const next=SCENES.find(s=>!S.seen[s.id]);if(!next){renderQuickRef();return}openScene(next.id)}
+function openChapter(ch){const first=scenesOf(ch).find(s=>!S.seen[s.id])||scenesOf(ch)[0];openScene(first.id)}
+
+/* ---------- audio ---------- */
+let AU=null,curSpans=[],curChars=[],curTotal=0;
+function stopAudio(){if(AU){try{AU.pause()}catch(e){}AU=null}}
+function setupAudio(src,text){
+ const sents=text.match(/[^.!?]+[.!?]+["']?/g)||[text];const cap=$("#cap");cap.innerHTML=sents.map(s=>`<span>${esc(s.trim())} </span>`).join("");
+ curSpans=$$("#cap span");curChars=sents.map(s=>s.length);curTotal=curChars.reduce((a,b)=>a+b,0);
+ const a=new Audio(src);AU=a;a.preload="auto";a.playbackRate=S.rate||1;const btn=$("#play"),pi=$("#pi");
+ btn.onclick=()=>{if(a.paused){a.play().catch(()=>{});btn.textContent="❚❚"}else{a.pause();btn.textContent="▶"}};
+ a.ontimeupdate=()=>{if(AU!==a)return;const f=a.currentTime/(a.duration||1);pi.style.width=(f*100)+"%";let acc=0,i=0;for(;i<curChars.length;i++){acc+=curChars[i];if(acc/curTotal>f)break}curSpans.forEach((s,j)=>s.classList.toggle("on",j<=i))};
+ a.onended=()=>{if(AU!==a)return;btn.textContent="↻";curSpans.forEach(s=>s.classList.add("on"));S.heard=S.heard||{};S.heard[CUR.id]=1;save();gate()};
+ a.onerror=()=>{if(AU!==a)return;curSpans.forEach(s=>s.classList.add("on"));btn.textContent="▶";S.heard=S.heard||{};S.heard[CUR.id]=1;gate()};
+ a.play().then(()=>{btn.textContent="❚❚"}).catch(()=>{btn.textContent="▶"})}
+function setRate(){S.rate=S.rate===1.25?1:1.25;save();if(AU)AU.playbackRate=S.rate;$("#rate").textContent=(S.rate||1)+"×"}
+
+/* ---------- scene ---------- */
+let CUR=null;
+function openScene(id){CUR=SCENES.find(s=>s.id===id);const i=SCENES.indexOf(CUR);const img=CUR.img||("s_"+CUR.id);const inter=INTER[CUR.id]||{type:"none"};
+ const vid=(COURSE.openers||{})[CUR.id];const media=vid?`<video src="assets/${vid}.mp4" poster="assets/${img}.jpg" autoplay muted loop playsinline style="width:100%;height:100%;object-fit:cover;display:block"></video>`:`<img src="assets/${img}.jpg" alt="">`;
+ $("#v-scene").innerHTML=`<div class="scene"><div class="hero"><span class="chip">Chapter ${CUR.ch} · ${esc(CUR.chTitle)}</span><span class="ref">${esc(CUR.ref)}</span>${media}<div class="title"><small>Scene ${i+1} of ${SCENES.length}</small><h1>${esc(CUR.title)}</h1></div></div>
+ <p class="cap" id="cap"></p><div class="bar"><button class="play" id="play" aria-label="Play or pause">▶</button><div class="prog"><i id="pi"></i></div><button class="speed" id="rate" onclick="setRate()">${(S.rate||1)}×</button></div>
+ <div id="inter"></div>
+ <div class="nav"><button class="btn ghost" onclick="prevScene()" ${i===0?"disabled":""}>Back</button><button class="btn ghost sm" onclick="renderHome()">Chapters</button><span class="sp"></span><span class="hint" id="gateTxt"></span><button class="btn" id="next" onclick="nextScene()" disabled>${i===SCENES.length-1?"Quick Reference":"Continue"}</button></div></div>`;
+ show("scene");renderInter(inter);setupAudio("assets/n_"+CUR.id+".mp3",CUR.narr);gate()}
+function gate(){const inter=INTER[CUR.id]||{type:"none"};const heard=(S.heard||{})[CUR.id];const done=inter.type==="none"||S.answers[CUR.id];
+ const b=$("#next"),t=$("#gateTxt");if(!b)return;if(!heard){b.disabled=true;t.textContent="Listen to the scene to continue";return}if(!done){b.disabled=true;t.textContent="Complete the activity to continue";return}b.disabled=false;t.textContent=""}
+function markDone(id){S.answers[id]=1;save();gate()}
+function nextScene(){S.seen[CUR.id]=1;save();const i=SCENES.indexOf(CUR);const ch=CUR.ch;const last=scenesOf(ch).slice(-1)[0];
+ if(last.id===CUR.id&&!S.badges[ch]){S.badges[ch]=1;save();showBadge(ch,()=>{i===SCENES.length-1?renderQuickRef():openScene(SCENES[i+1].id)});return}
+ i===SCENES.length-1?renderQuickRef():openScene(SCENES[i+1].id)}
+function prevScene(){const i=SCENES.indexOf(CUR);if(i>0)openScene(SCENES[i-1].id)}
+function showBadge(ch,cb){const name=CH[ch-1][0];const d=document.createElement("div");d.className="badge-pop";d.innerHTML=`<div class="bx"><div class="ic">${BADGE_ICON[ch]}</div><div class="small">Badge earned</div><h3>${esc(name)}</h3><p>Chapter ${ch} complete. ${Object.keys(S.badges).length} of ${CH.length}.</p><button class="btn">Keep going</button></div>`;document.body.appendChild(d);d.querySelector("button").onclick=()=>{d.remove();cb()}}
+
+/* ---------- interactions ---------- */
+function renderInter(it){const el=$("#inter");const done=S.answers[CUR.id];
+ if(it.type==="none"){el.innerHTML="";return}
+ let h=`<div class="panel"><div class="k">${esc(it.k||"Your turn")}</div>`;
+ if(it.type==="choice")h+=choiceHTML(it,"c");
+ else if(it.type==="multi")h+=multiHTML(it);
+ else if(it.type==="sort")h+=sortHTML(it);
+ else if(it.type==="flip")h+=`<div class="cards">${it.cards.map(c=>`<div class="card3" tabindex="0"><div class="in"><div class="f">${esc(c[0])}</div><div class="b">${esc(c[1])}</div></div></div>`).join("")}</div><p class="hint" style="color:var(--muted)">Tap each card to turn it over, then answer below.</p>`+choiceHTML({q:it.then.q,a:it.then.a.map((a,j)=>[a,j===it.then.k?1:0,j===it.then.k?it.then.fb:"Not quite. Turn the cards again."])},"c");
+ else if(it.type==="stages")h+=stagesHTML(it);
+ else if(it.type==="wordbank")h+=wordbankHTML(it);
+ else if(it.type==="calendar")h+=calHTML(it);
+ else if(it.type==="wheel")h+=wheelHTML(it);
+ else if(it.type==="respite")h+=respiteHTML(it);
+ h+=`</div>`;el.innerHTML=h;wire(it,el);if(done){el.querySelectorAll("button,input,select").forEach(x=>x.disabled=true);const f=el.querySelector(".fb-final");if(f)f.classList.remove("hidden")}}
+function choiceHTML(it,cls){return `<h2>${esc(it.q)}</h2>${it.a.map((a,j)=>`<button class="opt" data-j="${j}" data-ok="${a[1]}">${esc(a[0])}</button>`).join("")}<div class="fb hidden" id="cfb"></div>`}
+function multiHTML(it){return `<h2>${esc(it.q)}</h2><div class="checks">${it.items.map((x,j)=>`<label><input type="checkbox" data-j="${j}"> <span>${esc(x[0])}</span></label>`).join("")}</div><p><button class="btn sm" id="chk">Check my answers</button></p><div class="fb hidden fb-final">${esc(it.fb)}</div>${it.then?`<div id="then" class="hidden" style="margin-top:14px">`+choiceHTML({q:it.then.q,a:it.then.a.map((a,j)=>[a,j===it.then.k?1:0,j===it.then.k?it.then.fb:"Not quite. Look at the policy again."])},"c")+`</div>`:""}`}
+function sortHTML(it){return `<h2>${esc(it.q)}</h2><div class="chips">${it.items.map((x,j)=>`<button data-j="${j}" data-bin="${x[1]}">${esc(x[0])}</button>`).join("")}</div><div class="bins">${it.bins.map(b=>`<div class="bin" data-bin="${b[0]}" tabindex="0"><h4>${esc(b[1])}</h4></div>`).join("")}</div><div class="fb hidden fb-final">${esc(it.fb)}</div>`}
+function stagesHTML(it){return `<h2>${esc(it.q)}</h2>${it.items.map((x,j)=>`<div class="stage-row" data-j="${j}"><div>${esc(x[0])}</div><select data-j="${j}"><option value="">Choose a stage</option>${it.stages.map((s,k)=>`<option value="${k}">${esc(s)}</option>`).join("")}</select></div>`).join("")}<p><button class="btn sm" id="chk">Check</button></p><div class="fb hidden fb-final">${esc(it.fb)}</div>`}
+function wordbankHTML(it){return `<h2>${esc(it.q)}</h2><div class="wordbank">${it.groups.map((g,gi)=>`<div class="wb" data-g="${gi}"><h4>${esc(g[0])}</h4>${g.slice(1).map(w=>`<button>${esc(w)}</button>`).join("")}</div>`).join("")}</div><p class="hint" style="color:var(--muted)">Pick at least one in each box.</p><p><button class="btn sm" id="chk">Save Jada's guide</button></p><div class="fb hidden fb-final">${esc(it.fb)}</div>`}
+function calHTML(it){return `<h2>${esc(it.q)}</h2><div class="cal">${it.months.map((m,j)=>`<div data-j="${j}">${m}</div>`).join("")}</div><p><button class="btn sm" id="chk">Check</button></p><div class="fb hidden fb-final">${esc(it.fb)}</div>`}
+function wheelHTML(it){return `<h2>${esc(it.q)}</h2>${it.items.map((x,j)=>`<div style="margin:12px 0"><b>${esc(x[0])}</b><div class="wheel" data-j="${j}">${it.who.map((w,k)=>`<button data-k="${k}">${esc(w)}</button>`).join("")}</div></div>`).join("")}<div class="fb hidden fb-final">${esc(it.fb)}</div>`}
+function respiteHTML(it){return `<h2>${esc(it.q)}</h2><div id="rsteps">${it.steps.map((s,si)=>`<div class="rstep ${si?"hidden":""}" data-si="${si}"><p><b>Step ${si+1}.</b> ${esc(s.q)}</p>${s.a.map((a,j)=>`<button class="opt" data-ok="${j===s.k?1:0}">${esc(a)}</button>`).join("")}<div class="fb hidden"></div></div>`).join("")}</div><div class="payline hidden" id="pay"></div><div class="fb hidden fb-final">${esc(it.fb)}</div>`}
+function wire(it,el){
+ el.querySelectorAll(".card3").forEach(c=>{const t=()=>c.classList.toggle("on");c.onclick=t;c.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();t()}}});
+ if(it.type==="choice"||it.type==="flip"){const opts=el.querySelectorAll(".opt");const src=it.type==="flip"?it.then.a.map((a,j)=>[a,j===it.then.k?1:0,j===it.then.k?it.then.fb:"Not quite. Turn the cards again."]):it.a;
+  opts.forEach(o=>o.onclick=()=>{const ok=o.dataset.ok==="1";const j=+o.dataset.j;const fb=el.querySelector("#cfb");fb.classList.remove("hidden");fb.className="fb "+(ok?"":"bad");fb.textContent=src[j][2];
+   if(ok){o.classList.add("right");opts.forEach(x=>x.disabled=true);markDone(CUR.id)}else{o.classList.add("wrong");if(!it.retry){opts.forEach(x=>x.disabled=true);opts.forEach(x=>{if(x.dataset.ok==="1")x.classList.add("right")});markDone(CUR.id)}else{o.disabled=true}}})}
+ if(it.type==="multi"){el.querySelector("#chk").onclick=()=>{let okAll=true;el.querySelectorAll(".checks label").forEach(l=>{const j=+l.querySelector("input").dataset.j;const want=it.items[j][1]===1;const got=l.querySelector("input").checked;l.classList.remove("ok","miss","bad");if(want&&got)l.classList.add("ok");else if(want&&!got){l.classList.add("miss");okAll=false}else if(!want&&got){l.classList.add("bad");okAll=false}});el.querySelector(".fb-final").classList.remove("hidden");if(!okAll){toast("Gold = you missed it, red = not a requirement. Adjust and check again.");return}el.querySelectorAll("input,#chk").forEach(x=>x.disabled=true);if(it.then){const th=el.querySelector("#then");th.classList.remove("hidden");const src=it.then.a.map((a,j)=>[a,j===it.then.k?1:0,j===it.then.k?it.then.fb:"Not quite. Look at the policy again."]);th.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{const ok=o.dataset.ok==="1";const fb=th.querySelector("#cfb");fb.classList.remove("hidden");fb.className="fb "+(ok?"":"bad");fb.textContent=src[+o.dataset.j][2];if(ok){o.classList.add("right");th.querySelectorAll(".opt").forEach(x=>x.disabled=true);markDone(CUR.id)}else{o.classList.add("wrong");o.disabled=true}})}else markDone(CUR.id)}}
+ if(it.type==="sort"){let sel=null;const chips=el.querySelectorAll(".chips button");chips.forEach(c=>c.onclick=()=>{chips.forEach(x=>x.classList.remove("sel"));c.classList.add("sel");sel=c});
+  el.querySelectorAll(".bin").forEach(bn=>{const drop=()=>{if(!sel){toast("Tap an item first");return}const ok=sel.dataset.bin===bn.dataset.bin;const c=document.createElement("span");c.className="c "+(ok?"ok":"bad");c.textContent=sel.textContent+(ok?" ✓":" ✗");bn.appendChild(c);if(!ok){const r=el.querySelector(`.bin[data-bin="${sel.dataset.bin}"]`);const c2=document.createElement("span");c2.className="c ok";c2.textContent=sel.textContent+" (belongs here)";r.appendChild(c2)}sel.remove();sel=null;if(!el.querySelectorAll(".chips button").length){el.querySelector(".fb-final").classList.remove("hidden");markDone(CUR.id)}};bn.onclick=drop;bn.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();drop()}}})}
+ if(it.type==="stages"){el.querySelector("#chk").onclick=()=>{let ok=true;el.querySelectorAll(".stage-row").forEach(r=>{const j=+r.dataset.j;const v=r.querySelector("select").value;r.classList.remove("ok","bad");if(v===""){ok=false;return}if(+v===it.items[j][1])r.classList.add("ok");else{r.classList.add("bad");ok=false}});if(!ok){toast("Red rows need another look");return}el.querySelector(".fb-final").classList.remove("hidden");el.querySelectorAll("select,#chk").forEach(x=>x.disabled=true);markDone(CUR.id)}}
+ if(it.type==="wordbank"){el.querySelectorAll(".wb button").forEach(b=>b.onclick=()=>b.classList.toggle("sel"));el.querySelector("#chk").onclick=()=>{const ok=Array.from(el.querySelectorAll(".wb")).every(w=>w.querySelector("button.sel"));if(!ok){toast("Pick at least one word in each box");return}el.querySelector(".fb-final").classList.remove("hidden");el.querySelectorAll(".wb button,#chk").forEach(x=>x.disabled=true);markDone(CUR.id)}}
+ if(it.type==="calendar"){el.querySelectorAll(".cal div").forEach(d=>d.onclick=()=>d.classList.toggle("sel"));el.querySelector("#chk").onclick=()=>{const sel=Array.from(el.querySelectorAll(".cal div.sel")).map(d=>+d.dataset.j);const want=it.expect;const same=sel.length===want.length&&want.every(x=>sel.includes(x));el.querySelectorAll(".cal div").forEach(d=>d.classList.toggle("exp",want.includes(+d.dataset.j)));el.querySelector(".fb-final").classList.remove("hidden");if(!same){toast("The gold-outlined months are the due dates. Match them and check again.");return}el.querySelectorAll(".cal div,#chk").forEach(x=>x.style.pointerEvents="none");el.querySelector("#chk").disabled=true;markDone(CUR.id)}}
+ if(it.type==="wheel"){const rows=el.querySelectorAll(".wheel");rows.forEach(r=>{const j=+r.dataset.j;r.querySelectorAll("button").forEach(b=>b.onclick=()=>{const ok=+b.dataset.k===it.items[j][1];r.querySelectorAll("button").forEach(x=>{x.disabled=true;if(+x.dataset.k===it.items[j][1])x.classList.add("ok")});if(!ok)b.classList.add("bad");r.dataset.done=1;if(Array.from(rows).every(x=>x.dataset.done)){el.querySelector(".fb-final").classList.remove("hidden");markDone(CUR.id)}})})}
+ if(it.type==="respite"){const steps=el.querySelectorAll(".rstep");steps.forEach((st,si)=>{st.querySelectorAll(".opt").forEach(o=>o.onclick=()=>{const ok=o.dataset.ok==="1";const fb=st.querySelector(".fb");fb.classList.remove("hidden");if(ok){o.classList.add("right");fb.className="fb";fb.textContent=it.steps[si].fb;st.querySelectorAll(".opt").forEach(x=>x.disabled=true);if(steps[si+1])steps[si+1].classList.remove("hidden");else{const p=el.querySelector("#pay");p.classList.remove("hidden");p.textContent=it.pay;el.querySelector(".fb-final").classList.remove("hidden");markDone(CUR.id)}}else{o.classList.add("wrong");o.disabled=true;fb.className="fb bad";fb.textContent="Not that one. Try again."}})})}
+}
+
+/* ---------- Quick Reference, quiz, ack, cert ---------- */
+function renderQuickRef(){
+ $("#v-qref").innerHTML=`<div class="scene"><div class="hero"><span class="chip">Chapter ${CH.length} · ${esc(CH[CH.length-1][0])}</span><span class="ref">Quick Reference</span><img src="assets/${COURSE.qrefImg||"s_9_1"}.jpg" alt=""><div class="title"><small>Your Quick Reference</small><h1>Keep this in your binder</h1></div></div>
+ <div class="qref" id="qrefBody">${COURSE.qrefHtml||`<h3>What we ask of you</h3><ul><li>Use TST-FC every day: routines, pre-teaching, staying neutral, time-in, and signals of safety.</li><li>Build the Managing Emotions Guide with the child and keep it up to date.</li><li>Take the child to every appointment and keep a record of each service.</li><li>Tell your case manager right away if a service is denied, delayed, or cannot be found.</li><li>Support Normalcy and approved contact with parents, siblings, and relatives.</li><li>Tell your case manager when a child names a relative or another person who matters to them.</li><li>Come to Service Plan meetings and share what you see at home.</li><li>Keep your training current. It keeps your home credentialed.</li></ul>
+ <h3>The calendar</h3><table class="t"><tr><th></th><th>Basic</th><th>Mental &amp; Behavioral Health</th></tr><tr><td>Service Plan review</td><td>At least every 6 months</td><td>At least every 90 days</td></tr><tr><td>CANS 3.0 (over age 3)</td><td>Every 12 months</td><td>Every 90 days</td></tr><tr><td>Written plan for hard moments</td><td>Managing Emotions Guide</td><td>Managing Emotions Guide and a safety and crisis plan</td></tr><tr><td>When the child leaves</td><td>Discharge plan in the Service Plan</td><td>Aftercare plan and six months of follow-up</td></tr></table>
+ <h3>What you can count on from Benevolent House</h3><ul><li>A case manager who visits every month and coaches you in the model.</li><li>On-call staff 24 hours a day, 7 days a week.</li><li>Up to 7 days of paid Intermittent Alternate Care per child each fiscal year. Ask at least 10 days ahead when you can.</li><li>For kinship caregivers: help with verification and benefits, and meetings on evenings and weekends.</li></ul>
+ <h3>Call your case manager or the on-call line right away when</h3><ul><li>A child is in crisis, is hurt, or is missing. For a life-threatening emergency or a missing child, call 911 first, then on-call.</li><li>There is a serious incident or you use an emergency behavior intervention.</li><li>You have any concern that a child is being recruited or trafficked. Texas Abuse Hotline 1-800-252-5400.</li><li>Something changes in your household.</li></ul><h3>Kinship and re-credentialing</h3><ul><li>Kinship aftercare: weekly the first month, then twice a month, for six months, plus a support group.</li><li>Your home is re-credentialed every 12 months, in the month of the original credential.</li></ul><p class="small">Benevolent House office: (214) 774-4871. The full T3C Service Delivery Addendum: <a href="addendum.pdf" target="_blank" style="color:var(--green-dk)">open or download it here</a>. It is also in your foster home binder and available from your case manager at any time.</p>`}</div>
+ <div class="nav noprint"><button class="btn ghost" onclick="window.print()">Print this page</button><span class="sp"></span><button class="btn gold" onclick="renderQuiz()">Start the Knowledge Check</button></div></div>`;show("qref")}
+let attempt=0;
+function renderQuiz(){attempt++;let h=`<div class="panel"><div class="k">Knowledge Check</div><h2>Ten questions. Eight to pass. Attempt ${attempt}.</h2><p class="lead">Take your time. If you score below eight, you will see which items to review and can try again.</p>`;
+ QUIZ.forEach((x,i)=>{h+=`<div style="margin:14px 0;padding-top:10px;border-top:1px solid var(--line)"><b>${i+1}. ${esc(x.q)}</b>${x.a.map((a,j)=>`<label style="font-weight:400;display:flex;gap:8px;align-items:flex-start;margin:6px 0;color:var(--ink)"><input type="radio" name="q${i}" value="${j}" style="margin-top:4px"> <span>${esc(a)}</span></label>`).join("")}</div>`});
+ h+=`<p><button class="btn" onclick="gradeQuiz()">Submit answers</button></p></div>`;$("#v-quiz").innerHTML=h;show("quiz")}
+let RESULT=null;
+function gradeQuiz(){let ans=[],score=0,missed=[];for(let i=0;i<QUIZ.length;i++){const r=document.querySelector(`input[name=q${i}]:checked`);if(!r){toast("Please answer question "+(i+1));return}const v=+r.value;ans.push("abc"[v]);if(v===QUIZ[i].k)score++;else missed.push(i)}
+ const pass=score>=8;RESULT={score,answers:ans.join(""),pass,attempt};
+ let h=`<div class="panel" style="text-align:center"><div class="k">Knowledge Check</div><p class="score ${pass?"":"fail"}">${score} / ${QUIZ.length}</p><p>${pass?"<b>You passed.</b> One more step: the Acknowledgment.":"<b>Not yet.</b> Review the items below and take the check again. A retake is expected and is never held against you."}</p></div>`;
+ if(missed.length){h+=`<div class="panel"><div class="k">Items to review</div>${missed.map(i=>`<p><b>${i+1}. ${esc(QUIZ[i].q)}</b><br>Correct answer: ${esc(QUIZ[i].a[QUIZ[i].k])} <span style="background:var(--sand);border-radius:6px;padding:.1rem .4rem;font-size:.8rem">${esc(QUIZ[i].ref)}</span></p>`).join("")}</div>`}
+ h+=`<div class="nav">${pass?`<button class="btn gold" onclick="renderAck()">Continue to Acknowledgment</button>`:`<button class="btn" onclick="renderQuiz()">Retake the Knowledge Check</button> <button class="btn ghost" onclick="renderHome()">Review the chapters</button>`}</div>`;
+ $("#v-quiz").innerHTML=h;show("quiz")}
+function renderAck(){$("#v-ack").innerHTML=`<div class="panel"><div class="k">Acknowledgment</div><p style="font-size:1.08rem">${esc(ACK)}</p><div class="row"><div><label>Type your full name</label><input type="text" id="aName" value="${esc(S.user.name)}"></div><div><label>Date</label><input type="text" id="aDate" value="${fmtDate(new Date())}" readonly></div></div><label>Sign with your finger or mouse</label><canvas class="sig" id="sigPad" aria-label="Signature pad"></canvas><p><button class="btn ghost sm" style="color:var(--brown);border-color:var(--brown);background:#fff" onclick="clearSig()">Clear signature</button> <button class="btn ghost sm" style="color:var(--brown);border-color:var(--brown);background:#fff" onclick="typedSig()">I cannot draw: use my typed name</button></p><label style="font-weight:400"><input type="checkbox" id="aAgree"> I agree to the statement above and confirm that I completed this training myself.</label><p><button class="btn gold" id="ackSubmit" onclick="finish()">Submit and get my certificate</button></p></div>`;show("ack");initSig()}
+let sigCtx,sigDrawn=false;
+function initSig(){const c=$("#sigPad");c.width=c.offsetWidth*2;c.height=320;sigCtx=c.getContext("2d");sigCtx.scale(2,2);sigCtx.lineWidth=2.2;sigCtx.lineCap="round";sigCtx.strokeStyle="#1b2a4a";let d=false;const pos=e=>{const r=c.getBoundingClientRect();const p=e.touches?e.touches[0]:e;return[p.clientX-r.left,p.clientY-r.top]};
+ const st=e=>{d=true;const[x,y]=pos(e);sigCtx.beginPath();sigCtx.moveTo(x,y);e.preventDefault()},mv=e=>{if(!d)return;const[x,y]=pos(e);sigCtx.lineTo(x,y);sigCtx.stroke();sigDrawn=true;e.preventDefault()},en=()=>{d=false};
+ c.addEventListener("mousedown",st);c.addEventListener("mousemove",mv);window.addEventListener("mouseup",en);c.addEventListener("touchstart",st,{passive:false});c.addEventListener("touchmove",mv,{passive:false});c.addEventListener("touchend",en)}
+function typedSig(){const n=$("#aName").value.trim();if(!n){toast("Type your name first");return}clearSig();sigCtx.font="italic 34px Georgia, serif";sigCtx.fillStyle="#1b2a4a";sigCtx.fillText(n,16,90);sigDrawn=true;toast("Typed signature applied")}
+function clearSig(){const c=$("#sigPad");sigCtx.clearRect(0,0,c.width,c.height);sigDrawn=false}
+let finishing=false;
+async function finish(){if(finishing)return;const n=$("#aName").value.trim();if(!n){toast("Please type your name");return}if(!sigDrawn){toast("Please sign in the box");return}if(!$("#aAgree").checked){toast("Please check the agreement box");return}
+ finishing=true;const b=$("#ackSubmit");b.disabled=true;b.textContent="Submitting...";const now=new Date();const sig=$("#sigPad").toDataURL("image/png");
+ const rec={title:COURSE.title,code:COURSE.code,score:RESULT.score,pass:"Pass",date:fmtDate(now),time:fmtTime(now),hours:COURSE.hours,answers:"Attempt "+RESULT.attempt+": "+RESULT.answers,ack:ACK+" Signed by "+n,sig:sig,trainer:COURSE.trainer};
+ const ok=await logToForms(rec);S.done={date:fmtDate(now),score:RESULT.score,name:n};S.badges[CH.length]=1;save();finishing=false;renderCert(n,now,sig,ok)}
+async function logToForms(r){const fd=new FormData();fd.append("formID",JOTFORM_ID);fd.append("q3_q3_textbox1",S.user.name);fd.append("q4_q4_email2",S.user.email);fd.append("q5_q5_textbox3",S.user.home||"");fd.append("q6_q6_dropdown4",S.user.role);fd.append("q8_q8_textbox6",r.title);fd.append("q9_q9_textbox7",r.code);fd.append("q11_q11_number9",r.score);fd.append("q12_q12_dropdown10",r.pass);fd.append("q13_q13_textbox11",r.date);fd.append("q14_q14_textbox12",r.time);fd.append("q15_q15_number13",r.hours);fd.append("q16_q16_textarea14",r.answers);fd.append("q17_q17_textarea15",r.ack);fd.append("q18_q18_textarea16",r.sig);fd.append("q20_q20_textbox18",r.trainer);fd.append("q21_q21_textbox19",PORTAL_VERSION);
+ try{await fetch(JOTFORM_SUBMIT_URL,{method:"POST",body:fd,mode:"no-cors"});return true}catch(e){try{const q=JSON.parse(localStorage.getItem(KEY+"_queue")||"[]");q.push({r,u:S.user});localStorage.setItem(KEY+"_queue",JSON.stringify(q))}catch(x){}return false}}
+function renderCert(name,now,sig,ok){$("#v-cert").innerHTML=`<p class="noprint hint" style="margin:14px 0">${ok?"Your completion record has been sent to Benevolent House.":"Your record is saved on this device and will be sent when you are back online. Please also tell your case manager you finished."} Print or save this certificate for your records.</p>
+ <div id="cert"><img class="logo" src="bh-logo.png" alt=""><div style="font-weight:700;color:var(--brown);font-size:1.2rem">Benevolent House</div><div class="small">Foster Care and Adoption</div><h1>Certificate of Completion</h1><p>This certifies that</p><div class="name">${esc(name)}</div><p>${esc(S.user.role)}${S.user.home?" · "+esc(S.user.home):""}</p><p>has completed</p><p style="font-size:1.25rem;font-weight:700;color:var(--brown)">${esc(COURSE.title)}</p><p>Training code ${esc(COURSE.code)} · ${COURSE.hours} training hours · Knowledge Check ${RESULT.score} of ${QUIZ.length}<br>${fmtDate(now)}</p>
+ <div class="sigs"><div><img src="${sig}" alt=""><b>${esc(name)}</b>Participant</div><div style="padding-top:56px"><b>${esc(COURSE.trainer)}</b>Trainer of Record (electronic record on file)</div></div><div class="seal">BENEVOLENT<br>HOUSE<br>T3C<br>CERTIFIED</div>
+ <p class="small" style="margin-top:26px">Self-paced narrated course with Knowledge Check and signed Acknowledgment. Record on file with Benevolent House. Version ${PORTAL_VERSION}.</p></div>
+ <div class="nav noprint" style="justify-content:center"><button class="btn" onclick="window.print()">Print or save as PDF</button> <button class="btn ghost" onclick="renderHome()">Back to chapters</button></div>`;show("cert")}
+
+/* ---------- init ---------- */
+window.addEventListener("online",async()=>{try{const q=JSON.parse(localStorage.getItem(KEY+"_queue")||"[]");if(!q.length)return;localStorage.removeItem(KEY+"_queue");const u=S.user;for(const it of q){S.user=it.u;await logToForms(it.r)}S.user=u}catch(e){}});
+window.addEventListener("resize",()=>{if($("#v-ack")&&!$("#v-ack").classList.contains("hidden")&&!sigDrawn)initSig()});
+document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.activeElement&&["uName","uEmail","uHome"].includes(document.activeElement.id))signIn()});
+$("#homeBtn").onclick=renderHome;renderHome();
+</script>
+</body></html>

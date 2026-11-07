@@ -193,6 +193,24 @@ const CATALOG = [
   blurb:"Purposeful, trauma-informed daily care."},
  {code:"MC", title:"Medical Consent (Form 2759)", hours:1, who:"Caregivers who are medical consenters", freq:"Before serving as medical consenter", status:"record", group:"Pre-Service",
   blurb:"DFPS medical consent training. Record the completion date here."},
+ {code:"DFPS-MR", title:"DFPS Mandatory Reporting Community Response Training", hours:1, who:"All caregivers and staff", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Record the completion date here."},
+ {code:"DFPS-PM", title:"DFPS Psychotropic Medication Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Required for the Mental & Behavioral Health credential."},
+ {code:"DFPS-TIC", title:"DFPS Trauma Informed Care Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Record the completion date here."},
+ {code:"DFPS-NOR", title:"DFPS Normalcy Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Record the completion date here."},
+ {code:"DFPS-SA", title:"DFPS Preventing and Recognizing Sexual Abuse Training", hours:1, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Record the completion date here."},
+ {code:"DFPS-TS", title:"Transportation Safety Training", hours:2, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
+  blurb:"Online. Record the completion date here."},
+ {code:"DFPS-IC", title:"Infection Control and Communicable Disease Training", hours:2, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
+  blurb:"Online. Record the completion date here."},
+ {code:"DFPS-SB", title:"Shaken Baby and Sudden Infant Death Training", hours:1, who:"Caregivers of infants", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
+  blurb:"Online. Record the completion date here."},
+ {code:"DFPS-RP", title:"DFPS Runaway Prevention Training", hours:2.5, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
+  blurb:"Taken on the DFPS site. Record the completion date here."},
  {code:"CPR", title:"CPR and First Aid", hours:4, who:"All caregivers", freq:"Per certificate expiration", status:"record", group:"Outside Certificates",
   blurb:"Outside hands-on certification. Record the completion and expiration dates."},
 ];
@@ -483,7 +501,7 @@ function toggleRead(btn,el){if(reading){stopRead();return}if(!window.speechSynth
 function renderHome(){
  $("#userChip").textContent=userLabel();
  const groups=[...new Set(CATALOG.map(c=>c.group))];
- let h=`<h1>Benevolent House Training Portal</h1><p class="lead">Every Benevolent House training in one place. Complete a training here, or record one you completed live, and your training log stays current automatically.</p>`;
+ let h=`<h1>Benevolent House Training Portal</h1><p class="lead">Every Benevolent House training in one place (30 trainings). Complete a training here, or record one you completed live, and your training log stays current automatically.</p>`;
  if(!S.user){h+=`<div class="card"><h3 style="margin-top:0">Start by telling us who you are</h3><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div>
  <div class="row"><div><label>Foster home or staff role</label><input type="text" id="uHome" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label>I am a</label><select id="uRole"><option>Foster Caregiver</option><option>Kinship Caregiver</option><option>Adoptive Parent</option><option>Foster and Adoptive Caregiver</option><option>Staff</option><option>Contracted Provider</option></select></div></div>
  <p><button class="btn" onclick="signIn()">Continue</button></p><p class="small">Your name and completion records are kept by Benevolent House for licensing and T3C credentialing. No child information is ever entered here.</p></div>`;}
@@ -491,7 +509,7 @@ function renderHome(){
  groups.forEach(g=>{h+=`<div class="section-title"><h2>${g}</h2></div><div class="grid">`;
   CATALOG.filter(c=>c.group===g).forEach(c=>{const d=S.done[c.code];
    let pill=d?`<span class="pill done">Completed ${esc(d.date)}</span>`:c.status==="live"?`<span class="pill live">Available now</span>`:c.status==="record"?`<span class="pill ext">Record a completion</span>`:`<span class="pill soon">Online version coming</span>`;
-   let btn=c.status==="live"?(c.module==="t3c_core"?`<a class="btn sm" href="t3c/" style="text-decoration:none">${d?"Review again":"Start the course"}</a>`:`<button class="btn sm" onclick="startModule('${c.module}')" ${S.user?"":"disabled"}>${d?"Review again":"Start"}</button>`):c.status==="record"?`<button class="btn ghost sm" onclick="recordLive('${c.code}')" ${S.user?"":"disabled"}>Record</button>`:`<button class="btn ghost sm" disabled>Soon</button>`;
+   let btn=c.status==="live"?`<button class="btn sm" onclick="startModule('${c.module}')" ${S.user?"":"disabled"}>${d?"Review again":"Start"}</button>`:c.status==="record"?`<button class="btn ghost sm" onclick="recordLive('${c.code}')" ${S.user?"":"disabled"}>Record</button>`:`<button class="btn ghost sm" disabled>Soon</button>`;
    h+=`<div class="tcard"><div class="code">${c.code}${c.req?' · <span class="pill req">Required</span>':''}</div><h3>${esc(c.title)}</h3><div class="meta">${c.hours} hr · ${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p><div class="foot">${pill}${btn}</div></div>`});
   h+=`</div>`});
  h+=`<div class="card" style="margin-top:24px"><h3 style="margin-top:0">Questions?</h3><p>Call or text your case manager, or the Benevolent House on-call line, any hour. If a page will not load, try another browser or ask your case manager to help you complete the training one-on-one.</p></div>`;
