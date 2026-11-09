@@ -14,7 +14,7 @@
  function plan(o){const CAT=o.catalog||W.CATALOG;const now=o.now||new Date();const today=ymd(now);const t0=dayNum(today);
   const profByEmail={};(o.profiles||[]).forEach(p=>{profByEmail[nm(p.email)]=p});
   const nameCount={};(o.people||[]).forEach(a=>{if(a.active&&a.full_name){const k=nm(a.full_name);nameCount[k]=(nameCount[k]||0)+1}});
-  const legByName={};(o.legacy||[]).forEach(l=>{(legByName[nm(l.person_name)]=legByName[nm(l.person_name)]||[]).push(l)});
+  const legByName={};(o.legacy||[]).forEach(l=>{if(l.voided)return;(legByName[nm(l.person_name)]=legByName[nm(l.person_name)]||[]).push(l)});
   const compsBy={};(o.comps||[]).forEach(r=>{if(!r.voided)(compsBy[r.user_id]=compsBy[r.user_id]||[]).push(r)});
   const out=[];
   (o.people||[]).filter(a=>a.active&&a.email).forEach(a=>{const prof=profByEmail[nm(a.email)];const type=(prof&&prof.caregiver_type)||a.caregiver_type||(a.access==="caregiver"?"Foster Caregiver":"Staff");
