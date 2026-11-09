@@ -1,0 +1,270 @@
+// Benevolent House daily training reminders (source; build.py inlines catalog.js and reminders-core.js into index.ts).
+// Runs from a schedule inside Supabase each morning and early afternoon. A log table makes sure nothing is
+// sent twice; a reminder that failed is tried again on the next run.
+// default: send today's reminders (safe to call again; it never repeats one)
+// ?mode=count: only counts what would go out today (no names)
+// ?mode=sample: leadership only (signed-in token required); sends example emails to staff
+import { createClient } from "jsr:@supabase/supabase-js@2";
+const FROM = "Benevolent House Training <training@notify.benevolenthouse.org>";
+const CORS = { "Access-Control-Allow-Origin": "https://portal.benevolenthouse.org", "Access-Control-Allow-Headers": "authorization, apikey, content-type", "Access-Control-Allow-Methods": "GET, POST, OPTIONS" };
+const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...CORS, "Content-Type": "application/json" } });
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+const g: any = globalThis; g.window = g;
+
+// ---- catalog.js (copied from the portal at build time) ----
+/* Benevolent House training catalog: shared by the portal home and the admin page */
+window.CATALOG=[
+ {code:"T3C-PP", renew:0, aud:"both", title:"T3C Policy and Procedure Training (Core Session)", hours:2, who:"All caregivers, all staff, contracted providers", freq:"Once, then annual 1-hour refresher", status:"live", group:"T3C Credential", module:"t3c_core", req:true,
+  blurb:"What changes and what stays the same under Texas Child-Centered Care. Required before Benevolent House operates under its Active Full Credential."},
+ {code:"T3C-PP-S", renew:12, aud:"staff", title:"T3C Policy and Procedure Training (Staff Session)", hours:1, who:"Directors and case managers", freq:"Once, then annual", status:"live", group:"T3C Credential", module:"t3c_staff", req:true,
+  blurb:"The procedures staff carry out: referrals, reviews and confirmations, documenting engagement, aftercare, credentialing homes, and CQI data."},
+ {code:"TST-8", renew:0, aud:"both", title:"Trauma Systems Therapy for Foster Care (TST-FC) Pre-Service", hours:8, who:"All caregivers and staff", freq:"Once, before serving a child under T3C", status:"record", group:"T3C Credential", req:true,
+  blurb:"Benevolent House's Treatment Model. Four modules: The Alarm System, Find the Pattern, In the Moment, Safe and Responsive."},
+ {code:"TST-Q", renew:3, cycle:"quarter", window:45, aud:"both", title:"TST-FC Ongoing Training (Quarterly Sessions)", hours:1, who:"All caregivers and staff", freq:"Four 1-hour sessions a year, one each quarter", status:"soon", group:"T3C Credential", req:true,
+  blurb:"Q1 The Alarm System · Q2 Find the Pattern · Q3 In the Moment · Q4 Safe and Responsive. One session each quarter."},
+ {code:"CWB", renew:3, cycle:"quarter", window:45, aud:"caregiver", link:"https://form.jotform.com/252847200087052", linkNote:"Fill it out any time during the quarter, by the last day of March, June, September or December.", linkLabel:"Open the check-in", title:"Quarterly Caregiver Well-Being and Support Check-In", hours:0, who:"All caregivers", freq:"Once each quarter, same cycle for every family", status:"record", group:"T3C Credential", req:true,
+  blurb:"A short check-in on how you and your household are doing, so Benevolent House can support you."},
+ {code:"HT", renew:12, aud:"both", link:"https://learninghub.dfps.texas.gov/course/index.php", linkNote:"Search the DFPS Learning Hub for the Universal Human Trafficking Prevention Training.", title:"Human Trafficking Prevention (DFPS Universal)", hours:2, who:"All caregivers and staff", freq:"Pre-service or orientation, then every 12 months", status:"record", group:"Required Annual", req:true,
+  blurb:"Delivered by a Benevolent House trainer who completed the DFPS Train-the-Trainer course. Recorded here after the live session."},
+ {code:"LT-OR", renew:12, aud:"provider", title:"Licensed Therapist Orientation", hours:2, who:"Contracted Licensed Therapist", freq:"Once, then annual refresher", status:"soon", group:"T3C Credential",
+  blurb:"Orientation to the oversight role for the Mental & Behavioral Health Support Services Package."},
+ {code:"ORI", renew:0, aud:"both", title:"Benevolent House Orientation", hours:1, who:"New caregivers and staff", freq:"Once", status:"soon", group:"Pre-Service",
+  blurb:"Who we are, how we work, who to call, and what the first 30 days look like."},
+ {code:"PAPH", renew:12, aud:"both", title:"Prevention of Aggression and Physical Holds (PAPH)", hours:8, who:"All caregivers and staff", freq:"Pre-service, then as required", status:"soon", group:"Required Annual",
+  blurb:"Safe responses in the moment, in TST-FC language."},
+ {code:"SP", renew:12, aud:"both", title:"Suicide Prevention and Screening", hours:1, who:"All caregivers and staff", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Warning signs, how to ask, and what to do next."},
+ {code:"ASK", renew:12, aud:"both", link:"https://texassuicideprevention.org/training/ask-basic-gatekeeper/", linkNote:"After you register, choose the AS+K? Basic Gatekeeper Training.", title:"AS+K (Ask about Suicide to Save a Life)", hours:1, who:"All caregivers and staff", freq:"As required", status:"record", group:"Required Annual",
+  blurb:"Outside training. Upload your certificate to record it."},
+ {code:"CC", renew:12, aud:"both", title:"Cultural Competence", hours:3, who:"All caregivers and staff", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Serving every child and family with respect for culture, language, faith, and identity."},
+ {code:"CYB", renew:12, aud:"both", title:"Cybersecurity Awareness", hours:1, who:"All caregivers and staff", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Protecting children's information on phones, email, and shared computers."},
+ {code:"DFPS-CYB", renew:12, aud:"staff", title:"DFPS Cybersecurity Training Certification (Form 4530)", hours:1, who:"Staff with DFPS system access", freq:"Annual, by June 30", status:"record", group:"Required Annual",
+  blurb:"Taken on the DFPS site. Record the completion date here and keep Form 4530 on file."},
+ {code:"DOC", renew:0, aud:"both", title:"Documentation and STAR Health", hours:2, who:"Caregivers and staff", freq:"Pre-service, then as needed", status:"soon", group:"Pre-Service",
+  blurb:"What to write down, where it goes, and how STAR Health services are arranged."},
+ {code:"EDP", renew:12, aud:"caregiver", title:"Emergency and Disaster Preparedness and Water Safety", hours:2, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Your home's plan for fire, weather, and water, and what Benevolent House needs on file."},
+ {code:"EC", renew:12, aud:"caregiver", title:"Empowering Care", hours:2, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Normalcy, voice, and choice for children in care."},
+ {code:"SIS", renew:0, aud:"caregiver", title:"Safe Infant Sleep", hours:2, who:"Caregivers of infants", freq:"Before caring for an infant", status:"soon", group:"Pre-Service",
+  blurb:"Safe sleep practices required for every infant in care."},
+ {code:"SIR", renew:12, aud:"both", title:"Serious Incident Reporting", hours:1.5, who:"All caregivers and staff", freq:"Within 14 days of verification or hire, then annual", status:"live", group:"Required Annual", module:"sir",
+  blurb:"One week with the Delgado family: what counts as a serious incident, who to call, how fast, and what to write down."},
+ {code:"SCPC", renew:12, aud:"caregiver", title:"Supporting Children Through Purposeful Care", hours:2, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
+  blurb:"Purposeful, trauma-informed daily care."},
+ {code:"MC", renew:12, aud:"caregiver", link:"https://www.dfps.texas.gov/Training/Medical_Consent/index.asp", linkNote:"Also sign and turn in Form 2759 (Acknowledgement of Completion).", title:"Medical Consent (Form 2759)", hours:2.5, who:"Caregivers who are medical consenters", freq:"Before serving as medical consenter", status:"record", group:"Pre-Service",
+  blurb:"DFPS medical consent training. Record the completion date here."},
+ {code:"DFPS-MR", renew:12, aud:"both", link:"https://learninghub.dfps.texas.gov/course/index.php", linkNote:"Search the DFPS Learning Hub for Mandatory Reporting: A Community Response.", title:"DFPS Mandatory Reporting Community Response Training", hours:1, who:"All caregivers and staff", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Record the completion date here."},
+ {code:"DFPS-PM", renew:12, aud:"caregiver", link:"https://www.dfps.texas.gov/Training/Psychotropic_Medication/index.asp", title:"DFPS Psychotropic Medication Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Required for the Mental & Behavioral Health credential."},
+ {code:"DFPS-TIC", renew:12, aud:"caregiver", link:"https://www.dfps.texas.gov/Training/Trauma_Informed_Care/index.html", title:"DFPS Trauma Informed Care Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Record the completion date here."},
+ {code:"DFPS-NOR", renew:12, aud:"caregiver", link:"https://www.dfps.texas.gov/training/normalcy/index.asp", title:"DFPS Normalcy Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Record the completion date here."},
+ {code:"DFPS-SA", renew:12, window:30, aud:"caregiver", link:"https://traininghub.dfps.texas.gov", linkNote:"DFPS only lets you take this training within 30 days of your due date.", title:"DFPS Preventing and Recognizing Sexual Abuse Training", hours:1, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+  blurb:"Taken on the DFPS site. Record the completion date here."},
+ {code:"DFPS-TS", renew:0, aud:"caregiver", link:"https://agrilifelearn.tamu.edu/s/product/part-1-transporting-children-safely-in-child-care/01t4x000002ciMdAAI", linkNote:"Part 1 only.", title:"Transportation Safety Training", hours:2, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
+  blurb:"Online. Record the completion date here."},
+ {code:"DFPS-IC", renew:0, aud:"caregiver", link:"https://agrilifelearn.tamu.edu/s/product/infection-control-in-child-care-settings/01t4x000002ciMRAAY", title:"Infection Control and Communicable Disease Training", hours:2, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
+  blurb:"Online. Record the completion date here."},
+ {code:"DFPS-SB", renew:0, aud:"caregiver", link:"https://agrilifelearn.tamu.edu/s/product/brain-development-sudden-infant-death-syndrome-and-abusive-head-trauma-shaken-baby-syndrome/01t4x000002ciOsAAI", title:"Shaken Baby and Sudden Infant Death Training", hours:1, who:"Caregivers of infants", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
+  blurb:"Online. Record the completion date here."},
+ {code:"DFPS-RP", renew:0, aud:"caregiver", link:"https://www.dfps.texas.gov/Training/Runaway_Prevention/default.asp", title:"DFPS Runaway Prevention Training", hours:2.5, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
+  blurb:"Taken on the DFPS site. Record the completion date here."},
+ {code:"CPR", renew:24, aud:"caregiver", title:"CPR and First Aid", hours:2, who:"All caregivers", freq:"Per certificate expiration", status:"record", group:"Outside Certificates",
+  blurb:"Outside hands-on certification. Record the completion and expiration dates."},
+];
+
+/* When a training is due again: renew = months between completions (0 = once). */
+/* calendar month and year in Central time, so a check-in late on the last evening of a quarter counts for that quarter */
+window.BH_CT=function(d){try{const p=new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"numeric"}).formatToParts(d);return{y:+p.find(x=>x.type==="year").value,m:+p.find(x=>x.type==="month").value-1}}catch(e){return{y:d.getFullYear(),m:d.getMonth()}}};
+window.BH_QEND=function(d){const t=window.BH_CT(d);return new Date(t.y,Math.floor(t.m/3)*3+3,0,12)};
+window.BH_DUE=function(c,iso,now){now=now||new Date();
+ /* quarterly items keep every family on the same calendar quarter. Never done: due by the end of this quarter.
+    Done: due by the end of the quarter after the one it was done in, so a missed quarter shows as past due. */
+ if(c&&c.cycle==="quarter"){if(iso){const t=new Date(iso);if(!isNaN(t)){const q=window.BH_QEND(t);return new Date(q.getFullYear(),q.getMonth()+4,0,12)}}return window.BH_QEND(now)}
+ if(!c||!iso)return null;const m=+c.renew||0;if(!m)return null;const t=new Date(iso);if(isNaN(t))return null;const n=new Date(t);n.setMonth(n.getMonth()+m);return n};
+/* Which trainings a person sees: caregivers see caregiver trainings, staff see staff trainings,
+   contracted providers see their orientation and the T3C core session. */
+window.BH_GROUP=function(type){if(!type)return "all";if(type==="Staff")return "staff";if(type==="Contracted Provider")return "provider";return "caregiver"};
+window.BH_FOR=function(c,type){const g=window.BH_GROUP(type);if(g==="all")return true;if(g==="provider")return c.aud==="provider"||c.code==="T3C-PP";return c.aud==="both"||c.aud===g};
+/* Cover picture for each training tile, and the order groups appear in for families */
+window.BH_COVER=function(c){return "covers/"+String(c.code).toLowerCase()+".jpg"};
+window.BH_GROUPS=[["Pre-Service","Complete before your first placement."],["T3C Credential","Required for Benevolent House's T3C credential."],["Required Annual","Completed every year to keep your home current."],["DFPS Online (record)","Taken on the DFPS or partner website. Record your completion here."],["Outside Certificates","Hands-on certifications from an outside provider."]];
+/* Days before the due date that a training shows as coming due (some DFPS trainings can only be taken in the last 30 days) */
+window.BH_WINDOW=function(c){return +(c&&c.window)||90};
+
+// ---- reminders-core.js ----
+/* Benevolent House training reminders: who is due for what, and which reminder goes out today.
+   Shared by the admin page (to preview) and the daily reminder job in Supabase (to send).
+   Needs catalog.js loaded first. Dates are counted in Central time. */
+(function(){
+ const W=typeof window!=="undefined"?window:globalThis;
+ const FAMILY_MARKS=[60,30,14,7,2,1,0];   /* days before the due date that a person is emailed */
+ const STAFF_MARKS=[30,14,1];             /* days before the due date that staff get a list */
+ const nm=t=>String(t||"").trim().toLowerCase().replace(/\s+/g," ");
+ function ymd(d){const p=new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"2-digit",day:"2-digit"}).formatToParts(d);const g=k=>p.find(x=>x.type===k).value;return g("year")+"-"+g("month")+"-"+g("day")}
+ function dayNum(s){const[a,b,c]=s.split("-").map(Number);return Date.UTC(a,b-1,c)/864e5}
+ function marksFor(c){const w=+(c.window)||60;return FAMILY_MARKS.filter(m=>m<=w)}
+ const CATCH_UP=2; /* if a day was missed, the reminder still goes out up to 2 days late */
+ /* people: approved_people rows; profiles; comps: completions; legacy: legacy_training rows */
+ function plan(o){const CAT=o.catalog||W.CATALOG;const now=o.now||new Date();const today=ymd(now);const t0=dayNum(today);
+  const profByEmail={};(o.profiles||[]).forEach(p=>{profByEmail[nm(p.email)]=p});
+  const nameCount={};(o.people||[]).forEach(a=>{if(a.active&&a.full_name){const k=nm(a.full_name);nameCount[k]=(nameCount[k]||0)+1}});
+  const legByName={};(o.legacy||[]).forEach(l=>{(legByName[nm(l.person_name)]=legByName[nm(l.person_name)]||[]).push(l)});
+  const compsBy={};(o.comps||[]).forEach(r=>{if(!r.voided)(compsBy[r.user_id]=compsBy[r.user_id]||[]).push(r)});
+  const out=[];
+  (o.people||[]).filter(a=>a.active&&a.email).forEach(a=>{const prof=profByEmail[nm(a.email)];const type=(prof&&prof.caregiver_type)||a.caregiver_type||(a.access==="caregiver"?"Foster Caregiver":"Staff");
+   const name=(prof&&prof.full_name)||a.full_name||"";const latest={};
+   const add=(code,iso)=>{if(!latest[code]||new Date(iso)>new Date(latest[code]))latest[code]=iso};
+   if(prof)(compsBy[prof.id]||[]).forEach(r=>add(r.course_code,r.completed_at));
+   if(a.full_name&&nameCount[nm(a.full_name)]===1)(legByName[nm(a.full_name)]||[]).forEach(l=>add(l.course_code,l.completed_on+"T18:00:00Z"));
+   CAT.forEach(c=>{if(!W.BH_FOR(c,type))return;const iso=latest[c.code];if(!iso&&c.cycle!=="quarter")return;
+    const due=W.BH_DUE(c,iso||null,now);if(!due)return;const dueStr=ymd(due);const days=dayNum(dueStr)-t0;
+    const marks=marksFor(c).filter(m=>m>=days&&m-days<=CATCH_UP);
+    out.push({email:nm(a.email),name,home:(prof&&prof.home_label)||a.home_label||"",type,code:c.code,title:c.title,link:c.link||"",linkLabel:c.linkLabel||"Go to the training",linkNote:c.linkNote||"",status:c.status,hours:c.hours,due:dueStr,days,
+     window:+(c.window)||60,marks,staff:STAFF_MARKS.includes(days)})})});
+  return{today,items:out}}
+ function fmtLong(s){const[a,b,c]=s.split("-").map(Number);return new Date(Date.UTC(a,b-1,c,12)).toLocaleDateString("en-US",{timeZone:"UTC",month:"long",day:"numeric",year:"numeric"})}
+ const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+ const PORTAL="https://portal.benevolenthouse.org/";
+ function when(d){return d<0?"past due":d===0?"today":d===1?"tomorrow":"in "+d+" days"}
+ const joinNames=a=>{a=[...new Set(a.filter(Boolean))];return a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" and "+a[a.length-1]};
+ /* one email per email address. hit(item) says whether an item reaches a reminder day (the sender passes only marks not yet sent).
+    Each email also lists anything else for that address coming due soon, so families get fewer, fuller emails. */
+ function familyEmails(p,hit){hit=hit||(i=>i.marks.length>0);const by={};p.items.forEach(i=>{(by[i.email]=by[i.email]||[]).push(i)});const out=[];
+  Object.entries(by).forEach(([email,all])=>{const hits=all.filter(hit);if(!hits.length)return;
+   const extra=all.filter(i=>!hits.includes(i)&&i.days>=0&&i.days<=Math.min(30,i.window));
+   const merge=list=>{const m={};list.forEach(i=>{const k=i.code+"|"+i.due;(m[k]=m[k]||Object.assign({},i,{names:[]})).names.push(i.name)});return Object.values(m).sort((x,y)=>x.days-y.days)};
+   const main=merge(hits),more=merge(extra);const names=joinNames(all.map(i=>i.name));const soonest=main[0];
+   const onlyCheck=main.every(i=>i.code==="CWB");const what=onlyCheck?"check-in":(main.length===1?"training":"trainings");
+   const subject=`${soonest.days===0?"Due today":"Due "+fmtLong(soonest.due)}: Benevolent House ${main.length===1?soonest.title:main.length+" "+what}${names?" for "+names:""}`;
+   const li=i=>`<li style="margin:0 0 12px"><b>${esc(i.title)}</b>${i.names.filter(Boolean).length&&new Set(all.map(x=>x.name)).size>1?` <span style="color:#6B5F58">(${esc(joinNames(i.names))})</span>`:""}<br>Due ${esc(when(i.days))}${i.days>0?`, by ${esc(fmtLong(i.due))}`:""}${i.hours?` · ${esc(i.hours)} training hour${i.hours==1?"":"s"}`:""}<br>${i.link?`<a href="${esc(i.link)}">${esc(i.linkLabel)}</a>${i.linkNote?" · "+esc(i.linkNote):""}`:i.status==="live"?`<a href="${PORTAL}">Take it in the training portal</a>`:`Benevolent House will send you the materials, or ask your case manager. When you finish, add your date in the <a href="${PORTAL}">training portal</a>.`}</li>`;
+   const html=`<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#2B2320;max-width:600px">
+<p>Hello,</p>
+<p>This is a reminder from Benevolent House${names?` for <b>${esc(names)}</b>`:""} about ${main.length===1?`a ${what} that is`:`${what} that are`} coming due.</p>
+<ul style="padding-left:20px">${main.map(li).join("")}</ul>${more.length?`<p style="margin-bottom:6px"><b>Also coming up</b></p><ul style="padding-left:20px">${more.map(li).join("")}</ul>`:""}
+<p>When you finish, add your completion date in the <a href="${PORTAL}">Benevolent House Training Portal</a> so your training log stays current. If you already completed ${main.length+more.length===1?"it":"these"}, please add the date there or reply to this email and we will update your record.</p>
+<p>Questions? Reply to this email or call the office at (214) 774-4871.</p>
+<p>Thank you,<br>Benevolent House</p>
+<p style="font-size:12px;color:#6B5F58">You receive these reminders because you are a Benevolent House caregiver or staff member. Replies go to Ms. Orr and Ms. Mashburn.</p></div>`;
+   out.push({to:email,subject,html,items:hits})});return out}
+ /* one list for staff: who reaches 30 days, 2 weeks or 1 day before a due date today; on Mondays, everything past due too */
+ function staffEmail(p){const list=p.items.filter(i=>i.staff);const monday=new Date(p.today+"T12:00:00Z").getUTCDay()===1;const past=monday?p.items.filter(i=>i.days<0):[];if(!list.length&&!past.length)return null;
+  const section=(label,g)=>{if(!g.length)return "";const by={};g.forEach(i=>{const k=i.email;(by[k]=by[k]||{name:i.name,email:i.email,home:i.home,items:[]}).items.push(i)});
+   const rows=Object.values(by).sort((a,b)=>(a.home||"~").localeCompare(b.home||"~")||(a.name||"~").localeCompare(b.name||"~"));
+   return `<h3 style="color:#7B4B2A;margin:18px 0 6px">${label} (${rows.length} ${rows.length===1?"person":"people"})</h3><table style="border-collapse:collapse;width:100%;font-size:14px">${rows.map(r=>`<tr><td style="border-bottom:1px solid #E3D7C9;padding:6px 8px;vertical-align:top;width:40%"><b>${esc(r.name||r.email)}</b><br><span style="color:#6B5F58">${esc([r.home,r.name?r.email:""].filter(Boolean).join(" · "))}</span></td><td style="border-bottom:1px solid #E3D7C9;padding:6px 8px">${r.items.map(i=>`${esc(i.title)} <span style="color:#6B5F58">(due ${esc(fmtLong(i.due))})</span>`).join("<br>")}</td></tr>`).join("")}</table>`};
+  const groups=[[30,"Due in 30 days"],[14,"Due in 2 weeks"],[1,"Due tomorrow"]];
+  const body=groups.map(([d,l])=>section(l,list.filter(i=>i.days===d))).join("")+section("Past due (Monday list)",past);
+  const n=list.length+past.length;
+  return{subject:`Benevolent House training due list for ${fmtLong(p.today)}`,html:`<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.45;color:#2B2320;max-width:720px"><p>These trainings reach 30 days, 2 weeks or 1 day before their due date today${past.length?", and on Mondays the list also shows everything past due":""}. Families receive their own reminder emails.</p>${body}<p style="margin-top:18px">See everyone's records in <a href="${PORTAL}admin/">Training Admin</a>.</p></div>`,items:list.concat(past),count:n}}
+ W.BH_REMIND={plan,familyEmails,staffEmail,ymd,fmtLong,FAMILY_MARKS,STAFF_MARKS,CATCH_UP};
+})();
+
+
+async function all(q: () => any) {
+  let out: any[] = [], i = 0;
+  for (;;) {
+    const { data, error } = await q().range(i, i + 999);
+    if (error) throw error;
+    out = out.concat(data || []);
+    if (!data || data.length < 1000) return out;
+    i += 1000;
+  }
+}
+// returns null when sent, otherwise the error; quota=true means stop for today
+async function send(key: string, msg: Record<string, unknown>): Promise<{ err: string; quota: boolean } | null> {
+  for (let n = 0; n < 3; n++) {
+    const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify(msg) });
+    if (r.ok) return null;
+    const t = (await r.text()).slice(0, 300);
+    if (r.status === 429 && /daily|quota|limit/i.test(t) && !/second/i.test(t)) return { err: "Resend daily limit: " + t, quota: true };
+    if (r.status === 429) { await sleep(1500); continue; }
+    return { err: "Resend " + r.status + ": " + t, quota: false };
+  }
+  return { err: "Resend rate limit", quota: false };
+}
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  const mode = new URL(req.url).searchParams.get("mode") || "send";
+  if (!["send", "count", "sample"].includes(mode)) return json({ error: "unknown mode" }, 400);
+  const key = Deno.env.get("RESEND_API_KEY") || "";
+  let admin = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  if (!admin) { try { const k = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") || "{}"); admin = k.default || Object.values(k)[0] as string || ""; } catch (_) { /* none */ } }
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, admin, { auth: { persistSession: false } });
+  try {
+    const { data: set } = await sb.from("reminder_settings").select("*").eq("id", 1).maybeSingle();
+    const replyTo: string[] = set?.reply_to || ["torr@benevolenthouse.org", "hmashburn@benevolenthouse.org"];
+    const staffTo: string[] = set?.staff_to || replyTo;
+    const R = g.BH_REMIND;
+
+    if (mode === "sample") {
+      const tok = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+      const { data: u } = await sb.auth.getUser(tok);
+      const email = (u?.user?.email || "").toLowerCase();
+      const { data: lead } = email ? await sb.from("approved_people").select("email").eq("email", email).eq("access", "leadership").eq("active", true).maybeSingle() : { data: null };
+      if (!lead) return json({ error: "leadership only" }, 403);
+    } else if (mode === "send") {
+      const { data: recent } = await sb.from("reminder_log").select("id").eq("kind", "run").gte("at", new Date(Date.now() - 20 * 60e3).toISOString()).limit(1);
+      if (recent && recent.length) return json({ skipped: "a run already happened in the last 20 minutes" });
+      await sb.from("reminder_log").insert({ sent_on: new Date().toISOString().slice(0, 10), kind: "run", email: "", course_code: String(Date.now()), status: "started" });
+    }
+
+    const [people, profiles, comps, legacy] = await Promise.all([
+      all(() => sb.from("approved_people").select("email,full_name,home_label,caregiver_type,access,active").order("email")),
+      all(() => sb.from("profiles").select("id,email,full_name,home_label,caregiver_type").order("id")),
+      all(() => sb.from("completions").select("id,user_id,course_code,completed_at,voided").order("id")),
+      all(() => sb.from("legacy_training").select("id,person_name,course_code,completed_on").order("id")),
+    ]);
+    const plan = R.plan({ people, profiles, comps, legacy });
+    // marks already sent (or being sent) recently
+    await sb.from("reminder_log").delete().eq("status", "sending").lt("at", new Date(Date.now() - 15 * 60e3).toISOString());
+    const since = new Date(Date.now() - 10 * 864e5).toISOString().slice(0, 10);
+    const logged = new Set((await all(() => sb.from("reminder_log").select("email,course_code,due_date,mark").eq("kind", "family").gte("sent_on", since).order("id"))).map((r: any) => r.email + "|" + r.course_code + "|" + r.due_date + "|" + r.mark));
+    const open = (i: any) => i.marks.filter((m: number) => !logged.has(i.email + "|" + i.code + "|" + i.due + "|" + m));
+    const fam = R.familyEmails(plan, (i: any) => open(i).length > 0);
+    const staff = R.staffEmail(plan);
+
+    if (mode === "count") return json({ today: plan.today, family_emails: fam.length, staff_items: staff ? staff.count : 0, enabled: !!set?.enabled, key_set: !!key });
+    if (!key) return json({ error: "RESEND_API_KEY is not set" }, 500);
+    if (mode === "sample") {
+      const out: string[] = [];
+      for (const e of fam.slice(0, 2)) { const r = await send(key, { from: FROM, to: staffTo, reply_to: replyTo, subject: "[Sample] " + e.subject, html: `<p style="font-family:Arial;color:#9A2F1F"><b>Sample only.</b> This is what a family receives. It was sent only to Benevolent House staff.</p>` + e.html }); out.push(r ? r.err : "sent"); await sleep(600); }
+      if (staff) { const r = await send(key, { from: FROM, to: staffTo, reply_to: replyTo, subject: "[Sample] " + staff.subject, html: staff.html }); out.push(r ? r.err : "sent"); }
+      return json({ today: plan.today, samples: out, family_emails_today: fam.length });
+    }
+    if (!set?.enabled) return json({ today: plan.today, skipped: "reminders are turned off" });
+
+    let sent = 0, failed = 0, stopped = false;
+    for (const e of fam) {
+      const rows: any[] = [];
+      e.items.forEach((i: any) => open(i).forEach((m: number) => rows.push({ sent_on: plan.today, kind: "family", email: e.to, course_code: i.code, due_date: i.due, mark: m })));
+      const { data: claimed, error } = await sb.from("reminder_log").upsert(rows, { onConflict: "kind,email,course_code,due_date,mark", ignoreDuplicates: true }).select("id,course_code,due_date");
+      if (error || !claimed || !claimed.length) continue;
+      const got = new Set(claimed.map((c: any) => c.course_code + "|" + c.due_date));
+      const mine = { today: plan.today, items: plan.items.filter((i: any) => i.email === e.to) };
+      const msg = R.familyEmails(mine, (i: any) => got.has(i.code + "|" + i.due))[0];
+      const ids = claimed.map((c: any) => c.id);
+      if (!msg) { await sb.from("reminder_log").delete().in("id", ids); continue; }
+      const r = await send(key, { from: FROM, to: [e.to], reply_to: replyTo, subject: msg.subject, html: msg.html });
+      if (r) { await sb.from("reminder_log").delete().in("id", ids); failed++; if (r.quota) { stopped = true; break; } }
+      else { await sb.from("reminder_log").update({ status: "sent" }).in("id", ids); sent++; }
+      await sleep(600);
+    }
+    if (staff && !stopped) {
+      const { data: claimed } = await sb.from("reminder_log").upsert([{ sent_on: plan.today, kind: "staff", email: "staff", course_code: "", due_date: plan.today, mark: -1 }], { onConflict: "kind,email,course_code,due_date,mark", ignoreDuplicates: true }).select("id");
+      if (claimed && claimed.length) {
+        const r = await send(key, { from: FROM, to: staffTo, reply_to: replyTo, subject: staff.subject, html: staff.html });
+        if (r) await sb.from("reminder_log").delete().in("id", claimed.map((c: any) => c.id));
+        else await sb.from("reminder_log").update({ status: "sent" }).in("id", claimed.map((c: any) => c.id));
+      }
+    }
+    return json({ today: plan.today, family_sent: sent, family_failed: failed, stopped_for_daily_limit: stopped });
+  } catch (e) {
+    return json({ error: "reminder run failed" , detail: String((e as Error).message || e).slice(0, 200) }, 500);
+  }
+});

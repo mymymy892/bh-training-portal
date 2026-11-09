@@ -7,8 +7,8 @@ window.CATALOG=[
  {code:"TST-8", renew:0, aud:"both", title:"Trauma Systems Therapy for Foster Care (TST-FC) Pre-Service", hours:8, who:"All caregivers and staff", freq:"Once, before serving a child under T3C", status:"record", group:"T3C Credential", req:true,
   blurb:"Benevolent House's Treatment Model. Four modules: The Alarm System, Find the Pattern, In the Moment, Safe and Responsive."},
  {code:"TST-Q", renew:3, cycle:"quarter", window:45, aud:"both", title:"TST-FC Ongoing Training (Quarterly Sessions)", hours:1, who:"All caregivers and staff", freq:"Four 1-hour sessions a year, one each quarter", status:"soon", group:"T3C Credential", req:true,
-  blurb:"Q1 The Alarm System · Q2 Find the Pattern · Q3 In the Moment · Q4 Safe and Responsive. Session 4 is the current session (October to December 2026)."},
- {code:"CWB", renew:3, cycle:"quarter", window:45, aud:"caregiver", link:"https://form.jotform.com/252847200087052", linkNote:"Fill out the check-in once each quarter (January, April, July, October).", title:"Quarterly Caregiver Well-Being and Support Check-In", hours:0, who:"All caregivers", freq:"Once each quarter, same cycle for every family", status:"record", group:"T3C Credential", req:true,
+  blurb:"Q1 The Alarm System · Q2 Find the Pattern · Q3 In the Moment · Q4 Safe and Responsive. One session each quarter."},
+ {code:"CWB", renew:3, cycle:"quarter", window:45, aud:"caregiver", link:"https://form.jotform.com/252847200087052", linkNote:"Fill it out any time during the quarter, by the last day of March, June, September or December.", linkLabel:"Open the check-in", title:"Quarterly Caregiver Well-Being and Support Check-In", hours:0, who:"All caregivers", freq:"Once each quarter, same cycle for every family", status:"record", group:"T3C Credential", req:true,
   blurb:"A short check-in on how you and your household are doing, so Benevolent House can support you."},
  {code:"HT", renew:12, aud:"both", link:"https://learninghub.dfps.texas.gov/course/index.php", linkNote:"Search the DFPS Learning Hub for the Universal Human Trafficking Prevention Training.", title:"Human Trafficking Prevention (DFPS Universal)", hours:2, who:"All caregivers and staff", freq:"Pre-service or orientation, then every 12 months", status:"record", group:"Required Annual", req:true,
   blurb:"Delivered by a Benevolent House trainer who completed the DFPS Train-the-Trainer course. Recorded here after the live session."},
@@ -65,10 +65,13 @@ window.CATALOG=[
 ];
 
 /* When a training is due again: renew = months between completions (0 = once). */
-window.BH_QEND=function(d){return new Date(d.getFullYear(),Math.floor(d.getMonth()/3)*3+3,0,12)};
+/* calendar month and year in Central time, so a check-in late on the last evening of a quarter counts for that quarter */
+window.BH_CT=function(d){try{const p=new Intl.DateTimeFormat("en-US",{timeZone:"America/Chicago",year:"numeric",month:"numeric"}).formatToParts(d);return{y:+p.find(x=>x.type==="year").value,m:+p.find(x=>x.type==="month").value-1}}catch(e){return{y:d.getFullYear(),m:d.getMonth()}}};
+window.BH_QEND=function(d){const t=window.BH_CT(d);return new Date(t.y,Math.floor(t.m/3)*3+3,0,12)};
 window.BH_DUE=function(c,iso,now){now=now||new Date();
- /* quarterly items keep every family on the same calendar quarter: due by the last day of this quarter unless already done this quarter */
- if(c&&c.cycle==="quarter"){const q=window.BH_QEND(now);if(iso){const t=new Date(iso);if(!isNaN(t)&&window.BH_QEND(t).getTime()===q.getTime())return window.BH_QEND(new Date(q.getFullYear(),q.getMonth()+1,15))}return q}
+ /* quarterly items keep every family on the same calendar quarter. Never done: due by the end of this quarter.
+    Done: due by the end of the quarter after the one it was done in, so a missed quarter shows as past due. */
+ if(c&&c.cycle==="quarter"){if(iso){const t=new Date(iso);if(!isNaN(t)){const q=window.BH_QEND(t);return new Date(q.getFullYear(),q.getMonth()+4,0,12)}}return window.BH_QEND(now)}
  if(!c||!iso)return null;const m=+c.renew||0;if(!m)return null;const t=new Date(iso);if(isNaN(t))return null;const n=new Date(t);n.setMonth(n.getMonth()+m);return n};
 /* Which trainings a person sees: caregivers see caregiver trainings, staff see staff trainings,
    contracted providers see their orientation and the T3C core session. */
