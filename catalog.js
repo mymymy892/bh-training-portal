@@ -68,3 +68,6 @@ window.BH_DUE=function(c,iso){if(!c||!iso)return null;const m=+c.renew||0;if(!m)
    contracted providers see their orientation and the T3C core session. */
 window.BH_GROUP=function(type){if(!type)return "all";if(type==="Staff")return "staff";if(type==="Contracted Provider")return "provider";return "caregiver"};
 window.BH_FOR=function(c,type){const g=window.BH_GROUP(type);if(g==="all")return true;if(g==="provider")return c.aud==="provider"||c.code==="T3C-PP";return c.aud==="both"||c.aud===g};
+/* Cover picture for each training tile, and the order groups appear in for families */
+window.BH_COVER=function(c){return "covers/"+String(c.code).toLowerCase()+".jpg"};
+window.BH_GROUPS=[["Pre-Service","Complete before your first placement."],["T3C Credential","Required for Benevolent House's T3C credential."],["Required Annual","Completed every year to keep your home current."],["DFPS Online (record)","Taken on the DFPS or partner website. Record your completion here."],["Outside Certificates","Hands-on certifications from an outside provider."]];

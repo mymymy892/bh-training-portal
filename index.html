@@ -45,7 +45,14 @@ p.lead{font-size:1.1rem;color:var(--muted);margin-top:0}
 .pill.done{background:var(--green);color:#fff}
 .pill.req{background:#FFF4D6;color:#7A5A00}
 .pill.ext{background:#EAF0FB;color:#2B4C8C}
-.section-title{display:flex;align-items:baseline;gap:12px;margin-top:2rem}
+.tcard{padding:0;overflow:hidden}.tcard .tbody{padding:14px 16px 16px;display:flex;flex-direction:column;gap:6px;flex:1}
+.tcard img.cover{display:block;width:100%;aspect-ratio:16/9;object-fit:cover;background:var(--sand)}
+.hrs{display:inline-block;background:var(--brown);color:#fff;border-radius:999px;padding:.15rem .6rem;font-size:.78rem;font-weight:700;margin-right:6px}
+.next{background:#fff;border:2px solid var(--brown);border-radius:14px;padding:16px 18px;margin:16px 0}
+.next h2{margin:0 0 4px}.next ol{margin:8px 0 0;padding-left:1.3rem}.next li{margin:8px 0}.next li .why{font-size:.85rem;color:var(--muted)}
+.pvbar{position:sticky;top:0;z-index:40;background:#1b2a4a;color:#fff;padding:10px 16px;text-align:center;font-weight:700}
+.section-title p{margin:0;color:var(--muted);font-size:.9rem}
+.section-title{display:flex;align-items:baseline;gap:12px;margin-top:2rem;flex-wrap:wrap}
 .section-title span{color:var(--muted);font-size:.9rem}
 /* module */
 .progress{height:10px;background:var(--sand);border-radius:999px;overflow:hidden;margin:10px 0 4px}
@@ -424,7 +431,7 @@ const T3C_STAFF = {
 /* ===================== Portal app ===================== */
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
 function loadStore(){try{return JSON.parse(localStorage.getItem(STORE_KEY))||{}}catch(e){return {}}}
-function saveStore(d){try{localStorage.setItem(STORE_KEY,JSON.stringify(d))}catch(e){}}
+function saveStore(d){if(window.__pv)return;try{localStorage.setItem(STORE_KEY,JSON.stringify(d))}catch(e){}}
 let S=loadStore(); S.done=S.done||{}; S.progress=S.progress||{};
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
 function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
@@ -443,22 +450,26 @@ function toggleRead(btn,el){if(reading){stopRead();return}if(!window.speechSynth
 function renderHome(){
  if(S.user&&S.user.cloud&&!window.__bhChecked){$("#userChip").textContent="";$("#view-home").innerHTML=`<div class="card"><p>Loading your trainings…</p></div>`;show("home");return}
  $("#userChip").textContent=userLabel();
- const LIST=CATALOG.filter(c=>window.BH_FOR(c,S.user&&S.user.cloud?S.user.role:""));const groups=[...new Set(LIST.map(c=>c.group))];
+ const LIST=CATALOG.filter(c=>window.BH_FOR(c,S.user&&S.user.cloud?S.user.role:""));const groups=(window.BH_GROUPS||[]).map(g=>g[0]).filter(g=>LIST.some(c=>c.group===g)).concat([...new Set(LIST.map(c=>c.group))].filter(g=>!(window.BH_GROUPS||[]).some(x=>x[0]===g)));const gNote=g=>((window.BH_GROUPS||[]).find(x=>x[0]===g)||[])[1]||"";
  const forWho=S.user&&S.user.cloud?(BH_GROUP(S.user.role)==="staff"?"your staff trainings":BH_GROUP(S.user.role)==="provider"?"your trainings":"your caregiver trainings"):"every Benevolent House training";
  let h=`<h1>Benevolent House Training Portal</h1><p class="lead">${forWho.charAt(0).toUpperCase()+forWho.slice(1)} in one place (${LIST.length}). Complete a training here, or record one you completed somewhere else, and your training log stays current automatically.</p>`;
  if((!S.user||!S.user.cloud)&&window.BHC&&BHC.available()){h+=`<div class="card" id="bhsHost"></div>`}
  else if(!S.user){h+=`<div class="card"><h3 style="margin-top:0">Start by telling us who you are</h3><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div>
  <div class="row"><div><label>Foster home or staff role</label><input type="text" id="uHome" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label>I am a</label><select id="uRole"><option>Foster Caregiver</option><option>Kinship Caregiver</option><option>Adoptive Parent</option><option>Foster and Adoptive Caregiver</option><option>Staff</option><option>Contracted Provider</option></select></div></div>
  <p><button class="btn" onclick="signIn()">Continue</button></p><p class="small">Your name and completion records are kept by Benevolent House for licensing and T3C credentialing. No child information is ever entered here.</p></div>`;}
- else{h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><b>${esc(S.user.name)}</b><br><span class="small">${esc(S.user.role)} · ${esc(S.user.home||"")} · ${esc(S.user.email)}</span></div><button class="btn ghost sm" onclick="signOut()">Not you? Switch</button></div>`;}
- groups.forEach(g=>{h+=`<div class="section-title"><h2>${g}</h2></div><div class="grid">`;
+ else if(!window.__pv){h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><b>${esc(S.user.name)}</b><br><span class="small">${esc(S.user.role)} · ${esc(S.user.home||"")} · ${esc(S.user.email)}</span></div><button class="btn ghost sm" onclick="signOut()">Not you? Switch</button></div>`;}
+ if(S.user&&S.user.cloud){const now=new Date();const items=[];LIST.forEach(c=>{const d=S.done[c.code];if(d){const due=nextDue(c,d);if(due&&due-now<90*864e5)items.push({c,due,k:due<now?0:1})}else if(c.req)items.push({c,due:null,k:2})});
+  items.sort((a,b)=>a.k-b.k||(a.due&&b.due?a.due-b.due:0)||groups.indexOf(a.c.group)-groups.indexOf(b.c.group));
+  h+=`<div class="next"><h2>Your next steps</h2>${items.length?`<p class="small" style="margin:0">What is due first is at the top.</p><ol>${items.slice(0,8).map(({c,due,k})=>`<li><b>${esc(c.title)}</b> <span class="hrs">${c.hours} hr</span><br><span class="why">${k===0?`Past due since ${esc(fmtDate(due))}`:k===1?`Due by ${esc(fmtDate(due))}`:"Required, not completed yet"}</span> ${c.status==="live"?`<button class="btn sm" onclick="startModule('${c.module}')">Start</button>`:c.status==="record"?`<button class="btn ghost sm" onclick="recordLive('${c.code}')">Record</button>`:""}</li>`).join("")}</ol>${items.length>8?`<p class="small">and ${items.length-8} more below.</p>`:""}`:`<p style="margin:0"><b>You are all caught up.</b> Nothing is due in the next 90 days.</p>`}</div>`}
+ groups.forEach(g=>{h+=`<div class="section-title"><h2>${g}</h2><p>${esc(gNote(g))}</p></div><div class="grid">`;
   LIST.filter(c=>c.group===g).forEach(c=>{const d=S.done[c.code];
    const due=nextDue(c,d);const overdue=due&&due<new Date();const soon=due&&!overdue&&(due-new Date())<90*864e5;let pill=d?(overdue?`<span class="pill soon">Due now (was due ${esc(fmtDate(due))})</span>`:`<span class="pill done">Completed ${esc(d.date)}${due?` · due again ${esc(fmtDate(due))}`:""}</span>`+(soon?` <span class="pill soon">Coming due</span>`:"")):c.status==="live"?`<span class="pill live">Available now</span>`:c.status==="record"?`<span class="pill ext">Record a completion</span>`:`<span class="pill soon">Online version coming</span>`;
    let btn=c.status==="live"?`<button class="btn sm" onclick="startModule('${c.module}')" ${S.user?"":"disabled"}>${d?"Review again":"Start"}</button>`:c.status==="record"?`<button class="btn ghost sm" onclick="recordLive('${c.code}')" ${S.user?"":"disabled"}>Record</button>`:`<button class="btn ghost sm" disabled>Soon</button>`;
-   h+=`<div class="tcard"><div class="code">${c.code}${c.req?' · <span class="pill req">Required</span>':''}</div><h3>${esc(c.title)}</h3><div class="meta">${c.hours} hr · ${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p>${c.link?`<p class="small" style="margin:2px 0"><a href="${esc(c.link)}" target="_blank" rel="noopener">Go to the training</a>${c.linkNote?" · "+esc(c.linkNote):""}</p>`:""}<div class="foot">${pill}${btn}</div></div>`});
+   h+=`<div class="tcard"><img class="cover" src="${esc(BH_COVER(c))}" alt="" loading="lazy" onerror="this.remove()"><div class="tbody"><div class="code">${c.code}${c.req?' · <span class="pill req">Required</span>':''}</div><h3>${esc(c.title)}</h3><div class="meta"><span class="hrs">${c.hours} training hour${c.hours==1?"":"s"}</span>${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p>${c.link?`<p class="small" style="margin:2px 0"><a href="${esc(c.link)}" target="_blank" rel="noopener">Go to the training</a>${c.linkNote?" · "+esc(c.linkNote):""}</p>`:""}<div class="foot">${pill}${btn}</div></div></div>`});
   h+=`</div>`});
  h+=`<div class="card" style="margin-top:24px"><h3 style="margin-top:0">Questions?</h3><p>Call or text your case manager, or the Benevolent House on-call line, any hour. If a page will not load, try another browser or ask your case manager to help you complete the training one-on-one.</p></div>`;
- $("#view-home").innerHTML=h;show("home");if($("#bhsHost"))BHSignIn($("#bhsHost"),adoptUser,{profile:window.__bhNeedProfile||null,prefill:S.user&&!S.user.cloud?S.user:null,message:S.user&&!S.user.cloud?"Your trainings are saved on this device. Sign in once with your email so they are kept for good, on any phone or computer.":""})}
+ if(window.__pv)h=`<div class="pvbar">Viewing as ${esc(S.user.name)} (${esc(S.user.role||"Caregiver")}). This is their view. Nothing here can be changed.</div>`+h.replace(/<h1>[^<]*<\/h1>/,"<h1>Benevolent House Training Portal</h1>");
+ $("#view-home").innerHTML=h;show("home");if(window.__pv){$$("#view-home button").forEach(b=>{b.disabled=true;b.onclick=null;b.removeAttribute("onclick")});$("#homeBtn").disabled=true;return}if($("#bhsHost"))BHSignIn($("#bhsHost"),adoptUser,{profile:window.__bhNeedProfile||null,prefill:S.user&&!S.user.cloud?S.user:null,message:S.user&&!S.user.cloud?"Your trainings are saved on this device. Sign in once with your email so they are kept for good, on any phone or computer.":""})}
 function signIn(){const n=$("#uName").value.trim(),e=$("#uEmail").value.trim(),hm=$("#uHome").value.trim(),r=$("#uRole").value;
  if(!n||!e||!hm){toast("Please fill in your name, email, and home or role");return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){toast("Please enter a valid email address");return}
  S.user={name:n,email:e,home:hm,role:r};saveStore(S);renderHome()}
@@ -578,6 +589,21 @@ $("#homeBtn").addEventListener("click",()=>{if(M&&!$("#view-module").classList.c
 window.addEventListener("resize",()=>{if(!$("#view-ack").classList.contains("hidden")&&!sigDrawn)initSig()});
 window.addEventListener("online",async()=>{try{const q=JSON.parse(localStorage.getItem(STORE_KEY+"_queue")||"[]");if(!q.length)return;localStorage.removeItem(STORE_KEY+"_queue");const u=S.user;for(const it of q){S.user=it.u;await logToForms(it.r)}S.user=u}catch(e){}});
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.activeElement&&["uName","uEmail","uHome"].includes(document.activeElement.id))signIn()});
-renderHome();cloudBoot();
+const PV=new URLSearchParams(location.search).get("view");
+/* staff "See their view": shows a person's portal from their records, read only */
+async function previewBoot(id){window.__pv=true;$("#view-home").innerHTML=`<div class="card"><p>Loading their view…</p></div>`;show("home");
+ const fail=m=>{$("#view-home").innerHTML=`<div class="card"><h1>See their view</h1><p>${esc(m)}</p><p><a href="admin/">Back to admin</a></p></div>`};
+ if(!window.BHC||!BHC.available())return fail("This needs an internet connection.");const s=await BHC.session();if(!s)return fail("Please sign in on the admin page first, then open See their view again.");
+ const c=BHC.client();let perms=[];try{perms=(await c.rpc("my_permissions")).data||[]}catch(e){}if(!perms.includes("view_training"))return fail("Only Benevolent House staff with access to training records can use this.");try{BHC.log("view_preview",id.startsWith("legacy:")?"earlier record":id)}catch(e){}
+ const nm=t=>String(t||"").trim().toLowerCase().replace(/\s+/g," ");let person,comps=[],legacyName="";
+ if(id.startsWith("legacy:")){legacyName=id.slice(7);person={full_name:"",home_label:"",caregiver_type:"Foster Caregiver",email:""}}
+ else{const r=await c.from("profiles").select("id,email,full_name,home_label,caregiver_type").eq("id",id).maybeSingle();if(r.error||!r.data)return fail("That person was not found.");person=r.data;
+  const q=await c.from("completions").select("course_code,hours,completed_at,source,verified_by,voided").eq("user_id",id).eq("voided",false);comps=q.data||[];
+  const a=await c.from("approved_people").select("full_name").eq("email",(person.email||"").toLowerCase()).maybeSingle();legacyName=a.data&&a.data.full_name?nm(a.data.full_name):""}
+ let old=[];if(legacyName){const L=await c.from("legacy_training").select("person_name,home_label,course_code,completed_on,hours").ilike("person_name","%"+legacyName.replace(/[%_\\]/g,"").split(" ").join("%")+"%").limit(1000);old=(L.data||[]).filter(x=>nm(x.person_name)===legacyName);if(!person.full_name&&old[0]){person.full_name=old[0].person_name;person.home_label=old[0].home_label}}
+ const done={};const add=(code,iso,o)=>{if(!done[code]||new Date(iso)>new Date(done[code].iso))done[code]=Object.assign({date:fmtUS(iso),iso},o)};
+ comps.forEach(r=>add(r.course_code,r.completed_at,{hours:r.hours,source:r.source}));old.forEach(r=>add(r.course_code,r.completed_on+"T12:00:00",{hours:r.hours,source:"record"}));
+ S={user:{name:person.full_name||person.email,email:person.email,home:person.home_label||"",role:person.caregiver_type||"Foster Caregiver",cloud:true},done,progress:{}};window.__bhChecked=true;renderHome()}
+if(PV)previewBoot(PV);else{renderHome();cloudBoot();}
 </script>
 </body></html>
