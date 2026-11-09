@@ -15,6 +15,7 @@ window.BHC=(function(){
   const s=await session();if(!s){me=null;uid=null;meLoaded=true;return null}uid=s.user.id;
   const{data,error}=await client().from("profiles").select("id,email,full_name,role,caregiver_type,home_label,home_id").eq("id",s.user.id).maybeSingle();
   if(error){const x=new Error("profile_unavailable");x.unavailable=true;throw x}
+  if(data){const r=await client().rpc("my_role");if(r.error){const x=new Error("profile_unavailable");x.unavailable=true;throw x}if(r.data==="none"){me=null;meLoaded=true;return null}}
   me=data?Object.assign(data,{_email:s.user.email}):null;meLoaded=!!data;return me}
  function asUser(p){return p?{name:p.full_name||"",email:p._email||p.email||"",home:p.home_label||"",role:p.caregiver_type||"",cloud:true,id:p.id,access:p.role}:null}
  async function sendCode(email,meta){const c=client();if(!c)throw new Error("offline");
@@ -88,7 +89,7 @@ window.BHSignIn=function(host,onDone,opts){
     const upd={};if(meta.full_name&&!p.full_name)upd.name=meta.full_name;if(meta.home_label&&!p.home_label)upd.home=meta.home_label;if(meta.caregiver_type&&!p.caregiver_type)upd.role=meta.caregiver_type;
     if(Object.keys(upd).length)p=await BHC.saveProfile(upd)||p;BHC.log("sign_in",location.pathname);
     if(!p.full_name||!p.home_label){step3(p);return}onDone(BHC.asUser(p))}
-   catch(x){b.disabled=false;b.textContent="Sign in";if(x&&x.message==="noprofile"){await BHC.signOut();err.textContent="This email is not set up with Benevolent House yet. Please call (214) 774-4871 so we can add you.";return}err.textContent=(x&&x.unavailable)?"You are signed in, but your record could not be loaded. Check your connection and refresh the page.":"That code did not work. Check the newest email and try again, or ask for a new code."}};
+   catch(x){b.disabled=false;b.textContent="Sign in";if(x&&x.message==="noprofile"){await BHC.signOut();err.textContent="This email is not set up for an active Benevolent House home. Please call (214) 774-4871 if you think this is a mistake.";return}err.textContent=(x&&x.unavailable)?"You are signed in, but your record could not be loaded. Check your connection and refresh the page.":"That code did not work. Check the newest email and try again, or ask for a new code."}};
   host.querySelector("#bhsVerify").onclick=go;code.addEventListener("keydown",ev=>{if(ev.key==="Enter")go()});host.querySelector("#bhsBack").onclick=()=>step1()}
  function step3(p){host.innerHTML=`<div class="bhs"><h2>One more step</h2><p class="bhs-sub">You are signed in. Tell us your name and home so your certificates and training log are correct.</p>
   <div class="bhs-row"><div><label for="bhsName">Full name</label><input id="bhsName" type="text" autocomplete="name" value="${e(p.full_name||"")}"></div><div><label for="bhsHome">Foster home or staff role</label><input id="bhsHome" type="text" value="${e(p.home_label||"")}" placeholder="e.g., Johnson Home, or Case Manager"></div></div>
