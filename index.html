@@ -478,6 +478,8 @@ const T3C_STAFF = {
  ack:T3C_CORE.ack
 };
 </script>
+<script src="vendor/supabase-2.117.3.js"></script>
+<script src="bh-cloud.js"></script>
 <script>
 /* ===================== Portal app ===================== */
 const $=s=>document.querySelector(s), $$=s=>Array.from(document.querySelectorAll(s));
@@ -502,22 +504,29 @@ function renderHome(){
  $("#userChip").textContent=userLabel();
  const groups=[...new Set(CATALOG.map(c=>c.group))];
  let h=`<h1>Benevolent House Training Portal</h1><p class="lead">Every Benevolent House training in one place (30 trainings). Complete a training here, or record one you completed live, and your training log stays current automatically.</p>`;
- if(!S.user){h+=`<div class="card"><h3 style="margin-top:0">Start by telling us who you are</h3><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div>
+ if(!S.user&&window.BHC&&BHC.available()){h+=`<div class="card" id="bhsHost"></div>`}
+ else if(!S.user){h+=`<div class="card"><h3 style="margin-top:0">Start by telling us who you are</h3><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div>
  <div class="row"><div><label>Foster home or staff role</label><input type="text" id="uHome" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label>I am a</label><select id="uRole"><option>Foster Caregiver</option><option>Kinship Caregiver</option><option>Adoptive Parent</option><option>Foster and Adoptive Caregiver</option><option>Staff</option><option>Contracted Provider</option></select></div></div>
  <p><button class="btn" onclick="signIn()">Continue</button></p><p class="small">Your name and completion records are kept by Benevolent House for licensing and T3C credentialing. No child information is ever entered here.</p></div>`;}
  else{h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><b>${esc(S.user.name)}</b><br><span class="small">${esc(S.user.role)} · ${esc(S.user.home||"")} · ${esc(S.user.email)}</span></div><button class="btn ghost sm" onclick="signOut()">Not you? Switch</button></div>`;}
  groups.forEach(g=>{h+=`<div class="section-title"><h2>${g}</h2></div><div class="grid">`;
   CATALOG.filter(c=>c.group===g).forEach(c=>{const d=S.done[c.code];
-   let pill=d?`<span class="pill done">Completed ${esc(d.date)}</span>`:c.status==="live"?`<span class="pill live">Available now</span>`:c.status==="record"?`<span class="pill ext">Record a completion</span>`:`<span class="pill soon">Online version coming</span>`;
+   const due=nextDue(c,d);const overdue=due&&due<new Date();const soon=due&&!overdue&&(due-new Date())<90*864e5;let pill=d?(overdue?`<span class="pill soon">Due now (was due ${esc(fmtDate(due))})</span>`:`<span class="pill done">Completed ${esc(d.date)}${due?` · due again ${esc(fmtDate(due))}`:""}</span>`+(soon?` <span class="pill soon">Coming due</span>`:"")):c.status==="live"?`<span class="pill live">Available now</span>`:c.status==="record"?`<span class="pill ext">Record a completion</span>`:`<span class="pill soon">Online version coming</span>`;
    let btn=c.status==="live"?`<button class="btn sm" onclick="startModule('${c.module}')" ${S.user?"":"disabled"}>${d?"Review again":"Start"}</button>`:c.status==="record"?`<button class="btn ghost sm" onclick="recordLive('${c.code}')" ${S.user?"":"disabled"}>Record</button>`:`<button class="btn ghost sm" disabled>Soon</button>`;
    h+=`<div class="tcard"><div class="code">${c.code}${c.req?' · <span class="pill req">Required</span>':''}</div><h3>${esc(c.title)}</h3><div class="meta">${c.hours} hr · ${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p><div class="foot">${pill}${btn}</div></div>`});
   h+=`</div>`});
  h+=`<div class="card" style="margin-top:24px"><h3 style="margin-top:0">Questions?</h3><p>Call or text your case manager, or the Benevolent House on-call line, any hour. If a page will not load, try another browser or ask your case manager to help you complete the training one-on-one.</p></div>`;
- $("#view-home").innerHTML=h;show("home")}
+ $("#view-home").innerHTML=h;show("home");if(!S.user&&$("#bhsHost"))BHSignIn($("#bhsHost"),adoptUser)}
 function signIn(){const n=$("#uName").value.trim(),e=$("#uEmail").value.trim(),hm=$("#uHome").value.trim(),r=$("#uRole").value;
  if(!n||!e||!hm){toast("Please fill in your name, email, and home or role");return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){toast("Please enter a valid email address");return}
  S.user={name:n,email:e,home:hm,role:r};saveStore(S);renderHome()}
-function signOut(){S.user=null;saveStore(S);renderHome()}
+function signOut(){if(S.user&&S.user.cloud&&window.BHC){BHC.signOut();S={done:{},progress:{}};saveStore(S);renderHome();return}S.user=null;saveStore(S);renderHome()}
+function fmtUS(iso){const d=new Date(iso);return (d.getMonth()+1+"").padStart(2,"0")+"/"+(d.getDate()+"").padStart(2,"0")+"/"+d.getFullYear()}
+async function adoptUser(u){if(!u)return;const same=S.user&&S.user.email&&S.user.email.toLowerCase()===u.email.toLowerCase();if(!same){S={done:{},progress:{}}}S.user=u;
+ try{const rows=await BHC.myCompletions();const cloudDone={};rows.forEach(r=>{if(!cloudDone[r.course_code])cloudDone[r.course_code]={date:fmtUS(r.completed_at),iso:r.completed_at,hours:r.hours,source:r.source,verified:!!r.verified_by}});S.done=Object.assign({},same?S.done:{},cloudDone)}catch(e){}
+ saveStore(S);renderHome()}
+async function cloudBoot(){if(!window.BHC||!BHC.available())return;const p=await BHC.profile();if(!p){if(S.user&&S.user.cloud){S={done:{},progress:{}};saveStore(S);renderHome()}return}if(!p.full_name||!p.home_label){S.user=null;renderHome();return}await adoptUser(BHC.asUser(p))}
+function nextDue(c,d){if(!d)return null;const f=(c.freq||"").toLowerCase();if(!/annual|every 12 months/.test(f))return null;const t=d.iso?new Date(d.iso):(()=>{const m=(d.date||"").match(/(\d+)\/(\d+)\/(\d{4})/);return m?new Date(+m[3],+m[1]-1,+m[2]):null})();if(!t||isNaN(t))return null;const n=new Date(t);n.setFullYear(n.getFullYear()+1);return n}
 
 /* ---------- record a live / outside completion ---------- */
 function recordLive(code){const c=CATALOG.find(x=>x.code===code);
@@ -530,7 +539,8 @@ async function submitLive(code){const c=CATALOG.find(x=>x.code===code);const d=$
  if(!d||!t){toast("Date and trainer are required");return}if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||new Date(d)>new Date()){toast("Please enter a valid date that is not in the future");return}if(!(parseFloat(h)>0)){toast("Please enter the hours as a number");return}
  const now=new Date();const dd=d.split("-");const dUS=dd[1]+"/"+dd[2]+"/"+dd[0];
  await logToForms({title:c.title,code:c.code,score:"",pass:"Pass",date:dUS,time:fmtTime(now),hours:h,answers:"Recorded by participant: live/outside completion. "+($("#rNote").value.trim()),ack:"",sig:"",trainer:t});
- S.done[c.code]={date:dUS,hours:h,trainer:t};saveStore(S);toast("Recorded. Thank you.");renderHome()}
+ try{if(S.user&&S.user.cloud)await BHC.addCompletion({code:c.code,title:c.title,hours:h,completed_at:new Date(d+"T12:00:00").toISOString(),answers:{trainer:t,note:$("#rNote").value.trim()},source:"live"})}catch(e){}
+ S.done[c.code]={date:dUS,hours:h,trainer:t,iso:new Date(d+"T12:00:00").toISOString()};saveStore(S);toast("Recorded. Thank you.");renderHome()}
 
 /* ---------- module ---------- */
 let M=null, idx=0, timer=null, remain=0;
@@ -617,6 +627,6 @@ $("#homeBtn").addEventListener("click",()=>{if(M&&!$("#view-module").classList.c
 window.addEventListener("resize",()=>{if(!$("#view-ack").classList.contains("hidden")&&!sigDrawn)initSig()});
 window.addEventListener("online",async()=>{try{const q=JSON.parse(localStorage.getItem(STORE_KEY+"_queue")||"[]");if(!q.length)return;localStorage.removeItem(STORE_KEY+"_queue");const u=S.user;for(const it of q){S.user=it.u;await logToForms(it.r)}S.user=u}catch(e){}});
 document.addEventListener("keydown",e=>{if(e.key==="Enter"&&document.activeElement&&["uName","uEmail","uHome"].includes(document.activeElement.id))signIn()});
-renderHome();
+renderHome();cloudBoot();
 </script>
 </body></html>
