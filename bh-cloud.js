@@ -71,7 +71,7 @@ window.BHSignIn=function(host,onDone,opts){
   <div class="bhs-row"><div><label for="bhsName">Full name</label><input id="bhsName" type="text" autocomplete="name" placeholder="First and last name"></div><div><label for="bhsEmail">Email</label><input id="bhsEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com"></div></div>
   <div class="bhs-row"><div><label for="bhsHome">Foster home or staff role</label><input id="bhsHome" type="text" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label for="bhsRole">I am a</label><select id="bhsRole">${roles.map(r=>`<option>${e(r)}</option>`).join("")}</select></div></div>
   ${msg?`<p class="bhs-note">${e(msg)}</p>`:""}<p class="bhs-err" id="bhsErr"></p><p><button class="btn" id="bhsSend" type="button">Email me a code</button></p>
-  <p class="bhs-fine">Already signed in before? Just enter your email; your name and home are kept on file. Benevolent House keeps your name and training records for licensing and T3C credentialing. No child information is entered here.</p></div>`;
+  <p class="bhs-fine">Already signed in before? Just enter your email; your name and home are kept on file.</p></div>`;
   const go=async()=>{const n=host.querySelector("#bhsName").value.trim(),em=host.querySelector("#bhsEmail").value.trim().toLowerCase(),hm=host.querySelector("#bhsHome").value.trim(),r=host.querySelector("#bhsRole").value;
    const err=host.querySelector("#bhsErr");if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){err.textContent="Please enter a valid email address.";return}
    const b=host.querySelector("#bhsSend");b.disabled=true;b.textContent="Sending…";email=em;meta={full_name:n,home_label:hm,caregiver_type:r};
