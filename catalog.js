@@ -60,8 +60,8 @@ window.CATALOG=[
   blurb:"Online. Record the completion date here."},
  {code:"DFPS-RP", renew:0, aud:"caregiver", link:"https://www.dfps.texas.gov/Training/Runaway_Prevention/default.asp", title:"DFPS Runaway Prevention Training", hours:2.5, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
   blurb:"Taken on the DFPS site. Record the completion date here."},
- {code:"CPR", renew:24, aud:"caregiver", title:"CPR and First Aid", hours:2, who:"All caregivers", freq:"Per certificate expiration", status:"record", group:"Outside Certificates",
-  blurb:"Outside hands-on certification. Record the completion and expiration dates."},
+ {code:"CPR", renew:24, aud:"caregiver", bhOffer:"Benevolent House offers First Aid and CPR for $40 per caregiver, taught by our HSI-certified trainers. You may also use another approved provider.", title:"CPR and First Aid", hours:2, who:"All caregivers", freq:"Per certificate expiration", status:"record", group:"Outside Certificates",
+  blurb:"Hands-on certification every two years. Take it with Benevolent House or another approved provider, then add your date and upload your card."},
 ];
 
 /* When a training is due again: renew = months between completions (0 = once). */
