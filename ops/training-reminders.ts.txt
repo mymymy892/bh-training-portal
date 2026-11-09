@@ -142,7 +142,7 @@ window.BH_WINDOW=function(c){return +(c&&c.window)||90};
    const main=merge(hits),more=merge(extra);const names=joinNames(all.map(i=>i.name));const soonest=main[0];
    const onlyCheck=main.every(i=>i.code==="CWB");const what=onlyCheck?"check-in":(main.length===1?"training":"trainings");
    const subject=`${soonest.days===0?"Due today":"Due "+fmtLong(soonest.due)}: Benevolent House ${main.length===1?soonest.title:main.length+" "+what}${names?" for "+names:""}`;
-   const li=i=>`<li style="margin:0 0 12px"><b>${esc(i.title)}</b>${i.names.filter(Boolean).length&&new Set(all.map(x=>x.name)).size>1?` <span style="color:#6B5F58">(${esc(joinNames(i.names))})</span>`:""}<br>Due ${esc(when(i.days))}${i.days>0?`, by ${esc(fmtLong(i.due))}`:""}${i.hours?` · ${esc(i.hours)} training hour${i.hours==1?"":"s"}`:""}<br>${i.link?`<a href="${esc(i.link)}">${esc(i.linkLabel)}</a>${i.linkNote?" · "+esc(i.linkNote):""}`:i.status==="live"?`<a href="${PORTAL}">Take it in the training portal</a>`:`Benevolent House will send you the materials, or ask your case manager. When you finish, add your date in the <a href="${PORTAL}">training portal</a>.`}</li>`;
+   const li=i=>`<li style="margin:0 0 12px"><b>${esc(i.title)}</b>${i.names.filter(Boolean).length&&new Set(all.map(x=>x.name)).size>1?` <span style="color:#6B5F58">(${esc(joinNames(i.names))})</span>`:""}<br>Due ${esc(when(i.days))}${i.days>0?`, by ${esc(fmtLong(i.due))}`:""}${i.hours?` · ${esc(i.hours)} training hour${i.hours==1?"":"s"}`:""}<br>${i.code==="CPR"?`You can recertify with Benevolent House ($40 per caregiver, taught by our HSI-certified trainers). Choose "Schedule with Benevolent House" in the <a href="${PORTAL}">training portal</a>, or complete it with another provider and add your date there.`:i.link?`<a href="${esc(i.link)}">${esc(i.linkLabel)}</a>${i.linkNote?" · "+esc(i.linkNote):""}`:i.status==="live"?`<a href="${PORTAL}">Take it in the training portal</a>`:`Benevolent House will send you the materials, or ask your case manager. When you finish, add your date in the <a href="${PORTAL}">training portal</a>.`}</li>`;
    const html=`<div style="font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5;color:#2B2320;max-width:600px">
 <p>Hello,</p>
 <p>This is a reminder from Benevolent House${names?` for <b>${esc(names)}</b>`:""} about ${main.length===1?`a ${what} that is`:`${what} that are`} coming due.</p>
@@ -190,8 +190,10 @@ async function send(key: string, msg: Record<string, unknown>): Promise<{ err: s
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
-  const mode = new URL(req.url).searchParams.get("mode") || "send";
-  if (!["send", "count", "sample"].includes(mode)) return json({ error: "unknown mode" }, 400);
+  let body: any = {};
+  if (req.method === "POST") { try { body = await req.json(); } catch (_) { body = {}; } }
+  const mode = new URL(req.url).searchParams.get("mode") || body.mode || "send";
+  if (!["send", "count", "sample", "cpr_request"].includes(mode)) return json({ error: "unknown mode" }, 400);
   const key = Deno.env.get("RESEND_API_KEY") || "";
   let admin = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
   if (!admin) { try { const k = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") || "{}"); admin = k.default || Object.values(k)[0] as string || ""; } catch (_) { /* none */ } }
@@ -202,12 +204,35 @@ Deno.serve(async (req) => {
     const staffTo: string[] = set?.staff_to || replyTo;
     const R = g.BH_REMIND;
 
-    if (mode === "sample") {
-      const tok = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+    const tok = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+    if (mode === "cpr_request") {
+      // a signed-in caregiver asks to complete First Aid and CPR with Benevolent House
+      if (!key) return json({ error: "email is not set up" }, 500);
       const { data: u } = await sb.auth.getUser(tok);
       const email = (u?.user?.email || "").toLowerCase();
-      const { data: lead } = email ? await sb.from("approved_people").select("email").eq("email", email).eq("access", "leadership").eq("active", true).maybeSingle() : { data: null };
-      if (!lead) return json({ error: "leadership only" }, 403);
+      if (!email) return json({ error: "please sign in" }, 401);
+      const { data: ap } = await sb.from("approved_people").select("email,full_name,home_label").eq("email", email).eq("active", true).maybeSingle();
+      if (!ap) return json({ error: "not set up" }, 403);
+      const { data: pr } = await sb.from("profiles").select("full_name,home_label").ilike("email", email).maybeSingle();
+      const { data: recent } = await sb.from("reminder_log").select("id").eq("kind", "cpr").eq("email", email).gte("at", new Date(Date.now() - 864e5).toISOString()).limit(1);
+      if (recent && recent.length) return json({ ok: true, already: true });
+      const name = pr?.full_name || ap.full_name || email, home = pr?.home_label || ap.home_label || "";
+      const e2 = (x: string) => String(x).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as any)[c]);
+      const r = await send(key, { from: FROM, to: staffTo, reply_to: [email], subject: "First Aid and CPR request from " + name + (home ? " (" + home + ")" : ""),
+        html: `<div style="font-family:Arial;font-size:15px;line-height:1.5"><p><b>${e2(name)}</b>${home ? " (" + e2(home) + ")" : ""} would like to complete First Aid and CPR with Benevolent House.</p><p>Email: ${e2(email)}</p><p>Reply to this email to reach them directly. The class is $40 per caregiver with Benevolent House's HSI-certified trainers.</p></div>` });
+      if (r) return json({ error: "could not send" }, 502);
+      await sb.from("reminder_log").insert({ sent_on: new Date().toISOString().slice(0, 10), kind: "cpr", email, course_code: String(Date.now()), status: "sent" });
+      return json({ ok: true });
+    }
+    if (mode === "sample") {
+      let ok = tok && tok === admin;
+      if (!ok) {
+        const { data: u } = await sb.auth.getUser(tok);
+        const email = (u?.user?.email || "").toLowerCase();
+        const { data: lead } = email ? await sb.from("approved_people").select("email").eq("email", email).eq("access", "leadership").eq("active", true).maybeSingle() : { data: null };
+        ok = !!lead;
+      }
+      if (!ok) return json({ error: "leadership only" }, 403);
     } else if (mode === "send") {
       const { data: recent } = await sb.from("reminder_log").select("id").eq("kind", "run").gte("at", new Date(Date.now() - 20 * 60e3).toISOString()).limit(1);
       if (recent && recent.length) return json({ skipped: "a run already happened in the last 20 minutes" });
