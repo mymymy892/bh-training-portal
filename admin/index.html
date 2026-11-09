@@ -93,12 +93,12 @@ function renderList(){
  const rows=PEOPLE.filter(p=>(!homeFilter||p.home_label===homeFilter)&&(!filter||(p.full_name+" "+p.email+" "+(p.home_label||"")).toLowerCase().includes(filter)));
  const S=rows.map(p=>({p,s:summary(p)}));
  const tot={people:rows.length,over:S.filter(x=>x.s.over).length,due:S.filter(x=>x.s.due).length,missing:S.filter(x=>x.s.missing).length};
- let h=`<h1>Training records</h1><p class="lead">Every caregiver and staff member who has signed in to the portal, what is complete, and what is coming due. Click a name for that person's training log and certificates.</p>
+ let h=nav("records")+`<h1>Training records</h1><p class="lead">Every caregiver and staff member who has signed in to the portal, what is complete, and what is coming due. Click a name for that person's training log and certificates.</p>
  <div class="tiles"><div class="tile"><b>${tot.people}</b><span>people shown</span></div><div class="tile"><b>${tot.over}</b><span>with a past-due training</span></div><div class="tile"><b>${tot.due}</b><span>with one due within 90 days</span></div><div class="tile"><b>${tot.missing}</b><span>missing a required training</span></div></div>
  <div class="bar"><input id="q" type="search" placeholder="Search by name, email or home" value="${esc(filter)}" aria-label="Search"><select id="hf" aria-label="Filter by home"><option value="">All homes</option>${homes.map(x=>`<option ${x===homeFilter?"selected":""}>${esc(x)}</option>`).join("")}</select>${homeFilter?`<button class="btn ghost sm" id="homeLog">Print this home's logs</button>`:""}</div>`;
  if(!PEOPLE.length)h+=`<div class="card"><b>No one has signed in yet.</b><p class="muted">When caregivers sign in at the portal, they appear here automatically with their completed trainings.</p></div>`;
- else h+=`<div class="tscroll"><table><thead><tr><th>Name</th><th>Home</th><th>Type</th><th>Required trainings</th><th>Most recent</th>${ME.role==="leadership"?"<th>Access</th>":""}</tr></thead><tbody>${S.map(({p,s})=>`<tr class="click" tabindex="0" data-id="${esc(p.id)}"><td><b>${esc(p.full_name||"(no name yet)")}</b><br><span class="small muted">${esc(p.email)}</span></td><td>${esc(p.home_label||"")}</td><td>${esc(p.caregiver_type||"")}</td><td>${s.over?`<span class="pill over">${s.over} past due</span> `:""}${s.due?`<span class="pill due">${s.due} due soon</span> `:""}${s.missing?`<span class="pill none">${s.missing} not done</span> `:""}${!s.over&&!s.due&&!s.missing?`<span class="pill ok">All current</span>`:""}</td><td class="num">${s.last?esc(fmtShort(s.last.completed_at))+`<br><span class="small muted">${esc(s.last.course_code)}</span>`:"<span class='muted'>None</span>"}</td>${ME.role==="leadership"?`<td>${esc(p.role)}</td>`:""}</tr>`).join("")}</tbody></table></div>`;
- $("#view").innerHTML=h;
+ else h+=`<div class="tscroll"><table><thead><tr><th>Name</th><th>Home</th><th>Type</th><th>Required trainings</th><th>Most recent</th><th>Access</th></tr></thead><tbody>${S.map(({p,s})=>`<tr class="click" tabindex="0" data-id="${esc(p.id)}"><td><b>${esc(p.full_name||"(no name yet)")}</b><br><span class="small muted">${esc(p.email)}</span></td><td>${esc(p.home_label||"")}</td><td>${esc(p.caregiver_type||"")}</td><td>${s.over?`<span class="pill over">${s.over} past due</span> `:""}${s.due?`<span class="pill due">${s.due} due soon</span> `:""}${s.missing?`<span class="pill none">${s.missing} not done</span> `:""}${!s.over&&!s.due&&!s.missing?`<span class="pill ok">All current</span>`:""}</td><td class="num">${s.last?esc(fmtShort(s.last.completed_at))+`<br><span class="small muted">${esc(s.last.course_code)}</span>`:"<span class='muted'>None</span>"}</td><td>${esc(p.role)}</td></tr>`).join("")}</tbody></table></div>`;
+ $("#view").innerHTML=h;wireNav();
  $("#q")&&($("#q").oninput=e=>{filter=e.target.value.toLowerCase();const pos=e.target.selectionStart;renderList();const q=$("#q");q.focus();q.setSelectionRange(pos,pos)});
  $("#hf")&&($("#hf").onchange=e=>{homeFilter=e.target.value;renderList()});
  $("#homeLog")&&($("#homeLog").onclick=()=>renderHomeLogs(homeFilter));
@@ -106,26 +106,26 @@ function renderList(){
 
 function logTable(p){const m=latestBy(p.id);
  return `<div class="tscroll"><table><thead><tr><th>Training</th><th>Hours</th><th>Last completed</th><th>How</th><th>Next due</th><th>Status</th><th class="noprint"></th></tr></thead><tbody>${CAT.map(c=>{const r=m[c.code];const st=statusOf(c,r);const due=dueOf(c,r);
-  return `<tr><td><b>${esc(c.title)}</b><br><span class="small muted">${esc(c.code)}${c.req?" · Required":""} · ${esc(c.freq)}</span></td><td class="num">${r?esc(+r.hours):esc(c.hours)}</td><td class="num">${r?esc(fmtShort(r.completed_at)):""}</td><td>${r?(r.source==="portal"?"Online"+(r.score!=null?` (${esc(r.score)}/${esc(r.total||"")})`:""):r.source==="live"?"Live":r.source==="upload"?"Certificate":"Backfill")+(r.source!=="portal"&&!r.verified_by?` <span class="pill self">Self-reported</span>`:r.verified_by?` <span class="pill ok">Verified</span>`:""):""}</td><td class="num">${due?esc(fmtShort(due)):""}</td><td>${st.t?`<span class="pill ${st.k}">${esc(st.t)}</span>`:""}</td><td class="noprint">${r?`${r.source==="portal"?`<button class="btn ghost sm" data-cert="${esc(r.id)}">Certificate</button> `:""}${r.answers&&r.answers.items?`<button class="btn ghost sm" data-quiz="${esc(r.id)}">Quiz record</button> `:""}${!r.verified_by&&r.source!=="portal"?`<button class="btn sm" data-verify="${esc(r.id)}">Verify</button>`:""}`:""}</td></tr>`}).join("")}</tbody></table></div>`}
+  return `<tr><td><b>${esc(c.title)}</b><br><span class="small muted">${esc(c.code)}${c.req?" · Required":""} · ${esc(c.freq)}</span></td><td class="num">${r?esc(+r.hours):esc(c.hours)}</td><td class="num">${r?esc(fmtShort(r.completed_at)):""}</td><td>${r?(r.source==="portal"?"Online"+(r.score!=null?` (${esc(r.score)}/${esc(r.total||"")})`:""):r.source==="live"?"Live":r.source==="upload"?"Certificate":"Backfill")+(r.source!=="portal"&&!r.verified_by?` <span class="pill self">Self-reported</span>`:r.verified_by?` <span class="pill ok">Verified</span>`:""):""}</td><td class="num">${due?esc(fmtShort(due)):""}</td><td>${st.t?`<span class="pill ${st.k}">${esc(st.t)}</span>`:""}</td><td class="noprint">${r?`${r.source==="portal"?`<button class="btn ghost sm" data-cert="${esc(r.id)}">Certificate</button> `:""}${r.answers&&r.answers.items?`<button class="btn ghost sm" data-quiz="${esc(r.id)}">Quiz record</button> `:""}${can("record_trainings")&&!r.verified_by&&r.source!=="portal"?`<button class="btn sm" data-verify="${esc(r.id)}">Verify</button>`:""}`:""}</td></tr>`}).join("")}</tbody></table></div>`}
 
 function renderPerson(id){sel=PEOPLE.find(p=>p.id===id);if(!sel)return;const p=sel;
  let h=`<div class="noprint bar"><button class="btn ghost sm" id="back">All people</button><span class="spacer"></span><button class="btn sm" onclick="window.print()">Print training log</button></div>
  <div class="printhead"><b>Benevolent House</b> · Caregiver Training Log · Printed ${esc(fmt(new Date()))}</div>
  <h1>${esc(p.full_name||p.email)}</h1><p class="lead">${esc(p.home_label||"")}${p.caregiver_type?" · "+esc(p.caregiver_type):""} · ${esc(p.email)}</p>${logTable(p)}
  <p class="small muted">Online trainings are graded and signed in the portal. "Self-reported" means the person recorded a live or outside training; it becomes "Verified" once staff checks the sign-in sheet or certificate. Annual trainings are due one year after the last completion.</p>
- <div class="card noprint"><h2 style="margin-top:0">Record a live or outside training for ${esc(p.full_name||"this person")}</h2><div class="row2"><div><label for="rc">Training</label><select id="rc">${CAT.map(c=>`<option value="${esc(c.code)}">${esc(c.title)}</option>`).join("")}</select></div><div><label for="rd">Date completed</label><input id="rd" type="date"></div></div><div class="row2"><div><label for="rh">Hours</label><input id="rh" type="number" min="0.25" max="12" step="0.25"></div><div><label for="rt">Trainer or provider</label><input id="rt" type="text" placeholder="e.g., Haddie Mashburn"></div></div><p><button class="btn" id="rsave">Save as verified</button></p></div>
- ${ME.role==="leadership"?`<div class="card noprint"><h2 style="margin-top:0">Access</h2><p class="small muted">Caregiver: their own records only. Staff: every caregiver's training records. Leadership: everything, including access levels.</p><div class="bar"><select id="role" aria-label="Access level">${["caregiver","staff","leadership"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select><button class="btn sm" id="roleSave">Save access level</button></div></div>`:""}`;
+ ${can("record_trainings")?`<div class="card noprint"><h2 style="margin-top:0">Record a live or outside training for ${esc(p.full_name||"this person")}</h2><div class="row2"><div><label for="rc">Training</label><select id="rc">${CAT.map(c=>`<option value="${esc(c.code)}">${esc(c.title)}</option>`).join("")}</select></div><div><label for="rd">Date completed</label><input id="rd" type="date"></div></div><div class="row2"><div><label for="rh">Hours</label><input id="rh" type="number" min="0.25" max="12" step="0.25"></div><div><label for="rt">Trainer or provider</label><input id="rt" type="text" placeholder="e.g., Haddie Mashburn"></div></div><p><button class="btn" id="rsave">Save as verified</button></p></div>`:""}
+ `;
  $("#view").innerHTML=h;window.scrollTo(0,0);
  $("#back").onclick=renderList;
- const rc=$("#rc"),rh=$("#rh");const setH=()=>{const c=CAT.find(x=>x.code===rc.value);rh.value=c?c.hours:1};rc.onchange=setH;setH();
- $("#rsave").onclick=async()=>{const c=CAT.find(x=>x.code===rc.value),d=$("#rd").value,t=$("#rt").value.trim(),hrs=parseFloat(rh.value);
+ const rc=$("#rc"),rh=$("#rh");if(rc){const setH=()=>{const c=CAT.find(x=>x.code===rc.value);rh.value=c?c.hours:1};rc.onchange=setH;setH()}
+ $("#rsave")&&($("#rsave").onclick=async()=>{const c=CAT.find(x=>x.code===rc.value),d=$("#rd").value,t=$("#rt").value.trim(),hrs=parseFloat(rh.value);
   if(!d||new Date(d+"T12:00:00")>new Date()){toast("Enter a date that is not in the future");return}if(!(hrs>0&&hrs<=12)){toast("Hours must be between 0.25 and 12");return}if(!t){toast("Enter the trainer or provider");return}
   const{error}=await BHC.client().from("completions").insert({user_id:p.id,course_code:c.code,course_title:c.title,hours:hrs,completed_at:new Date(d+"T12:00:00").toISOString(),source:"live",answers:{trainer:t,recorded_by:ME.full_name},verified_by:ME.id});
-  if(error){toast("Could not save: "+error.message);return}BHC.log("record_live",c.code);await load();toast("Saved");renderPerson(p.id)};
+  if(error){toast("Could not save: "+error.message);return}BHC.log("record_live",c.code);await load();toast("Saved");renderPerson(p.id)});
  document.querySelectorAll("[data-verify]").forEach(b=>b.onclick=async()=>{const{error}=await BHC.client().from("completions").update({verified_by:ME.id}).eq("id",b.dataset.verify);if(error){toast("Could not verify: "+error.message);return}BHC.log("verify",b.dataset.verify);await load();toast("Verified");renderPerson(p.id)});
  document.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>renderCert(b.dataset.cert));
  document.querySelectorAll("[data-quiz]").forEach(b=>b.onclick=()=>renderQuiz(b.dataset.quiz));
- $("#roleSave")&&($("#roleSave").onclick=async()=>{const r=$("#role").value;if(p.id===ME.id&&r!=="leadership"){toast("You cannot remove your own leadership access");return}const{error}=await BHC.client().from("profiles").update({role:r}).eq("id",p.id);if(error){toast("Could not change access: "+error.message);return}BHC.log("set_role",p.id+":"+r);await load();toast("Access updated");renderPerson(p.id)});
+
  BHC.log("view_person",p.id)}
 
 function renderCert(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x=>x.id===r.user_id);
@@ -144,14 +144,57 @@ function renderHomeLogs(home){const ps=PEOPLE.filter(p=>p.home_label===home);
  $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">All people</button><span class="spacer"></span><button class="btn sm" onclick="window.print()">Print</button></div>`+ps.map((p,i)=>`<div style="${i?"page-break-before:always;":""}"><div class="printhead"><b>Benevolent House</b> · Caregiver Training Log · Printed ${esc(fmt(new Date()))}</div><h1>${esc(p.full_name)}</h1><p class="lead">${esc(home)} · ${esc(p.caregiver_type||"")} · ${esc(p.email)}</p>${logTable(p)}</div>`).join("");
  $("#back").onclick=renderList;document.querySelectorAll("[data-cert],[data-quiz],[data-verify]").forEach(b=>b.remove())}
 
+let PERMS=[],APPROVED=[];
+const PERM_LABELS={view_training:"View all training records",record_trainings:"Record and verify live trainings",manage_families:"Manage approved families",print_records:"Print training logs and certificates",licensing:"Applicant families and licensing (coming)",case_records:"Children and case records (coming)",reports:"Reports and T3C data (coming)",billing:"Billing and payments (coming)",discrepancies:"Discrepancy reports and back pay (coming)"};
+const TYPES=["Foster Caregiver","Kinship Caregiver","Adoptive Parent","Foster and Adoptive Caregiver","Staff","Contracted Provider"];
+const can=p=>PERMS.includes(p);
+function nav(active){return `<div class="bar noprint" role="tablist">${can("view_training")?`<button class="btn ${active==="records"?"":"ghost"} sm" id="navRec">Training records</button>`:""}${can("manage_families")||can("view_training")?`<button class="btn ${active==="people"?"":"ghost"} sm" id="navPeople">Approved people</button>`:""}<span class="spacer"></span><button class="btn ghost sm" id="navOut">Sign out</button></div>`}
+function wireNav(){$("#navRec")&&($("#navRec").onclick=()=>renderList());$("#navPeople")&&($("#navPeople").onclick=()=>renderPeople());$("#navOut").onclick=async()=>{await BHC.signOut();location.reload()}}
+async function loadApproved(){const{data,error}=await BHC.client().from("approved_people").select("*").order("home_label");if(error)throw error;APPROVED=data||[]}
+let pFilter="",pShowOff=false;
+function renderPeople(){
+ const signed=new Set(PEOPLE.map(p=>(p.email||"").toLowerCase()));
+ const rows=APPROVED.filter(a=>(pShowOff||a.active)&&(!pFilter||((a.email+" "+(a.full_name||"")+" "+(a.home_label||"")).toLowerCase().includes(pFilter))));
+ const offN=APPROVED.filter(a=>!a.active).length;
+ let h=nav("people")+`<h1>Approved people</h1><p class="lead">Only emails on this list can sign in to the portal. Each person's access comes from this list. Turning someone off blocks sign-in and hides their records from them; their completed trainings stay on file.</p>
+ <div class="bar"><input id="pq" type="search" placeholder="Search by email, name or home" value="${esc(pFilter)}" aria-label="Search approved people"><label class="small" style="display:flex;gap:6px;align-items:center;margin:0;font-weight:400"><input type="checkbox" id="poff" ${pShowOff?"checked":""} style="width:auto"> Show turned-off (${offN})</label>${can("manage_families")?`<button class="btn sm" id="padd">Add a person</button>`:""}</div>
+ <div class="tscroll"><table><thead><tr><th>Email</th><th>Name</th><th>Home</th><th>Access</th><th>Status</th><th class="noprint"></th></tr></thead><tbody>${rows.map(a=>`<tr><td>${esc(a.email)}</td><td>${esc(a.full_name||"")}</td><td>${esc(a.home_label||"")}</td><td>${esc(a.access)}${a.access==="staff"?`<br><span class="small muted">${(a.permissions||[]).map(x=>esc((PERM_LABELS[x]||x).replace(" (coming)",""))).join(", ")||"No switches on"}</span>`:""}</td><td>${a.active?(signed.has(a.email)?`<span class="pill ok">Signed in before</span>`:`<span class="pill none">Not signed in yet</span>`):`<span class="pill over">Turned off</span>`}</td><td class="noprint">${can("manage_families")&&(a.access==="caregiver"||ME.role==="leadership")?`<button class="btn ghost sm" data-edit="${esc(a.email)}">Edit</button>`:""}</td></tr>`).join("")}</tbody></table></div>
+ <p class="small muted">${rows.length} shown. Emails from the BH tracker's Email Distribution List were loaded on November 9, 2026; check each home before the sign-in rule is switched on.</p>`;
+ $("#view").innerHTML=h;wireNav();
+ $("#pq").oninput=e=>{pFilter=e.target.value.toLowerCase();const pos=e.target.selectionStart;renderPeople();const q=$("#pq");q.focus();q.setSelectionRange(pos,pos)};
+ $("#poff").onchange=e=>{pShowOff=e.target.checked;renderPeople()};
+ $("#padd")&&($("#padd").onclick=()=>editPerson(null));
+ document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editPerson(APPROVED.find(a=>a.email===b.dataset.edit)))}
+function editPerson(a){const isNew=!a;a=a||{email:"",full_name:"",home_label:"",caregiver_type:"Foster Caregiver",access:"caregiver",active:true,permissions:[],notes:""};const lead=ME.role==="leadership";
+ $("#view").innerHTML=nav("people")+`<h1>${isNew?"Add a person":"Edit "+esc(a.email)}</h1><div class="card">
+ <div class="row2"><div><label for="ae">Email</label><input id="ae" type="email" value="${esc(a.email)}" ${isNew?"":"disabled"}></div><div><label for="an">Full name</label><input id="an" type="text" value="${esc(a.full_name||"")}" placeholder="Filled in when they first sign in, if left blank"></div></div>
+ <div class="row2"><div><label for="ah">Foster home or staff role</label><input id="ah" type="text" value="${esc(a.home_label||"")}" placeholder="e.g., Johnson, Mark & Lisa"></div><div><label for="at">Type</label><select id="at">${TYPES.map(t=>`<option ${t===a.caregiver_type?"selected":""}>${t}</option>`).join("")}</select></div></div>
+ ${lead?`<label for="aa">Access level</label><select id="aa">${["caregiver","staff","leadership"].map(r=>`<option ${r===a.access?"selected":""}>${r}</option>`).join("")}</select>
+ <div id="permBox" style="${a.access==="staff"?"":"display:none"}"><label>Permission switches</label>${Object.entries(PERM_LABELS).map(([k,v])=>`<label style="display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0"><input type="checkbox" class="perm" value="${k}" ${(a.permissions||[]).includes(k)?"checked":""} style="width:auto"> ${esc(v)}</label>`).join("")}</div>`:`<p class="small muted">Access level: caregiver. Only leadership can approve staff.</p>`}
+ <label for="ano">Notes (optional, no child information)</label><input id="ano" type="text" maxlength="300" value="${esc(a.notes||"")}">
+ <label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="aact" ${a.active?"checked":""} style="width:auto"> Allowed to sign in</label>
+ <p style="margin-top:14px"><button class="btn" id="asave">Save</button> <button class="btn ghost" id="acancel">Cancel</button></p></div>`;
+ wireNav();$("#acancel").onclick=renderPeople;
+ $("#aa")&&($("#aa").onchange=e=>{$("#permBox").style.display=e.target.value==="staff"?"":"none"});
+ $("#asave").onclick=async()=>{const email=(isNew?$("#ae").value:a.email).trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast("Enter a valid email");return}
+  const row={full_name:$("#an").value.trim()||null,home_label:$("#ah").value.trim()||null,caregiver_type:$("#at").value,notes:$("#ano").value.trim()||null,active:$("#aact").checked};
+  if(lead){row.access=$("#aa").value;row.permissions=row.access==="staff"?[...document.querySelectorAll(".perm:checked")].map(x=>x.value):[]}
+  if(lead&&email===(ME._email||"").toLowerCase()&&(row.access!=="leadership"||!row.active)){toast("You cannot remove your own leadership access");return}
+  let res;if(isNew){row.email=email;if(!lead)row.access="caregiver";res=await BHC.client().from("approved_people").insert(row)}else res=await BHC.client().from("approved_people").update(row).eq("email",email);
+  if(res.error){toast(/duplicate|unique/i.test(res.error.message)?"That email is already on the list":"Could not save: "+res.error.message);return}
+  BHC.log(isNew?"approve_add":"approve_edit",email);await loadApproved();await load().catch(()=>{});toast("Saved");renderPeople()}}
+
+let idleT=null;function idle(){clearTimeout(idleT);idleT=setTimeout(async()=>{await BHC.signOut();location.reload()},30*60*1000)}
+["click","keydown","mousemove","touchstart"].forEach(ev=>document.addEventListener(ev,idle,{passive:true}));
 async function start(u){
  let p;try{p=await BHC.profile(true)}catch(e){}
- if(!p){$("#view").innerHTML=`<div class="card">Could not load your account. Please refresh the page.</div>`;return}
- ME=p;$("#who").textContent=(p.full_name||p._email)+" · "+p.role;
- if(p.role!=="staff"&&p.role!=="leadership"){$("#view").innerHTML=`<div class="card"><h1>This page is for Benevolent House staff</h1><p>You are signed in as ${esc(p.full_name||p._email)}. Your own trainings and certificates are on the <a href="../">portal home</a>.</p><p><button class="btn ghost sm" id="so">Sign out</button></p></div>`;$("#so").onclick=async()=>{await BHC.signOut();location.reload()};return}
- $("#view").innerHTML=`<div class="card">Loading training records…</div>`;
- try{await load()}catch(e){$("#view").innerHTML=`<div class="card">Could not load records: ${esc(e.message||e)}</div>`;return}
- BHC.log("open_admin","");renderList()}
+ if(!p){$("#view").innerHTML=`<div class="card"><h1>This page is for Benevolent House staff</h1><p>Your email is not set up for the admin page. Your own trainings are on the <a href="../">portal home</a>.</p><p><button class="btn ghost sm" id="so">Sign out</button></p></div>`;$("#so").onclick=async()=>{await BHC.signOut();location.reload()};return}
+ ME=p;try{const r=await BHC.client().rpc("my_permissions");PERMS=r.data||[]}catch(e){PERMS=[]}
+ $("#who").textContent=(p.full_name||p._email)+" · "+p.role;
+ if(!(can("view_training")||can("manage_families"))){$("#view").innerHTML=`<div class="card"><h1>This page is for Benevolent House staff</h1><p>You are signed in as ${esc(p.full_name||p._email)}. Your own trainings and certificates are on the <a href="../">portal home</a>.</p><p><button class="btn ghost sm" id="so">Sign out</button></p></div>`;$("#so").onclick=async()=>{await BHC.signOut();location.reload()};return}
+ idle();$("#view").innerHTML=`<div class="card">Loading…</div>`;
+ try{await Promise.all([can("view_training")?load():Promise.resolve(),loadApproved()])}catch(e){$("#view").innerHTML=`<div class="card">Could not load records: ${esc(e.message||e)}</div>`;return}
+ BHC.log("open_admin","");can("view_training")?renderList():renderPeople()}
 
 (async function(){
  if(!window.BHC||!BHC.available()){$("#view").innerHTML=`<div class="card">The admin page needs an internet connection. Please check your connection and refresh.</div>`;return}

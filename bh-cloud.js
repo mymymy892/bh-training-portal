@@ -65,10 +65,10 @@ window.BHSignIn=function(host,onDone,opts){
   const go=async()=>{const n=host.querySelector("#bhsName").value.trim(),em=host.querySelector("#bhsEmail").value.trim().toLowerCase(),hm=host.querySelector("#bhsHome").value.trim(),r=host.querySelector("#bhsRole").value;
    const err=host.querySelector("#bhsErr");if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em)){err.textContent="Please enter a valid email address.";return}
    const b=host.querySelector("#bhsSend");b.disabled=true;b.textContent="Sending…";email=em;meta={full_name:n,home_label:hm,caregiver_type:r};
-   try{await BHC.sendCode(em,meta);step2()}catch(x){b.disabled=false;b.textContent="Email me a code";
+   try{await BHC.sendCode(em,meta);step2()}catch(x){if(x&&(x.status===403||x.status===422||/not set up|not allowed|signups/i.test(x.message||""))){step2();return}b.disabled=false;b.textContent="Email me a code";
     err.textContent=/rate|security purposes|seconds/i.test(x&&x.message||"")?"A code was just sent. Please wait a minute, then try again.":"We could not send the code just now. Check your connection and try again."}};
   host.querySelector("#bhsSend").onclick=go;host.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",ev=>{if(ev.key==="Enter")go()}))}
- function step2(msg){host.innerHTML=`<div class="bhs"><h2>Check your email</h2><p class="bhs-sub">We sent a 6-digit code to <b>${e(email)}</b> from Benevolent House Training. It can take a minute. If you do not see it, check your spam or junk folder.</p>
+ function step2(msg){host.innerHTML=`<div class="bhs"><h2>Check your email</h2><p class="bhs-sub">If <b>${e(email)}</b> is set up with Benevolent House, a 6-digit code from Benevolent House Training is on its way. It can take a minute; check your spam or junk folder too. No code after five minutes? Call Benevolent House at (214) 774-4871 so we can add you.</p>
   <label for="bhsCode">Your 6-digit code</label><input id="bhsCode" class="bhs-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456">
   <p class="bhs-err" id="bhsErr">${e(msg||"")}</p><p><button class="btn" id="bhsVerify" type="button">Sign in</button> <button class="btn ghost" id="bhsBack" type="button">Use a different email</button></p>
   <p class="bhs-fine">You can also tap the link in the email if you opened it on this same device.</p></div>`;
@@ -79,7 +79,7 @@ window.BHSignIn=function(host,onDone,opts){
     const upd={};if(meta.full_name&&!p.full_name)upd.name=meta.full_name;if(meta.home_label&&!p.home_label)upd.home=meta.home_label;if(meta.caregiver_type&&!p.caregiver_type)upd.role=meta.caregiver_type;
     if(Object.keys(upd).length)p=await BHC.saveProfile(upd)||p;BHC.log("sign_in",location.pathname);
     if(!p.full_name||!p.home_label){step3(p);return}onDone(BHC.asUser(p))}
-   catch(x){b.disabled=false;b.textContent="Sign in";err.textContent=(x&&(x.message==="noprofile"||x.unavailable))?"You are signed in, but your record could not be loaded. Check your connection and refresh the page.":"That code did not work. Check the newest email and try again, or ask for a new code."}};
+   catch(x){b.disabled=false;b.textContent="Sign in";if(x&&x.message==="noprofile"){await BHC.signOut();err.textContent="This email is not set up with Benevolent House yet. Please call (214) 774-4871 so we can add you.";return}err.textContent=(x&&x.unavailable)?"You are signed in, but your record could not be loaded. Check your connection and refresh the page.":"That code did not work. Check the newest email and try again, or ask for a new code."}};
   host.querySelector("#bhsVerify").onclick=go;code.addEventListener("keydown",ev=>{if(ev.key==="Enter")go()});host.querySelector("#bhsBack").onclick=()=>step1()}
  function step3(p){host.innerHTML=`<div class="bhs"><h2>One more step</h2><p class="bhs-sub">You are signed in. Tell us your name and home so your certificates and training log are correct.</p>
   <div class="bhs-row"><div><label for="bhsName">Full name</label><input id="bhsName" type="text" autocomplete="name" value="${e(p.full_name||"")}"></div><div><label for="bhsHome">Foster home or staff role</label><input id="bhsHome" type="text" value="${e(p.home_label||"")}" placeholder="e.g., Johnson Home, or Case Manager"></div></div>
