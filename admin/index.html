@@ -67,7 +67,7 @@ label{display:block;font-weight:600;margin:10px 0 4px}
  .card,.tscroll{border:0;padding:0;margin:0}.printhead{display:block;margin-bottom:10px}
  th{background:#fff;position:static}table{font-size:11px}thead{display:table-header-group}tr{page-break-inside:avoid}
  html,body{background:#fff!important}.printdoc{display:block}.screenonly{display:none}
- #cert{border:3px solid #7B4B2A;max-width:none;aspect-ratio:auto;height:7.4in;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ #cert{border:3px solid #7B4B2A;max-width:none;aspect-ratio:auto;height:7.1in;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
 @page{margin:.5in}
 </style>
@@ -147,13 +147,13 @@ function printLog(p){const m=latestBy(p.id);const rows=catFor(p).map(c=>({c,r:m[
   return `<tr${r?"":` class="missing"`}><td>${esc(c.title)}</td><td>${esc(CAT_LABEL[c.group]||"")}</td><td class="r">${r?esc(+r.hours):""}</td><td>${r?esc(fmtShort(r.completed_at)):"Not on file"}</td><td>${esc(tr)}</td><td${due&&due<new Date()?` class="late"`:""}>${due?esc(fmtShort(due))+(due<new Date()?" (past due)":""):r?"Completed":""}</td></tr>`}).join("")}</tbody>
  <tfoot><tr><td colspan="2">Training hours in the last 12 months</td><td class="r">${esc(Math.round(hrsYear*100)/100)}</td><td colspan="3"></td></tr></tfoot></table>
  <div class="pd-sign"><div><b></b>Reviewed by (Benevolent House)</div><div><b></b>Date</div></div>
- <p class="pd-foot">Training record kept by Benevolent House for licensing and T3C credentialing. Certificates and sign-in sheets are on file.</p></div>`}
+ <p class="pd-foot">Training record kept by Benevolent House for licensing and T3C credentialing. Supporting documentation is kept on file.</p></div>`}
 function logTable(p){const m=latestBy(p.id);const mine=!canFix(p);
  return `<div class="tscroll"><table><thead><tr><th>Training</th><th>Hours</th><th>Last completed</th><th>Trainer</th><th class="noprint">How</th><th>Next due</th><th>Status</th><th class="noprint"></th></tr></thead><tbody>${catFor(p).map(c=>{const r=m[c.code];const st=statusOf(c,r);const due=dueOf(c,r);const tr=r?(r.trainer||(r.answers&&r.answers.trainer)||""):"";
   return `<tr><td><b>${esc(c.title)}</b><br><span class="small muted">${esc(c.code)}${c.req?" · Required":""} · ${esc(c.freq)}</span></td><td class="num">${r?esc(+r.hours):esc(c.hours)}</td><td class="num">${r?esc(fmtShort(r.completed_at)):""}${r&&r.edits&&r.edits.length?`<br><span class="small muted noprint">edited</span>`:""}</td><td class="small">${esc(tr)}</td><td class="noprint">${r?howOf(r):""}</td><td class="num">${due?esc(fmtShort(due)):""}</td><td>${st.t?`<span class="pill ${st.k}">${esc(st.t)}</span>`:""}</td><td class="noprint">${r&&r.legacy?`<button class="btn ghost sm" data-cert="${esc(r.id)}">Certificate</button> ${canFixRec(p,r)?`<button class="btn ghost sm" data-editc="${esc(r.id)}">Edit</button> `:""}<br><span class="small muted">From ${esc(/tracker/i.test(r.record_src||"")?"the BH tracker":"the Drive training record")}</span>`:r?`<button class="btn ghost sm" data-cert="${esc(r.id)}">Certificate</button> ${r.file_path?`<button class="btn ghost sm" data-file="${esc(r.id)}">Uploaded certificate</button> `:""}${r.answers&&r.answers.items?`<button class="btn ghost sm" data-quiz="${esc(r.id)}">Quiz record</button> `:""}${can("record_trainings")&&!mine?`<button class="btn ghost sm" data-editc="${esc(r.id)}">Edit</button> `:""}${can("record_trainings")&&!mine&&!r.verified_by&&r.source!=="portal"?`<button class="btn sm" data-verify="${esc(r.id)}">Verify</button>`:""}`:""}</td></tr>`}).join("")}</tbody></table></div>`}
 
 const CH_LABEL={training_date:"Training date",hours:"Hours",trainer:"Trainer",removed:"Removed",verified:"Verified"};
-function chText(k,v){if(k==="verified")return "Verified";if(k==="removed")return v[1]?"Removed this entry":"Restored this entry";const f=x=>k==="training_date"?fmtShort(x):(x==null||x===""?"(blank)":x);return `${CH_LABEL[k]||k}: ${esc(f(v[0]))} → ${esc(f(v[1]))}`}
+function chText(k,v){if(k==="verified")return "Verified";if(k==="removed")return v[1]?"Removed this entry":"Restored this entry";const f=x=>k==="training_date"?fmtShort(x):(x==null||x===""?"(blank)":x);return `${esc(CH_LABEL[k]||k)}: ${esc(f(v[0]))} → ${esc(f(v[1]))}`}
 function historyHtml(p){const items=[];COMPS.filter(r=>r.user_id===p.id&&r.edits&&r.edits.length).forEach(r=>r.edits.forEach(e=>items.push({r,e})));items.sort((a,b)=>new Date(b.e.at)-new Date(a.e.at));
  if(!items.length)return "";return `<div class="card noprint"><h2 style="margin-top:0">Changes to these records</h2><div class="tscroll"><table><thead><tr><th>When</th><th>Who</th><th>Training</th><th>Change</th></tr></thead><tbody>${items.map(({r,e})=>`<tr><td class="num">${esc(fmtWhen(e.at))}</td><td>${esc(whoName(e.by))}</td><td>${esc(r.course_title)}</td><td>${Object.entries(e.changes||{}).map(([k,v])=>chText(k,v)).join("<br>")}</td></tr>`).join("")}</tbody></table></div></div>`}
 function activityHtml(p){if(p.legacy)return `<div class="card noprint"><b>Not signed in yet.</b> <span class="muted">These are earlier records from the BH tracker and Drive. To connect them to a portal account, open Approved people and enter "${esc(p.full_name)}" as the full name on that person's email. They then show here and on their own portal page.</span></div>`;
@@ -185,21 +185,22 @@ function renderPerson(id){sel=PEOPLE.find(p=>p.id===id);if(!sel)return;const p=s
 
  if(!p.legacy)BHC.log("view_person",p.id)}
 
-function renderCert(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x=>x.id===r.user_id);const tr=r.trainer||(r.answers&&r.answers.trainer)||"";
+function renderCert(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x=>x.id===r.user_id);const cc=CAT.find(x=>x.code===r.course_code);const title=(cc&&cc.title)||r.course_title;
+ const tr=r.trainer||(r.answers&&r.answers.trainer)||(cc&&/^DFPS/.test(cc.group||"")?"Texas Department of Family and Protective Services":cc&&cc.group==="Outside Certificates"?"":"Benevolent House");{let st=document.getElementById("pgsize");if(!st){st=document.createElement("style");st.id="pgsize";document.head.appendChild(st)}st.textContent="@page{size:letter landscape;margin:.4in}"}
  $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">Back to ${esc(p.full_name)}</button><span class="spacer"></span>${can("print_records")?`<button class="btn sm" onclick="window.print()">Print certificate</button>`:""}</div>
  <div id="cert"><div class="c-in"><img src="../bh-logo.png" alt="" class="c-logo"><div class="c-org">Benevolent House</div><div class="c-tag">Building strong foundations for our children</div>
  <div class="c-title">Certificate of Completion</div><p class="c-small">This certifies that</p><div class="c-name">${esc(p.full_name)}</div>
- <p class="c-small">has successfully completed</p><div class="c-course">${esc(r.course_title)}</div>
+ <p class="c-small">has successfully completed</p><div class="c-course">${esc(title)}</div>
  <p class="c-meta">${esc(+r.hours)} training hour${+r.hours===1?"":"s"} · Completed ${esc(fmt(r.completed_at))}${r.score!=null?` · Knowledge Check ${esc(r.score)} of ${esc(r.total||"")}`:""}</p>
- <div class="c-sigs"><div><span>${esc(tr||"Benevolent House")}</span><b></b>Trainer or provider</div><div><span>&nbsp;</span><b></b>Benevolent House</div></div>
+ <div class="c-sigs"><div><span>${esc(tr||"Benevolent House")}</span><b></b>Trainer or provider</div><div><span>&nbsp;</span><b></b>Authorized representative, Benevolent House</div></div>
  <p class="c-foot">${esc(p.home_label||"")}${p.home_label?" · ":""}Record ${esc(String(r.legacy?"BH-"+r.legacyId:r.id).slice(0,10).toUpperCase())} · PO Box 2518, Red Oak, TX 75154 · (214) 774-4871</p></div></div>`;
- $("#back").onclick=()=>renderPerson(p.id)}
+ $("#back").onclick=()=>{const st=document.getElementById("pgsize");if(st)st.remove();renderPerson(p.id)}}
 
 async function openFile(cid){const r=COMPS.find(x=>x.id===cid);if(!r||!r.file_path)return;const w=window.open("","_blank");
  const{data,error}=await BHC.client().storage.from("certificates").createSignedUrl(r.file_path,300);if(error||!data){if(w)w.close();toast("Could not open the file: "+((error&&error.message)||""));return}if(w)w.location=data.signedUrl;else location.href=data.signedUrl;BHC.log("view_file",r.id)}
 function editComp(cid){const r=COMPS.find(x=>x.id===cid);if(!r)return;const p=PEOPLE.find(x=>x.id===r.user_id);const iso=new Date(r.completed_at);const d=iso.getFullYear()+"-"+String(iso.getMonth()+1).padStart(2,"0")+"-"+String(iso.getDate()).padStart(2,"0");
  $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">Back to ${esc(p.full_name)}</button></div><h1>Edit a training record</h1><p class="lead">${esc(p.full_name)} · ${esc(r.course_title)}</p><div class="card">
- <div class="row2"><div><label for="ed">Training date</label><input id="ed" type="date" value="${d}"></div><div><label for="eh">Hours</label><input id="eh" type="number" min="0.25" max="12" step="0.25" value="${esc(+r.hours)}"></div></div>
+ <div class="row2"><div><label for="ed">Training date</label><input id="ed" type="date" value="${d}"></div><div><label for="eh">Hours</label><input id="eh" type="number" min="0.25" max="12" step="0.25" value="${esc(+r.hours||((CAT.find(x=>x.code===r.course_code)||{}).hours)||1)}"></div></div>
  <label for="et">Trainer or provider</label><input id="et" type="text" maxlength="120" value="${esc(r.trainer||(r.answers&&r.answers.trainer)||"")}">
  <label style="display:flex;gap:8px;align-items:center;font-weight:400;margin-top:14px"><input type="checkbox" id="ev" style="width:auto"> Remove this entry (entered by mistake). It stays in the history.</label>
  <p class="small muted">${r.legacy?"This record came from "+(/tracker/i.test(r.record_src||"")?"the BH tracker":"the Drive training record")+". If the paper file shows something different, correct it here. ":"Example: a training taken in person on 11/5 and entered in the portal on 11/9 can be changed to 11/5. "}Your name and the time of the change are saved with the record.</p>
