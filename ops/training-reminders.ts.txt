@@ -225,15 +225,9 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
     if (mode === "sample") {
-      // allowed when the caller's own token can read reminder_settings: a leadership account, or the Supabase dashboard
-      let ok = false;
-      if (tok) {
-        try {
-          const asCaller = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY") || req.headers.get("apikey") || "", { global: { headers: { Authorization: "Bearer " + tok } }, auth: { persistSession: false } });
-          const { data } = await asCaller.from("reminder_settings").select("id").eq("id", 1).maybeSingle();
-          ok = !!data;
-        } catch (_) { ok = false; }
-      }
+      // allowed when leadership asked for a sample in the last 15 minutes (reminder_settings.sample_requested_at, leadership only)
+      let ok = !!set?.sample_requested_at && Date.now() - new Date(set.sample_requested_at).getTime() < 15 * 60e3;
+      if (ok) await sb.from("reminder_settings").update({ sample_requested_at: null }).eq("id", 1);
       if (!ok) return json({ error: "leadership only" }, 403);
     } else if (mode === "send") {
       const { data: recent } = await sb.from("reminder_log").select("id").eq("kind", "run").gte("at", new Date(Date.now() - 20 * 60e3).toISOString()).limit(1);
