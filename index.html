@@ -16,17 +16,17 @@ button{font-family:inherit;font-size:1rem;cursor:pointer}
 .btn.brown{background:var(--brown)}.btn.brown:hover{background:var(--brown-dk)}
 .btn.ghost{background:#fff;color:var(--brown);border:2px solid var(--brown)}
 .btn.ghost:hover{background:var(--sand)}
-.btn.sm{padding:.5rem .85rem;font-size:.9rem;border-radius:8px}
+.btn.sm{padding:.5rem .85rem;font-size:.9rem;border-radius:8px;min-height:44px}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 header.top{background:#fff;border-bottom:4px solid var(--brown);position:sticky;top:0;z-index:20}
 .wrap{max-width:1040px;margin:0 auto;padding:0 16px}
 .topbar{display:flex;align-items:center;gap:14px;padding:10px 0;flex-wrap:wrap}
 .topbar img{height:54px;width:auto}
-@media(max-width:640px){.topbar img{height:40px}.topbar{padding:6px 0;gap:8px}.brand{font-size:1rem}.brand small{display:none}.user-chip{font-size:.78rem;padding:.25rem .6rem;max-width:55vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pmeta span:first-child{display:none}}
 .brand{font-weight:700;color:var(--brown);font-size:1.15rem;line-height:1.1}
 .brand small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:3px}
 .topbar .spacer{flex:1}
 .user-chip{background:var(--sand);border-radius:999px;padding:.35rem .85rem;font-size:.9rem;color:var(--brown-dk)}
+@media(max-width:640px){.topbar img{height:40px}.topbar{padding:6px 16px;gap:8px}.brand{font-size:1rem}.brand small{display:none}.user-chip{font-size:.78rem;padding:.25rem .6rem;max-width:55vw;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.pmeta span:first-child{display:none}}
 main{padding:28px 0 60px}
 h1{font-size:1.9rem;color:var(--brown);margin:.2rem 0 .5rem;line-height:1.2}
 h2{font-size:1.4rem;color:var(--brown);margin:1.6rem 0 .6rem}
@@ -50,6 +50,17 @@ p.lead{font-size:1.1rem;color:var(--muted);margin-top:0}
 .hrs{display:inline-block;background:var(--brown);color:#fff;border-radius:999px;padding:.15rem .6rem;font-size:.78rem;font-weight:700;margin-right:6px}
 .next{background:#fff;border:2px solid var(--brown);border-radius:14px;padding:16px 18px;margin:16px 0}
 .next h2{margin:0 0 4px}.next ol{margin:8px 0 0;padding-left:1.3rem}.next li{margin:8px 0}.next li .why{font-size:.85rem;color:var(--muted)}
+.pill.due{background:#FCE8E3;color:#9A2F1F}
+.tcard .tbody a{display:inline-block;padding:8px 0}
+.hero{position:relative;border-radius:16px;overflow:hidden;min-height:180px;display:flex;align-items:flex-end;margin:0 0 14px;background:linear-gradient(rgba(43,35,32,.15),rgba(43,35,32,.65)),url(covers/ori.jpg) center/cover}
+.hero div{padding:18px 22px;color:#fff}.hero h1{color:#fff;margin:0 0 4px}.hero p{margin:0;color:#F6EEE6;font-size:1.05rem}
+.next li{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--line);margin:0}
+.next li:first-child{border-top:0}.next ol{list-style:none;padding:0}.next h3{margin:14px 0 2px;font-size:.95rem;color:var(--green-dk)}
+.next .more{display:none}.next.open .more{display:flex}
+details.grp>summary{list-style:none;cursor:pointer}details.grp>summary::-webkit-details-marker{display:none}
+details.grp>summary h2::after{content:" ▾";font-size:.9rem;color:var(--muted)}details.grp:not([open])>summary h2::after{content:" ▸"}
+.section-title{margin:2rem 0 10px}.section-title h2{margin:0}
+@media(max-width:640px){.tcard{display:grid;grid-template-columns:104px 1fr}.tcard img.cover{aspect-ratio:auto;height:100%;min-height:130px}.tcard .tbody p.small:not(.lnk){display:none}.tcard .tbody{padding:12px}.tcard .foot{flex-wrap:wrap}.hero{min-height:150px}.hero h1{font-size:1.45rem}.next li .btn{white-space:nowrap}}
 .pvbar{background:#1b2a4a;color:#fff;padding:10px 16px;text-align:center;font-weight:700}
 .section-title p{margin:0;color:var(--muted);font-size:.9rem}
 .section-title{display:flex;align-items:baseline;gap:12px;margin-top:2rem;flex-wrap:wrap}
@@ -452,23 +463,27 @@ function renderHome(){
  $("#userChip").textContent=userLabel();
  const LIST=CATALOG.filter(c=>window.BH_FOR(c,S.user&&S.user.cloud?S.user.role:"")||(S.user&&S.done[c.code]));const groups=(window.BH_GROUPS||[]).map(g=>g[0]).filter(g=>LIST.some(c=>c.group===g)).concat([...new Set(LIST.map(c=>c.group))].filter(g=>!(window.BH_GROUPS||[]).some(x=>x[0]===g)));const gNote=g=>((window.BH_GROUPS||[]).find(x=>x[0]===g)||[])[1]||"";
  const forWho=S.user&&S.user.cloud?(BH_GROUP(S.user.role)==="staff"?"your staff trainings":BH_GROUP(S.user.role)==="provider"?"your trainings":"your caregiver trainings"):"every Benevolent House training";
- let h=`<h1>Benevolent House Training Portal</h1><p class="lead">${forWho.charAt(0).toUpperCase()+forWho.slice(1)} in one place (${LIST.length}). Complete a training here, or record one you completed somewhere else, and your training log stays current automatically.</p>`;
+ let h=`<div class="hero"><div><h1>Benevolent House Training Portal</h1><p>Your trainings, what is due, and your record, all in one place.</p></div></div>`;
  if((!S.user||!S.user.cloud)&&window.BHC&&BHC.available()){h+=`<div class="card" id="bhsHost"></div>`}
  else if(!S.user){h+=`<div class="card"><h3 style="margin-top:0">Start by telling us who you are</h3><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div>
  <div class="row"><div><label>Foster home or staff role</label><input type="text" id="uHome" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label>I am a</label><select id="uRole"><option>Foster Caregiver</option><option>Kinship Caregiver</option><option>Adoptive Parent</option><option>Foster and Adoptive Caregiver</option><option>Staff</option><option>Contracted Provider</option></select></div></div>
  <p><button class="btn" onclick="signIn()">Continue</button></p><p class="small">Your name and completion records are kept by Benevolent House for licensing and T3C credentialing. No child information is ever entered here.</p></div>`;}
- else if(!window.__pv){h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><b>${esc(S.user.name)}</b><br><span class="small">${esc(S.user.role)} · ${esc(S.user.home||"")} · ${esc(S.user.email)}</span></div><button class="btn ghost sm" onclick="signOut()">Not you? Switch</button></div>`;}
+ else if(!window.__pv){h+=`<p class="small" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin:0 0 4px"><span>Signed in as <b>${esc(S.user.name)}</b> · ${esc(S.user.email)}</span><button class="btn ghost sm" onclick="signOut()">Not you? Sign out</button></p>`;}
  if(S.user&&S.user.cloud){const now=new Date();const items=[];LIST.forEach(c=>{const d=S.done[c.code];if(d){const due=nextDue(c,d);if(due&&due-now<BH_WINDOW(c)*864e5)items.push({c,due,k:due<now?0:1})}else if(c.req)items.push({c,due:null,k:2})});
   items.sort((a,b)=>a.k-b.k||(a.due&&b.due?a.due-b.due:0)||groups.indexOf(a.c.group)-groups.indexOf(b.c.group));
-  h+=`<div class="next"><h2>Your next steps</h2>${items.length?`<p class="small" style="margin:0">What is due first is at the top.</p><ol>${items.slice(0,8).map(({c,due,k})=>`<li><b>${esc(c.title)}</b> <span class="hrs">${c.hours} hr</span><br><span class="why">${k===0?`Past due since ${esc(fmtDate(due))}`:k===1?`Due by ${esc(fmtDate(due))}`:"Required, not completed yet"}</span> ${c.status==="live"?`<button class="btn sm" onclick="startModule('${c.module}')">Start</button>`:`<button class="btn ghost sm" onclick="recordLive('${c.code}')">Record</button>`}${c.status==="soon"?`<br><span class="why">Taken live with Benevolent House for now. Record it here after you attend, or ask your case manager.</span>`:""}</li>`).join("")}</ol>${items.length>8?`<p class="small">and ${items.length-8} more below.</p>`:""}`:`<p style="margin:0"><b>You are all caught up.</b> Nothing is due in the next 90 days.</p>`}</div>`}
- groups.forEach(g=>{h+=`<div class="section-title"><h2>${g}</h2><p>${esc(gNote(g))}</p></div><div class="grid">`;
-  LIST.filter(c=>c.group===g).forEach(c=>{const d=S.done[c.code];
-   const due=nextDue(c,d);const overdue=due&&due<new Date();const soon=due&&!overdue&&(due-new Date())<BH_WINDOW(c)*864e5;let pill=d?(overdue?`<span class="pill soon">Due now (was due ${esc(fmtDate(due))})</span>`:`<span class="pill done">Completed ${esc(d.date)}${due?` · due again ${esc(fmtDate(due))}`:""}</span>`+(soon?` <span class="pill soon">Coming due</span>`:"")):c.status==="live"?`<span class="pill live">Available now</span>`:c.status==="record"?`<span class="pill ext">Record a completion</span>`:`<span class="pill soon">Live for now · online coming</span>`;
-   let btn=c.status==="live"?`<button class="btn sm" onclick="startModule('${c.module}')" ${S.user?"":"disabled"}>${d?"Review again":"Start"}</button>`:c.status==="record"?`<button class="btn ghost sm" onclick="recordLive('${c.code}')" ${S.user?"":"disabled"}>Record</button>`:`<button class="btn ghost sm" onclick="recordLive('${c.code}')" ${S.user?"":"disabled"}>Record</button>`;
-   h+=`<div class="tcard"><img class="cover" src="${esc(BH_COVER(c))}" alt="" loading="lazy" onerror="this.remove()"><div class="tbody"><div class="code">${c.code}${c.req?' · <span class="pill req">Required</span>':''}</div><h3>${esc(c.title)}</h3><div class="meta"><span class="hrs">${c.hours} training hour${c.hours==1?"":"s"}</span>${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p>${c.link?`<p class="small" style="margin:2px 0"><a href="${esc(c.link)}" target="_blank" rel="noopener">Go to the training</a>${c.linkNote?" · "+esc(c.linkNote):""}</p>`:""}<div class="foot">${pill}${btn}</div></div></div>`});
-  h+=`</div>`});
+  const row=({c,due,k},n)=>`<li class="${n>=3?"more":""}"><span><b>${esc(c.title)}</b> <span class="hrs">${c.hours} hr</span><br><span class="why">${k===0?`Past due since ${esc(fmtDate(due))}`:k===1?`Due by ${esc(fmtDate(due))}`:c.status==="soon"?"Offered in person by Benevolent House":""}</span></span>${c.status==="live"?`<button class="btn sm" onclick="startModule('${c.module}')">Start</button>`:`<button class="btn ghost sm" onclick="recordLive('${c.code}')">Add my date</button>`}</li>`;
+  const dueI=items.filter(x=>x.k<2),reqI=items.filter(x=>x.k===2);let n=0;
+  h+=`<div class="next" id="nextBox"><h2>Your next steps</h2>${items.length?`${dueI.length?`<h3>Due now or soon</h3><ol>${dueI.map(x=>row(x,n++)).join("")}</ol>`:""}${reqI.length?`<h3>Required, not completed yet</h3><ol>${reqI.map(x=>row(x,n++)).join("")}</ol>`:""}${items.length>3?`<p style="margin:8px 0 0"><button class="btn ghost sm" id="moreBtn" onclick="const b=document.getElementById('nextBox');b.classList.toggle('open');this.textContent=b.classList.contains('open')?'Show fewer':'Show ${items.length-3} more'">Show ${items.length-3} more</button></p>`:""}`:`<p style="margin:0"><b>You are all caught up.</b> Nothing is due in the next 90 days.</p>`}</div>`}
+ const needs=c=>{const d=S.done[c.code];if(!d)return !!c.req;const due=nextDue(c,d);return !!(due&&due-new Date()<BH_WINDOW(c)*864e5)};let opened=false;
+ groups.forEach((g,gi)=>{const gl=LIST.filter(c=>c.group===g);const open=!S.user||!S.user.cloud||gl.some(needs)||(!opened&&gi===groups.length-1);if(open)opened=true;
+  h+=`<details class="grp" ${open?"open":""}><summary class="section-title"><h2>${g}</h2><p>${esc(gNote(g))} (${gl.length})</p></summary><div class="grid">`;
+  gl.forEach(c=>{const d=S.done[c.code];
+   const due=nextDue(c,d);const overdue=due&&due<new Date();const soon=due&&!overdue&&(due-new Date())<BH_WINDOW(c)*864e5;let pill=d?(overdue?`<span class="pill due">Due now (was due ${esc(fmtDate(due))})</span>`:`<span class="pill done">Completed ${esc(d.date)}${due?` · due again ${esc(fmtDate(due))}`:""}</span>`+(soon?` <span class="pill soon">Coming due</span>`:"")):c.status==="live"?`<span class="pill live">Available now</span>`:c.status==="record"?``:`<span class="pill soon">Offered in person</span>`;
+   let btn=c.status==="live"?`<button class="btn sm" onclick="startModule('${c.module}')" ${S.user?"":"disabled"}>${d?"Review again":"Start"}</button>`:`<button class="btn ghost sm" onclick="recordLive('${c.code}')" ${S.user?"":"disabled"}>Add my date</button>`;
+   h+=`<div class="tcard" data-code="${esc(c.code)}"><img class="cover" src="${esc(BH_COVER(c))}" alt="" loading="lazy" onerror="this.remove()"><div class="tbody">${c.req?'<div class="code"><span class="pill req">Required</span></div>':''}<h3>${esc(c.title)}</h3><div class="meta"><span class="hrs">${c.hours} training hour${c.hours==1?"":"s"}</span>${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p>${c.link?`<p class="small lnk" style="margin:2px 0"><a href="${esc(c.link)}" target="_blank" rel="noopener">Go to the training</a>${c.linkNote?" · "+esc(c.linkNote):""}</p>`:""}<div class="foot">${pill}${btn}</div></div></div>`});
+  h+=`</div></details>`});
  h+=`<div class="card" style="margin-top:24px"><h3 style="margin-top:0">Questions?</h3><p>Call or text your case manager, or the Benevolent House on-call line, any hour. If a page will not load, try another browser or ask your case manager to help you complete the training one-on-one.</p></div>`;
- if(window.__pv)h=`<div class="pvbar">Viewing as ${esc(S.user.name)} (${esc(S.user.role||"Caregiver")}). This is their view. Nothing here can be changed.</div>`+h.replace(/<h1>[^<]*<\/h1>/,"<h1>Benevolent House Training Portal</h1>");
+ if(window.__pv)h=`<div class="pvbar">Viewing as ${esc(S.user.name)} (${esc(S.user.role||"Caregiver")}). This is their view. Nothing here can be changed.</div>`+h;
  $("#view-home").innerHTML=h;show("home");if(window.__pv){$$("#view-home button").forEach(b=>{b.disabled=true;b.onclick=null;b.removeAttribute("onclick")});$("#homeBtn").disabled=true;return}if($("#bhsHost"))BHSignIn($("#bhsHost"),adoptUser,{profile:window.__bhNeedProfile||null,prefill:S.user&&!S.user.cloud?S.user:null,message:S.user&&!S.user.cloud?"Your trainings are saved on this device. Sign in once with your email so they are kept for good, on any phone or computer.":""})}
 function signIn(){const n=$("#uName").value.trim(),e=$("#uEmail").value.trim(),hm=$("#uHome").value.trim(),r=$("#uRole").value;
  if(!n||!e||!hm){toast("Please fill in your name, email, and home or role");return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){toast("Please enter a valid email address");return}

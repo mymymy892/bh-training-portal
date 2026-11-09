@@ -85,7 +85,7 @@ function statusOf(c,comp){
  const due=dueOf(c,comp);if(!due)return{k:"ok",t:"Complete"};
  const days=(due-Date.now())/864e5;if(days<0)return{k:"over",t:"Past due"};if(days<=BH_WINDOW(c))return{k:"due",t:"Due in "+Math.ceil(days)+" days"};return{k:"ok",t:"Current"}}
 function latestBy(userId){const m={};COMPS.filter(r=>r.user_id===userId&&!r.voided).forEach(r=>{if(!m[r.course_code]||new Date(r.completed_at)>new Date(m[r.course_code].completed_at))m[r.course_code]=r});return m}
-function summary(p){const m=latestBy(p.id);let done=0,due=0,over=0,missing=0;CAT.filter(c=>c.req&&window.BH_FOR(c,typeOf(p))).forEach(c=>{const s=statusOf(c,m[c.code]).k;if(s==="ok")done++;else if(s==="due")due++;else if(s==="over")over++;else missing++});return{done,due,over,missing,last:Object.values(m).sort((a,b)=>new Date(b.completed_at)-new Date(a.completed_at))[0]}}
+function summary(p){const m=latestBy(p.id);let done=0,due=0,over=0,missing=0;catFor(p).forEach(c=>{const r=m[c.code];if(!r&&!(c.req&&window.BH_FOR(c,typeOf(p))))return;const s=statusOf(c,r).k;if(s==="ok")done++;else if(s==="due")due++;else if(s==="over")over++;else if(s==="none")missing++});return{done,due,over,missing,last:Object.values(m).sort((a,b)=>new Date(b.completed_at)-new Date(a.completed_at))[0]}}
 
 async function all(q){let out=[],i=0;for(;;){const{data,error}=await q().range(i,i+999);if(error)throw error;out=out.concat(data||[]);if(!data||data.length<1000)return out;i+=1000}}
 async function load(){const c=BHC.client();const since=new Date(Date.now()-120*864e5).toISOString();
