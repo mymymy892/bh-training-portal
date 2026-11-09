@@ -42,13 +42,22 @@ window.BHC=(function(){
  function cqSet(a){try{a.length?localStorage.setItem(CQ,JSON.stringify(a)):localStorage.removeItem(CQ)}catch(e){}}
  async function retryCompletions(){const s=await session();if(!s)return;const q=cq();if(!q.length)return;const left=[];for(const it of q){if(it.uid!==s.user.id){left.push(it);continue}const{error}=await client().from("completions").insert(it.row);if(error)left.push(it)}cqSet(left)}
  async function addCompletion(r){const s=await session();if(!s)return false;
-  const row={user_id:s.user.id,course_code:r.code,course_title:r.title,hours:parseFloat(r.hours)||0,completed_at:r.completed_at||new Date().toISOString(),score:r.score==null||r.score===""?null:+r.score,total:r.total||null,attempt:r.attempt||null,answers:r.answers||null,acknowledgment:r.ack||null,source:r.source||"portal"};
+  const row={user_id:s.user.id,course_code:r.code,course_title:r.title,hours:parseFloat(r.hours)||0,completed_at:r.completed_at||new Date().toISOString(),score:r.score==null||r.score===""?null:+r.score,total:r.total||null,attempt:r.attempt||null,answers:r.answers||null,acknowledgment:r.ack||null,source:r.source||"portal",trainer:r.trainer?String(r.trainer).slice(0,120):null,file_path:r.file_path||null};
   let ok=false;try{const{error}=await client().from("completions").insert(row);ok=!error}catch(e){}
   if(!ok){const q=cq();q.push({uid:s.user.id,row});cqSet(q)}return ok}
  async function myCompletions(){const s=await session();if(!s)return[];
-  const{data}=await client().from("completions").select("course_code,course_title,hours,completed_at,score,total,source,verified_by").eq("user_id",s.user.id).order("completed_at",{ascending:false});return data||[]}
+  const{data}=await client().from("completions").select("course_code,course_title,hours,completed_at,score,total,source,verified_by,trainer,file_path").eq("user_id",s.user.id).eq("voided",false).order("completed_at",{ascending:false});return data||[]}
+ async function myLegacy(){const s=await session();if(!s)return[];try{const{data,error}=await client().rpc("my_legacy_training");return error?[]:(data||[])}catch(e){return[]}}
+ /* one activity entry per page per day, so staff can see who has been in and how often */
+ async function visit(){const s=await session();if(!s)return;const k="bh_course_visits";let m={};try{m=JSON.parse(localStorage.getItem(k)||"{}")}catch(e){}
+  const day=new Date().toDateString(),key=s.user.id+"|"+location.pathname;if(m[key]===day)return;m[key]=day;try{localStorage.setItem(k,JSON.stringify(m))}catch(e){}log("visit",location.pathname)}
+ /* certificate upload into the person's own private folder; returns the stored path */
+ async function uploadCert(file,code,forUser){const s=await session();if(!s||!file)return null;const nm=(file.name||"").toLowerCase();const TYPES={pdf:"application/pdf",jpg:"image/jpeg",jpeg:"image/jpeg",png:"image/png",heic:"image/heic",heif:"image/heic",webp:"image/webp"};
+  let ext=nm.includes(".")?nm.split(".").pop().replace(/[^a-z0-9]/g,""):"";if(!TYPES[ext])ext=({"application/pdf":"pdf","image/jpeg":"jpg","image/png":"png","image/heic":"heic","image/heif":"heic","image/webp":"webp"})[file.type]||"";if(!ext)throw new Error("Please upload a PDF or a photo (JPG, PNG or HEIC).");
+  const path=(forUser||s.user.id)+"/"+String(code).replace(/[^A-Za-z0-9-]/g,"")+"-"+Date.now()+"."+ext;
+  const{error}=await client().storage.from("certificates").upload(path,file,{upsert:false,contentType:TYPES[ext]});if(error)throw error;return path}
  async function log(action,target){const s=await session();if(!s)return;try{await client().from("access_log").insert({actor:s.user.id,action,target:target||null})}catch(e){}}
- return{available,client,session,profile,asUser,sendCode,verify,saveProfile,signOut,clearLocal,getProgress,putProgress,flush,flushAll,addCompletion,retryCompletions,myCompletions,log}
+ return{available,client,session,profile,asUser,sendCode,verify,saveProfile,signOut,clearLocal,getProgress,putProgress,flush,flushAll,addCompletion,retryCompletions,myCompletions,myLegacy,visit,uploadCert,log}
 })();
 
 /* Shared sign-in panel used by the portal home and the courses.

@@ -427,7 +427,7 @@ function loadStore(){try{return JSON.parse(localStorage.getItem(STORE_KEY))||{}}
 function saveStore(d){try{localStorage.setItem(STORE_KEY,JSON.stringify(d))}catch(e){}}
 let S=loadStore(); S.done=S.done||{}; S.progress=S.progress||{};
 function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
-function esc(s){return String(s||"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function esc(s){return String(s||"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]))}
 function show(id){$$("main>section").forEach(s=>s.classList.add("hidden"));$("#view-"+id).classList.remove("hidden");window.scrollTo(0,0);stopRead()}
 function fmtDate(d){return d.toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"})}
 function fmtTime(d){return d.toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"})}
@@ -443,18 +443,19 @@ function toggleRead(btn,el){if(reading){stopRead();return}if(!window.speechSynth
 function renderHome(){
  if(S.user&&S.user.cloud&&!window.__bhChecked){$("#userChip").textContent="";$("#view-home").innerHTML=`<div class="card"><p>Loading your trainings…</p></div>`;show("home");return}
  $("#userChip").textContent=userLabel();
- const groups=[...new Set(CATALOG.map(c=>c.group))];
- let h=`<h1>Benevolent House Training Portal</h1><p class="lead">Every Benevolent House training in one place (30 trainings). Complete a training here, or record one you completed live, and your training log stays current automatically.</p>`;
+ const LIST=CATALOG.filter(c=>window.BH_FOR(c,S.user&&S.user.cloud?S.user.role:""));const groups=[...new Set(LIST.map(c=>c.group))];
+ const forWho=S.user&&S.user.cloud?(BH_GROUP(S.user.role)==="staff"?"your staff trainings":BH_GROUP(S.user.role)==="provider"?"your trainings":"your caregiver trainings"):"every Benevolent House training";
+ let h=`<h1>Benevolent House Training Portal</h1><p class="lead">${forWho.charAt(0).toUpperCase()+forWho.slice(1)} in one place (${LIST.length}). Complete a training here, or record one you completed somewhere else, and your training log stays current automatically.</p>`;
  if((!S.user||!S.user.cloud)&&window.BHC&&BHC.available()){h+=`<div class="card" id="bhsHost"></div>`}
  else if(!S.user){h+=`<div class="card"><h3 style="margin-top:0">Start by telling us who you are</h3><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div>
  <div class="row"><div><label>Foster home or staff role</label><input type="text" id="uHome" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label>I am a</label><select id="uRole"><option>Foster Caregiver</option><option>Kinship Caregiver</option><option>Adoptive Parent</option><option>Foster and Adoptive Caregiver</option><option>Staff</option><option>Contracted Provider</option></select></div></div>
  <p><button class="btn" onclick="signIn()">Continue</button></p><p class="small">Your name and completion records are kept by Benevolent House for licensing and T3C credentialing. No child information is ever entered here.</p></div>`;}
  else{h+=`<div class="card" style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px"><div><b>${esc(S.user.name)}</b><br><span class="small">${esc(S.user.role)} · ${esc(S.user.home||"")} · ${esc(S.user.email)}</span></div><button class="btn ghost sm" onclick="signOut()">Not you? Switch</button></div>`;}
  groups.forEach(g=>{h+=`<div class="section-title"><h2>${g}</h2></div><div class="grid">`;
-  CATALOG.filter(c=>c.group===g).forEach(c=>{const d=S.done[c.code];
+  LIST.filter(c=>c.group===g).forEach(c=>{const d=S.done[c.code];
    const due=nextDue(c,d);const overdue=due&&due<new Date();const soon=due&&!overdue&&(due-new Date())<90*864e5;let pill=d?(overdue?`<span class="pill soon">Due now (was due ${esc(fmtDate(due))})</span>`:`<span class="pill done">Completed ${esc(d.date)}${due?` · due again ${esc(fmtDate(due))}`:""}</span>`+(soon?` <span class="pill soon">Coming due</span>`:"")):c.status==="live"?`<span class="pill live">Available now</span>`:c.status==="record"?`<span class="pill ext">Record a completion</span>`:`<span class="pill soon">Online version coming</span>`;
    let btn=c.status==="live"?`<button class="btn sm" onclick="startModule('${c.module}')" ${S.user?"":"disabled"}>${d?"Review again":"Start"}</button>`:c.status==="record"?`<button class="btn ghost sm" onclick="recordLive('${c.code}')" ${S.user?"":"disabled"}>Record</button>`:`<button class="btn ghost sm" disabled>Soon</button>`;
-   h+=`<div class="tcard"><div class="code">${c.code}${c.req?' · <span class="pill req">Required</span>':''}</div><h3>${esc(c.title)}</h3><div class="meta">${c.hours} hr · ${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p><div class="foot">${pill}${btn}</div></div>`});
+   h+=`<div class="tcard"><div class="code">${c.code}${c.req?' · <span class="pill req">Required</span>':''}</div><h3>${esc(c.title)}</h3><div class="meta">${c.hours} hr · ${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p>${c.link?`<p class="small" style="margin:2px 0"><a href="${esc(c.link)}" target="_blank" rel="noopener">Go to the training</a>${c.linkNote?" · "+esc(c.linkNote):""}</p>`:""}<div class="foot">${pill}${btn}</div></div>`});
   h+=`</div>`});
  h+=`<div class="card" style="margin-top:24px"><h3 style="margin-top:0">Questions?</h3><p>Call or text your case manager, or the Benevolent House on-call line, any hour. If a page will not load, try another browser or ask your case manager to help you complete the training one-on-one.</p></div>`;
  $("#view-home").innerHTML=h;show("home");if($("#bhsHost"))BHSignIn($("#bhsHost"),adoptUser,{profile:window.__bhNeedProfile||null,prefill:S.user&&!S.user.cloud?S.user:null,message:S.user&&!S.user.cloud?"Your trainings are saved on this device. Sign in once with your email so they are kept for good, on any phone or computer.":""})}
@@ -464,24 +465,33 @@ function signIn(){const n=$("#uName").value.trim(),e=$("#uEmail").value.trim(),h
 async function signOut(){if(S.user&&S.user.cloud&&window.BHC){await BHC.signOut();S={done:{},progress:{}};renderHome();return}S.user=null;saveStore(S);renderHome()}
 function fmtUS(iso){const d=new Date(iso);return (d.getMonth()+1+"").padStart(2,"0")+"/"+(d.getDate()+"").padStart(2,"0")+"/"+d.getFullYear()}
 async function adoptUser(u){if(!u)return;const same=S.user&&S.user.email&&S.user.email.toLowerCase()===u.email.toLowerCase();if(!same){S={done:{},progress:{}}}S.user=u;
- try{const rows=await BHC.myCompletions();const cloudDone={};rows.forEach(r=>{if(!cloudDone[r.course_code])cloudDone[r.course_code]={date:fmtUS(r.completed_at),iso:r.completed_at,hours:r.hours,source:r.source,verified:!!r.verified_by}});S.done=Object.assign({},same?S.done:{},cloudDone)}catch(e){}
+ try{const[rows,old]=await Promise.all([BHC.myCompletions(),BHC.myLegacy()]);const cloudDone={};const add=(code,iso,o)=>{const cur=cloudDone[code];if(!cur||new Date(iso)>new Date(cur.iso))cloudDone[code]=Object.assign({date:fmtUS(iso),iso},o)};
+  rows.forEach(r=>add(r.course_code,r.completed_at,{hours:r.hours,source:r.source,verified:!!r.verified_by}));old.forEach(r=>add(r.course_code,r.completed_on+"T12:00:00",{hours:r.hours,source:"record",verified:true}));
+  /* the cloud is the record: anything staff removed disappears; completions still waiting to upload are kept */
+  let q=[];try{q=JSON.parse(localStorage.getItem("bh_course_completion_queue")||"[]")}catch(x){}q.filter(it=>it.uid===u.id&&it.row).forEach(it=>add(it.row.course_code,it.row.completed_at,{hours:it.row.hours,source:it.row.source,verified:false}));
+  S.done=cloudDone}catch(e){if(!same)S.done={}}try{BHC.visit()}catch(e){}
  window.__bhNeedProfile=null;saveStore(S);try{BHC.retryCompletions()}catch(e){}renderHome()}
 async function cloudBoot(){if(!window.BHC||!BHC.available()){window.__bhChecked=true;if(S.user&&S.user.cloud){S={done:{},progress:{}};renderHome()}return}let p;try{p=await BHC.profile()}catch(e){window.__bhChecked=true;renderHome();return}window.__bhChecked=true;if(!p){if(S.user&&S.user.cloud){S={done:{},progress:{}};saveStore(S)}renderHome();return}if(!p.full_name||!p.home_label){window.__bhNeedProfile=p;if(S.user&&S.user.cloud)S.user=null;renderHome();return}await adoptUser(BHC.asUser(p))}
-function nextDue(c,d){if(!d)return null;const f=(c.freq||"").toLowerCase();if(!/annual|every 12 months/.test(f)||/refresher/.test(f))return null;const t=d.iso?new Date(d.iso):(()=>{const m=(d.date||"").match(/(\d+)\/(\d+)\/(\d{4})/);return m?new Date(+m[3],+m[1]-1,+m[2]):null})();if(!t||isNaN(t))return null;const n=new Date(t);n.setFullYear(n.getFullYear()+1);return n}
+function nextDue(c,d){if(!d)return null;const t=d.iso?new Date(d.iso):(()=>{const m=(d.date||"").match(/(\d+)\/(\d+)\/(\d{4})/);return m?new Date(+m[3],+m[1]-1,+m[2]):null})();if(!t||isNaN(t))return null;return window.BH_DUE(c,t.toISOString())}
 
 /* ---------- record a live / outside completion ---------- */
 function recordLive(code){const c=CATALOG.find(x=>x.code===code);
- $("#view-start").innerHTML=`<h1>Record a completion</h1><div class="card"><h3 style="margin-top:0">${esc(c.title)}</h3><p class="small">Use this when you completed the training live with a Benevolent House trainer or with an outside provider. Benevolent House checks the record against the sign-in sheet or certificate.</p>
+ $("#view-start").innerHTML=`<h1>Record a completion</h1><div class="card"><h3 style="margin-top:0">${esc(c.title)}</h3><p class="small">Use this when you completed the training with a Benevolent House trainer, on the DFPS site, or with an outside provider. Benevolent House checks the record against the sign-in sheet or certificate.</p>
  <div class="row"><div><label>Date completed</label><input type="date" id="rDate" max="2099-12-31"></div><div><label>Hours</label><input type="text" id="rHours" value="${c.hours}"></div></div>
  <label>Trainer or provider</label><input type="text" id="rTrainer" placeholder="e.g., Haddie Mashburn, or American Red Cross">
+ ${c.link?`<p class="small"><a href="${esc(c.link)}" target="_blank" rel="noopener">Go to the training</a>${c.linkNote?" · "+esc(c.linkNote):""}</p>`:""}
  <label>Certificate or expiration note (optional)</label><input type="text" id="rNote" placeholder="e.g., CPR card expires 05/2028">
+ ${S.user&&S.user.cloud?`<label for="rFile">Upload your certificate (optional, PDF or photo)</label><input type="file" id="rFile" accept="application/pdf,image/*"><p class="small">A photo of the certificate works. Benevolent House keeps it with your training record.</p>`:""}
  <p><button class="btn" onclick="submitLive('${code}')">Submit record</button> <button class="btn ghost" onclick="renderHome()">Cancel</button></p></div>`;show("start")}
-async function submitLive(code){const c=CATALOG.find(x=>x.code===code);const d=$("#rDate").value.trim(),h=$("#rHours").value.trim(),t=$("#rTrainer").value.trim();
- if(!d||!t){toast("Date and trainer are required");return}if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||new Date(d)>new Date()){toast("Please enter a valid date that is not in the future");return}if(!(parseFloat(h)>0)){toast("Please enter the hours as a number");return}
+let submittingLive=false;
+async function submitLive(code){if(submittingLive)return;const sbtn=document.querySelector('#view-start .btn');submittingLive=true;if(sbtn)sbtn.disabled=true;try{await submitLiveInner(code)}finally{submittingLive=false;if(sbtn)sbtn.disabled=false}}
+async function submitLiveInner(code){const c=CATALOG.find(x=>x.code===code);const d=$("#rDate").value.trim(),h=$("#rHours").value.trim(),t=$("#rTrainer").value.trim();
+ if(!d||!t){toast("Date and trainer are required");return}if(!/^\d{4}-\d{2}-\d{2}$/.test(d)||new Date(d)>new Date()){toast("Please enter a valid date that is not in the future");return}if(!(parseFloat(h)>0)){toast("Please enter the hours as a number");return}const f0=$("#rFile")&&$("#rFile").files[0];if(f0&&f0.size>10*1024*1024){toast("That file is over 10 MB. Please take a smaller photo.");return}
  const now=new Date();const dd=d.split("-");const dUS=dd[1]+"/"+dd[2]+"/"+dd[0];
  await logToForms({title:c.title,code:c.code,score:"",pass:"Pass",date:dUS,time:fmtTime(now),hours:h,answers:"Recorded by participant: live/outside completion. "+($("#rNote").value.trim()),ack:"",sig:"",trainer:t});
- try{if(S.user&&S.user.cloud)await BHC.addCompletion({code:c.code,title:c.title,hours:h,completed_at:new Date(d+"T12:00:00").toISOString(),answers:{trainer:t,note:$("#rNote").value.trim()},source:"live"})}catch(e){}
- S.done[c.code]={date:dUS,hours:h,trainer:t,iso:new Date(d+"T12:00:00").toISOString()};saveStore(S);toast("Recorded. Thank you.");renderHome()}
+ let upFail=false;if(S.user&&S.user.cloud){const f=f0;let fp=null;if(f){try{fp=await BHC.uploadCert(f,c.code)}catch(e){upFail=true}}
+  try{await BHC.addCompletion({code:c.code,title:c.title,hours:h,completed_at:new Date(d+"T12:00:00").toISOString(),answers:{trainer:t,note:$("#rNote").value.trim()},trainer:t,file_path:fp,source:fp?"upload":"live"})}catch(e){}}
+ S.done[c.code]={date:dUS,hours:h,trainer:t,iso:new Date(d+"T12:00:00").toISOString()};saveStore(S);toast(upFail?"Recorded. The certificate did not upload; please give it to your case manager.":"Recorded. Thank you.");renderHome()}
 
 /* ---------- module ---------- */
 let M=null, idx=0, timer=null, remain=0;
@@ -560,7 +570,7 @@ function renderCert(name,now,sig,ok){
  <h1>Certificate of Completion</h1><p>This certifies that</p><div class="name">${esc(name)}</div><p>${esc(S.user.role)}${S.user.home?" · "+esc(S.user.home):""}</p>
  <p>has completed</p><p style="font-size:1.25rem;font-weight:700;color:var(--brown)">${esc(M.title)}</p><p>Training code ${esc(M.code)} · ${M.hours} training hour${M.hours==1?"":"s"} · Knowledge Check ${M.result.score} of ${M.quiz.length}<br>${fmtDate(now)}</p>
  <div class="sigs"><div><img src="${sig}" alt=""><b>${esc(name)}</b><br>Participant</div><div style="padding-top:56px"><b>${esc(M.trainer)}</b><br>Trainer of Record (electronic record on file)</div></div>
- <p class="small" style="margin-top:26px">Self-paced online module with Knowledge Check and signed Acknowledgment. Record on file with Benevolent House. Portal version ${PORTAL_VERSION}.</p></div>
+ <p class="small" style="margin-top:26px">Knowledge Check and signed Acknowledgment on file with Benevolent House.</p></div>
  <p class="noprint" style="text-align:center"><button class="btn" onclick="window.print()">Print or save as PDF</button> <button class="btn ghost" onclick="renderHome()">Back to all trainings</button></p>`;show("cert")}
 
 /* ---------- init ---------- */
