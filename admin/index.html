@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Benevolent House Training Admin</title>
+<meta name="robots" content="noindex">
+<style>
+:root{--brown:#7B4B2A;--brown-dk:#5E3920;--green:#2E7D4F;--green-dk:#226040;--cream:#FBF7F2;--sand:#F1E8DD;--ink:#2B2320;--muted:#6B5F58;--line:#E3D7C9;--red:#B23A3A;--amber:#9A6A00;--amber-bg:#FFF4D6;--red-bg:#FBE9E7;--green-bg:#E3F3E9}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--cream);color:var(--ink);font-family:Arial,Helvetica,sans-serif;font-size:16px;line-height:1.5}
+a{color:var(--green)}
+button,input,select{font-family:inherit;font-size:1rem}
+.btn{display:inline-flex;align-items:center;gap:.4rem;border:0;border-radius:9px;padding:.65rem 1.05rem;font-weight:700;background:var(--green);color:#fff;cursor:pointer}
+.btn:hover{background:var(--green-dk)}.btn.ghost{background:#fff;color:var(--brown);border:2px solid var(--brown)}.btn.ghost:hover{background:var(--sand)}
+.btn.sm{padding:.4rem .7rem;font-size:.88rem;border-radius:7px}.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn:focus-visible,input:focus-visible,select:focus-visible,tr:focus-visible{outline:3px solid var(--brown);outline-offset:2px}
+header.top{background:#fff;border-bottom:4px solid var(--brown)}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.topbar{display:flex;align-items:center;gap:14px;padding-block:10px;flex-wrap:wrap}
+.topbar img{height:48px}.brand{font-weight:700;color:var(--brown);font-size:1.1rem;line-height:1.1}.brand small{display:block;color:var(--muted);font-weight:400;font-size:.8rem;margin-top:3px}
+.spacer{flex:1}.chip{background:var(--sand);border-radius:999px;padding:.3rem .8rem;font-size:.88rem;color:var(--brown-dk)}
+main{padding-block:24px 60px}
+h1{font-size:1.7rem;color:var(--brown);margin:.2rem 0 .4rem;line-height:1.2}
+h2{font-size:1.25rem;color:var(--brown);margin:1.4rem 0 .5rem}
+.lead{color:var(--muted);margin:0 0 14px}
+.card{background:#fff;border:1px solid var(--line);border-radius:12px;padding:18px 20px;margin:12px 0}
+.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:14px 0}
+@media(max-width:760px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.tile{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
+.tile b{display:block;font-size:1.7rem;color:var(--brown);font-variant-numeric:tabular-nums}.tile span{color:var(--muted);font-size:.88rem}
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin:10px 0}
+.bar input,.bar select{padding:.55rem .7rem;border:1px solid var(--line);border-radius:8px;background:#fff;min-width:0}
+.bar input{flex:1 1 220px}
+.tscroll{overflow-x:auto;background:#fff;border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-size:.93rem}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-size:.75rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted);background:#FCFAF7;position:sticky;top:0}
+tbody tr.click{cursor:pointer}tbody tr.click:hover{background:#FCF8F2}
+td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
+.pill{display:inline-block;border-radius:999px;padding:.15rem .6rem;font-size:.75rem;font-weight:700;white-space:nowrap}
+.ok{background:var(--green-bg);color:var(--green-dk)}.due{background:var(--amber-bg);color:var(--amber)}.over{background:var(--red-bg);color:var(--red)}.none{background:var(--sand);color:var(--brown-dk)}.self{background:#EAF0FB;color:#2B4C8C}
+.muted{color:var(--muted)}.small{font-size:.86rem}
+.row2{display:grid;grid-template-columns:1fr 1fr;gap:12px}@media(max-width:640px){.row2{grid-template-columns:1fr}}
+label{display:block;font-weight:600;margin:10px 0 4px}
+.card input,.card select{width:100%;padding:.6rem .7rem;border:1px solid var(--line);border-radius:8px;background:#fff}
+.toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%);background:var(--ink);color:#fff;padding:.7rem 1.1rem;border-radius:10px;opacity:0;transition:opacity .2s;pointer-events:none;z-index:50}
+.toast.show{opacity:1}
+.hidden{display:none!important}
+.printhead{display:none}
+#cert{border:10px double var(--brown);padding:40px 36px;text-align:center;background:#fff;max-width:900px;margin:0 auto}
+#cert h1{font-size:2.1rem;margin:10px 0}#cert .name{font-size:1.9rem;font-weight:700;margin:12px 0;color:var(--ink)}
+@media print{
+ header.top,.noprint,.bar,.toast{display:none!important}
+ body{background:#fff;font-size:12px}main{padding:0}.wrap{max-width:none;padding:0}
+ .card,.tscroll{border:0;padding:0;margin:0}.printhead{display:block;margin-bottom:10px}
+ th{background:#fff;position:static}table{font-size:11px}thead{display:table-header-group}tr{page-break-inside:avoid}
+ #cert{border:10px double #7B4B2A}
+}
+</style>
+</head>
+<body>
+<header class="top"><div class="wrap topbar"><img src="../bh-logo.png" alt="Benevolent House"><div class="brand">Benevolent House<small>Training Admin</small></div><span class="spacer"></span><span class="chip" id="who">Not signed in</span><a class="btn ghost sm noprint" href="../">Portal home</a></div></header>
+<main class="wrap"><section id="view"></section></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="../catalog.js"></script>
+<script src="../vendor/supabase-2.117.3.js"></script>
+<script src="../bh-cloud.js"></script>
+<script>
+const $=s=>document.querySelector(s);
+const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),2600)}
+const fmt=d=>d?new Date(d).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"}):"";
+const fmtShort=d=>d?new Date(d).toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"}):"";
+const CAT=window.CATALOG||[];
+let ME=null,PEOPLE=[],COMPS=[],filter="",homeFilter="",sel=null;
+
+function annual(c){return /annual|every 12 months/i.test(c.freq||"")&&!/refresher/i.test(c.freq||"")}
+function dueOf(c,comp){if(!comp||!annual(c))return null;const d=new Date(comp.completed_at);d.setFullYear(d.getFullYear()+1);return d}
+function statusOf(c,comp){
+ if(!comp)return c.req?{k:"none",t:"Not yet completed"}:{k:"",t:""};
+ const due=dueOf(c,comp);if(!due)return{k:"ok",t:"Complete"};
+ const days=(due-Date.now())/864e5;if(days<0)return{k:"over",t:"Past due"};if(days<=90)return{k:"due",t:"Due in "+Math.ceil(days)+" days"};return{k:"ok",t:"Current"}}
+function latestBy(userId){const m={};COMPS.filter(r=>r.user_id===userId).forEach(r=>{if(!m[r.course_code]||new Date(r.completed_at)>new Date(m[r.course_code].completed_at))m[r.course_code]=r});return m}
+function summary(p){const m=latestBy(p.id);let done=0,due=0,over=0,missing=0;CAT.filter(c=>c.req).forEach(c=>{const s=statusOf(c,m[c.code]).k;if(s==="ok")done++;else if(s==="due")due++;else if(s==="over")over++;else missing++});return{done,due,over,missing,last:Object.values(m).sort((a,b)=>new Date(b.completed_at)-new Date(a.completed_at))[0]}}
+
+async function load(){const c=BHC.client();
+ const[p,r]=await Promise.all([c.from("profiles").select("id,email,full_name,home_label,caregiver_type,role,created_at").order("full_name"),c.from("completions").select("id,user_id,course_code,course_title,hours,completed_at,score,total,attempt,answers,source,verified_by,acknowledgment").order("completed_at",{ascending:false})]);
+ if(p.error||r.error){throw p.error||r.error}PEOPLE=p.data||[];COMPS=r.data||[]}
+
+function renderList(){
+ const homes=[...new Set(PEOPLE.map(p=>p.home_label).filter(Boolean))].sort();
+ const rows=PEOPLE.filter(p=>(!homeFilter||p.home_label===homeFilter)&&(!filter||(p.full_name+" "+p.email+" "+(p.home_label||"")).toLowerCase().includes(filter)));
+ const S=rows.map(p=>({p,s:summary(p)}));
+ const tot={people:rows.length,over:S.filter(x=>x.s.over).length,due:S.filter(x=>x.s.due).length,missing:S.filter(x=>x.s.missing).length};
+ let h=`<h1>Training records</h1><p class="lead">Every caregiver and staff member who has signed in to the portal, what is complete, and what is coming due. Click a name for that person's training log and certificates.</p>
+ <div class="tiles"><div class="tile"><b>${tot.people}</b><span>people shown</span></div><div class="tile"><b>${tot.over}</b><span>with a past-due training</span></div><div class="tile"><b>${tot.due}</b><span>with one due within 90 days</span></div><div class="tile"><b>${tot.missing}</b><span>missing a required training</span></div></div>
+ <div class="bar"><input id="q" type="search" placeholder="Search by name, email or home" value="${esc(filter)}" aria-label="Search"><select id="hf" aria-label="Filter by home"><option value="">All homes</option>${homes.map(x=>`<option ${x===homeFilter?"selected":""}>${esc(x)}</option>`).join("")}</select>${homeFilter?`<button class="btn ghost sm" id="homeLog">Print this home's logs</button>`:""}</div>`;
+ if(!PEOPLE.length)h+=`<div class="card"><b>No one has signed in yet.</b><p class="muted">When caregivers sign in at the portal, they appear here automatically with their completed trainings.</p></div>`;
+ else h+=`<div class="tscroll"><table><thead><tr><th>Name</th><th>Home</th><th>Type</th><th>Required trainings</th><th>Most recent</th>${ME.role==="leadership"?"<th>Access</th>":""}</tr></thead><tbody>${S.map(({p,s})=>`<tr class="click" tabindex="0" data-id="${esc(p.id)}"><td><b>${esc(p.full_name||"(no name yet)")}</b><br><span class="small muted">${esc(p.email)}</span></td><td>${esc(p.home_label||"")}</td><td>${esc(p.caregiver_type||"")}</td><td>${s.over?`<span class="pill over">${s.over} past due</span> `:""}${s.due?`<span class="pill due">${s.due} due soon</span> `:""}${s.missing?`<span class="pill none">${s.missing} not done</span> `:""}${!s.over&&!s.due&&!s.missing?`<span class="pill ok">All current</span>`:""}</td><td class="num">${s.last?esc(fmtShort(s.last.completed_at))+`<br><span class="small muted">${esc(s.last.course_code)}</span>`:"<span class='muted'>None</span>"}</td>${ME.role==="leadership"?`<td>${esc(p.role)}</td>`:""}</tr>`).join("")}</tbody></table></div>`;
+ $("#view").innerHTML=h;
+ $("#q")&&($("#q").oninput=e=>{filter=e.target.value.toLowerCase();const pos=e.target.selectionStart;renderList();const q=$("#q");q.focus();q.setSelectionRange(pos,pos)});
+ $("#hf")&&($("#hf").onchange=e=>{homeFilter=e.target.value;renderList()});
+ $("#homeLog")&&($("#homeLog").onclick=()=>renderHomeLogs(homeFilter));
+ document.querySelectorAll("tr.click").forEach(tr=>{const go=()=>renderPerson(tr.dataset.id);tr.onclick=go;tr.onkeydown=e=>{if(e.key==="Enter")go()}})}
+
+function logTable(p){const m=latestBy(p.id);
+ return `<div class="tscroll"><table><thead><tr><th>Training</th><th>Hours</th><th>Last completed</th><th>How</th><th>Next due</th><th>Status</th><th class="noprint"></th></tr></thead><tbody>${CAT.map(c=>{const r=m[c.code];const st=statusOf(c,r);const due=dueOf(c,r);
+  return `<tr><td><b>${esc(c.title)}</b><br><span class="small muted">${esc(c.code)}${c.req?" · Required":""} · ${esc(c.freq)}</span></td><td class="num">${r?esc(+r.hours):esc(c.hours)}</td><td class="num">${r?esc(fmtShort(r.completed_at)):""}</td><td>${r?(r.source==="portal"?"Online"+(r.score!=null?` (${esc(r.score)}/${esc(r.total||"")})`:""):r.source==="live"?"Live":r.source==="upload"?"Certificate":"Backfill")+(r.source!=="portal"&&!r.verified_by?` <span class="pill self">Self-reported</span>`:r.verified_by?` <span class="pill ok">Verified</span>`:""):""}</td><td class="num">${due?esc(fmtShort(due)):""}</td><td>${st.t?`<span class="pill ${st.k}">${esc(st.t)}</span>`:""}</td><td class="noprint">${r?`${r.source==="portal"?`<button class="btn ghost sm" data-cert="${esc(r.id)}">Certificate</button> `:""}${r.answers&&r.answers.items?`<button class="btn ghost sm" data-quiz="${esc(r.id)}">Quiz record</button> `:""}${!r.verified_by&&r.source!=="portal"?`<button class="btn sm" data-verify="${esc(r.id)}">Verify</button>`:""}`:""}</td></tr>`}).join("")}</tbody></table></div>`}
+
+function renderPerson(id){sel=PEOPLE.find(p=>p.id===id);if(!sel)return;const p=sel;
+ let h=`<div class="noprint bar"><button class="btn ghost sm" id="back">All people</button><span class="spacer"></span><button class="btn sm" onclick="window.print()">Print training log</button></div>
+ <div class="printhead"><b>Benevolent House</b> · Caregiver Training Log · Printed ${esc(fmt(new Date()))}</div>
+ <h1>${esc(p.full_name||p.email)}</h1><p class="lead">${esc(p.home_label||"")}${p.caregiver_type?" · "+esc(p.caregiver_type):""} · ${esc(p.email)}</p>${logTable(p)}
+ <p class="small muted">Online trainings are graded and signed in the portal. "Self-reported" means the person recorded a live or outside training; it becomes "Verified" once staff checks the sign-in sheet or certificate. Annual trainings are due one year after the last completion.</p>
+ <div class="card noprint"><h2 style="margin-top:0">Record a live or outside training for ${esc(p.full_name||"this person")}</h2><div class="row2"><div><label for="rc">Training</label><select id="rc">${CAT.map(c=>`<option value="${esc(c.code)}">${esc(c.title)}</option>`).join("")}</select></div><div><label for="rd">Date completed</label><input id="rd" type="date"></div></div><div class="row2"><div><label for="rh">Hours</label><input id="rh" type="number" min="0.25" max="12" step="0.25"></div><div><label for="rt">Trainer or provider</label><input id="rt" type="text" placeholder="e.g., Haddie Mashburn"></div></div><p><button class="btn" id="rsave">Save as verified</button></p></div>
+ ${ME.role==="leadership"?`<div class="card noprint"><h2 style="margin-top:0">Access</h2><p class="small muted">Caregiver: their own records only. Staff: every caregiver's training records. Leadership: everything, including access levels.</p><div class="bar"><select id="role" aria-label="Access level">${["caregiver","staff","leadership"].map(r=>`<option ${r===p.role?"selected":""}>${r}</option>`).join("")}</select><button class="btn sm" id="roleSave">Save access level</button></div></div>`:""}`;
+ $("#view").innerHTML=h;window.scrollTo(0,0);
+ $("#back").onclick=renderList;
+ const rc=$("#rc"),rh=$("#rh");const setH=()=>{const c=CAT.find(x=>x.code===rc.value);rh.value=c?c.hours:1};rc.onchange=setH;setH();
+ $("#rsave").onclick=async()=>{const c=CAT.find(x=>x.code===rc.value),d=$("#rd").value,t=$("#rt").value.trim(),hrs=parseFloat(rh.value);
+  if(!d||new Date(d+"T12:00:00")>new Date()){toast("Enter a date that is not in the future");return}if(!(hrs>0&&hrs<=12)){toast("Hours must be between 0.25 and 12");return}if(!t){toast("Enter the trainer or provider");return}
+  const{error}=await BHC.client().from("completions").insert({user_id:p.id,course_code:c.code,course_title:c.title,hours:hrs,completed_at:new Date(d+"T12:00:00").toISOString(),source:"live",answers:{trainer:t,recorded_by:ME.full_name},verified_by:ME.id});
+  if(error){toast("Could not save: "+error.message);return}BHC.log("record_live",c.code);await load();toast("Saved");renderPerson(p.id)};
+ document.querySelectorAll("[data-verify]").forEach(b=>b.onclick=async()=>{const{error}=await BHC.client().from("completions").update({verified_by:ME.id}).eq("id",b.dataset.verify);if(error){toast("Could not verify: "+error.message);return}BHC.log("verify",b.dataset.verify);await load();toast("Verified");renderPerson(p.id)});
+ document.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>renderCert(b.dataset.cert));
+ document.querySelectorAll("[data-quiz]").forEach(b=>b.onclick=()=>renderQuiz(b.dataset.quiz));
+ $("#roleSave")&&($("#roleSave").onclick=async()=>{const r=$("#role").value;if(p.id===ME.id&&r!=="leadership"){toast("You cannot remove your own leadership access");return}const{error}=await BHC.client().from("profiles").update({role:r}).eq("id",p.id);if(error){toast("Could not change access: "+error.message);return}BHC.log("set_role",p.id+":"+r);await load();toast("Access updated");renderPerson(p.id)});
+ BHC.log("view_person",p.id)}
+
+function renderCert(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x=>x.id===r.user_id);
+ $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">Back to ${esc(p.full_name)}</button><span class="spacer"></span><button class="btn sm" onclick="window.print()">Print certificate</button></div>
+ <div id="cert"><img src="../bh-logo.png" alt="" style="height:70px"><div style="font-weight:700;color:var(--brown);font-size:1.15rem">Benevolent House</div><h1>Certificate of Completion</h1><p>This certifies that</p><div class="name">${esc(p.full_name)}</div><p>completed</p><div style="font-size:1.35rem;font-weight:700;color:var(--green-dk)">${esc(r.course_title)}</div>
+ <p style="margin-top:14px">${esc(fmt(r.completed_at))} · ${esc(+r.hours)} training hour${+r.hours===1?"":"s"}${r.score!=null?` · Knowledge Check ${esc(r.score)} of ${esc(r.total||"")}`:""}</p><p class="small muted">${esc(p.home_label||"")} · Completed online through the Benevolent House Training Portal · Record ${esc(String(r.id).slice(0,8))}</p></div>`;
+ $("#back").onclick=()=>renderPerson(p.id)}
+
+function renderQuiz(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x=>x.id===r.user_id);const picks=(r.answers&&r.answers.items)||[];
+ $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">Back to ${esc(p.full_name)}</button><span class="spacer"></span><button class="btn sm" onclick="window.print()">Print quiz record</button></div>
+ <div class="printhead"><b>Benevolent House</b> · Knowledge Check Record</div><h1>${esc(r.course_title)}: Knowledge Check</h1><p class="lead">${esc(p.full_name)} · ${esc(fmt(r.completed_at))} · Attempt ${esc(r.attempt||1)} · Score ${esc(r.score)} of ${esc(r.total||picks.length)}</p>
+ <div class="tscroll"><table><thead><tr><th>#</th><th>Question</th><th>Answer given</th><th>Result</th></tr></thead><tbody>${picks.map((q,i)=>`<tr><td class="num">${i+1}</td><td>${esc(q.q)}</td><td>${esc(q.a)}${!q.ok?`<br><span class="small muted">Correct answer: ${esc(q.right)}</span>`:""}</td><td>${q.ok?`<span class="pill ok">Correct</span>`:`<span class="pill over">Missed</span>`}</td></tr>`).join("")}</tbody></table></div>`;
+ $("#back").onclick=()=>renderPerson(p.id)}
+
+function renderHomeLogs(home){const ps=PEOPLE.filter(p=>p.home_label===home);
+ $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">All people</button><span class="spacer"></span><button class="btn sm" onclick="window.print()">Print</button></div>`+ps.map((p,i)=>`<div style="${i?"page-break-before:always;":""}"><div class="printhead"><b>Benevolent House</b> · Caregiver Training Log · Printed ${esc(fmt(new Date()))}</div><h1>${esc(p.full_name)}</h1><p class="lead">${esc(home)} · ${esc(p.caregiver_type||"")} · ${esc(p.email)}</p>${logTable(p)}</div>`).join("");
+ $("#back").onclick=renderList;document.querySelectorAll("[data-cert],[data-quiz],[data-verify]").forEach(b=>b.remove())}
+
+async function start(u){
+ let p;try{p=await BHC.profile(true)}catch(e){}
+ if(!p){$("#view").innerHTML=`<div class="card">Could not load your account. Please refresh the page.</div>`;return}
+ ME=p;$("#who").textContent=(p.full_name||p._email)+" · "+p.role;
+ if(p.role!=="staff"&&p.role!=="leadership"){$("#view").innerHTML=`<div class="card"><h1>This page is for Benevolent House staff</h1><p>You are signed in as ${esc(p.full_name||p._email)}. Your own trainings and certificates are on the <a href="../">portal home</a>.</p><p><button class="btn ghost sm" id="so">Sign out</button></p></div>`;$("#so").onclick=async()=>{await BHC.signOut();location.reload()};return}
+ $("#view").innerHTML=`<div class="card">Loading training records…</div>`;
+ try{await load()}catch(e){$("#view").innerHTML=`<div class="card">Could not load records: ${esc(e.message||e)}</div>`;return}
+ BHC.log("open_admin","");renderList()}
+
+(async function(){
+ if(!window.BHC||!BHC.available()){$("#view").innerHTML=`<div class="card">The admin page needs an internet connection. Please check your connection and refresh.</div>`;return}
+ const s=await BHC.session();
+ if(s){start();return}
+ $("#view").innerHTML=`<h1>Training Admin</h1><p class="lead">Sign in with your Benevolent House email to see every caregiver's training records.</p><div class="card" id="host"></div>`;
+ BHSignIn($("#host"),()=>start(),{roles:["Staff","Foster Caregiver","Kinship Caregiver","Adoptive Parent","Foster and Adoptive Caregiver","Contracted Provider"]});
+})();
+</script>
+</body>
+</html>

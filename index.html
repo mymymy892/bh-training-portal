@@ -143,6 +143,7 @@ footer{border-top:1px solid var(--line);padding:18px 0;color:var(--muted);font-s
 </main>
 <footer class="wrap">Benevolent House · Training records are kept by Benevolent House for licensing and T3C credentialing. Questions: call your case manager or the Benevolent House office at (214) 774-4871.</footer>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
+<script src="catalog.js"></script>
 <script>
 /* ===================== Benevolent House Training Portal: content ===================== */
 const PORTAL_VERSION = "1.0 (Nov 2026)";
@@ -152,68 +153,7 @@ const STORE_KEY = "bh_portal_v1";
 
 /* Catalog: every Benevolent House training. status: live = can be taken here now,
    record = completed live/outside and recorded here, soon = online version in progress. */
-const CATALOG = [
- {code:"T3C-PP", title:"T3C Policy and Procedure Training (Core Session)", hours:2, who:"All caregivers, all staff, contracted providers", freq:"Once, then annual 1-hour refresher", status:"live", group:"T3C Credential", module:"t3c_core", req:true,
-  blurb:"What changes and what stays the same under Texas Child-Centered Care. Required before Benevolent House operates under its Active Full Credential."},
- {code:"T3C-PP-S", title:"T3C Policy and Procedure Training (Staff Session)", hours:1, who:"Directors and case managers", freq:"Once, then annual", status:"live", group:"T3C Credential", module:"t3c_staff", req:true,
-  blurb:"The procedures staff carry out: referrals, reviews and confirmations, documenting engagement, aftercare, credentialing homes, and CQI data."},
- {code:"TST-8", title:"Trauma Systems Therapy for Foster Care (TST-FC) Pre-Service", hours:8, who:"All caregivers and staff", freq:"Once, before serving a child under T3C", status:"record", group:"T3C Credential", req:true,
-  blurb:"Benevolent House's Treatment Model. Four modules: The Alarm System, Find the Pattern, In the Moment, Safe and Responsive."},
- {code:"TST-Q", title:"TST-FC Ongoing Training (Quarterly Sessions)", hours:1, who:"All caregivers and staff", freq:"Four 1-hour sessions a year, one each quarter", status:"soon", group:"T3C Credential", req:true,
-  blurb:"Q1 The Alarm System · Q2 Find the Pattern · Q3 In the Moment · Q4 Safe and Responsive. Session 4 is the current session (October to December 2026)."},
- {code:"HT", title:"Human Trafficking Prevention (DFPS Universal)", hours:1, who:"All caregivers and staff", freq:"Pre-service or orientation, then every 12 months", status:"record", group:"Required Annual", req:true,
-  blurb:"Delivered by a Benevolent House trainer who completed the DFPS Train-the-Trainer course. Recorded here after the live session."},
- {code:"LT-OR", title:"Licensed Therapist Orientation", hours:2, who:"Contracted Licensed Therapist", freq:"Once, then annual refresher", status:"soon", group:"T3C Credential",
-  blurb:"Orientation to the oversight role for the Mental & Behavioral Health Support Services Package."},
- {code:"ORI", title:"Benevolent House Orientation", hours:2, who:"New caregivers and staff", freq:"Once", status:"soon", group:"Pre-Service",
-  blurb:"Who we are, how we work, who to call, and what the first 30 days look like."},
- {code:"PAPH", title:"Prevention of Aggression and Physical Holds (PAPH)", hours:2, who:"All caregivers and staff", freq:"Pre-service, then as required", status:"soon", group:"Required Annual",
-  blurb:"Safe responses in the moment, in TST-FC language."},
- {code:"SP", title:"Suicide Prevention and Screening", hours:1, who:"All caregivers and staff", freq:"Annual", status:"soon", group:"Required Annual",
-  blurb:"Warning signs, how to ask, and what to do next."},
- {code:"ASK", title:"AS+K (Ask about Suicide to Save a Life)", hours:3, who:"Staff", freq:"As required", status:"record", group:"Required Annual",
-  blurb:"Outside training. Upload your certificate to record it."},
- {code:"CC", title:"Cultural Competence", hours:1, who:"All caregivers and staff", freq:"Annual", status:"soon", group:"Required Annual",
-  blurb:"Serving every child and family with respect for culture, language, faith, and identity."},
- {code:"CYB", title:"Cybersecurity Awareness", hours:1, who:"All caregivers and staff", freq:"Annual", status:"soon", group:"Required Annual",
-  blurb:"Protecting children's information on phones, email, and shared computers."},
- {code:"DFPS-CYB", title:"DFPS Cybersecurity Training Certification (Form 4530)", hours:1, who:"Staff with DFPS system access", freq:"Annual, by June 30", status:"record", group:"Required Annual",
-  blurb:"Taken on the DFPS site. Record the completion date here and keep Form 4530 on file."},
- {code:"DOC", title:"Documentation and STAR Health", hours:1, who:"Caregivers and staff", freq:"Pre-service, then as needed", status:"soon", group:"Pre-Service",
-  blurb:"What to write down, where it goes, and how STAR Health services are arranged."},
- {code:"EDP", title:"Emergency and Disaster Preparedness and Water Safety", hours:1, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
-  blurb:"Your home's plan for fire, weather, and water, and what Benevolent House needs on file."},
- {code:"EC", title:"Empowering Care", hours:1, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
-  blurb:"Normalcy, voice, and choice for children in care."},
- {code:"SIS", title:"Safe Infant Sleep", hours:1, who:"Caregivers of infants", freq:"Before caring for an infant", status:"soon", group:"Pre-Service",
-  blurb:"Safe sleep practices required for every infant in care."},
- {code:"SIR", title:"Serious Incident Reporting", hours:1, who:"All caregivers and staff", freq:"Within 14 days of verification or hire, then annual", status:"live", group:"Required Annual", module:"sir",
-  blurb:"One week with the Delgado family: what counts as a serious incident, who to call, how fast, and what to write down."},
- {code:"SCPC", title:"Supporting Children Through Purposeful Care", hours:1, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
-  blurb:"Purposeful, trauma-informed daily care."},
- {code:"MC", title:"Medical Consent (Form 2759)", hours:1, who:"Caregivers who are medical consenters", freq:"Before serving as medical consenter", status:"record", group:"Pre-Service",
-  blurb:"DFPS medical consent training. Record the completion date here."},
- {code:"DFPS-MR", title:"DFPS Mandatory Reporting Community Response Training", hours:1, who:"All caregivers and staff", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
-  blurb:"Taken on the DFPS site. Record the completion date here."},
- {code:"DFPS-PM", title:"DFPS Psychotropic Medication Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
-  blurb:"Taken on the DFPS site. Required for the Mental & Behavioral Health credential."},
- {code:"DFPS-TIC", title:"DFPS Trauma Informed Care Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
-  blurb:"Taken on the DFPS site. Record the completion date here."},
- {code:"DFPS-NOR", title:"DFPS Normalcy Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
-  blurb:"Taken on the DFPS site. Record the completion date here."},
- {code:"DFPS-SA", title:"DFPS Preventing and Recognizing Sexual Abuse Training", hours:1, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
-  blurb:"Taken on the DFPS site. Record the completion date here."},
- {code:"DFPS-TS", title:"Transportation Safety Training", hours:2, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
-  blurb:"Online. Record the completion date here."},
- {code:"DFPS-IC", title:"Infection Control and Communicable Disease Training", hours:2, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
-  blurb:"Online. Record the completion date here."},
- {code:"DFPS-SB", title:"Shaken Baby and Sudden Infant Death Training", hours:1, who:"Caregivers of infants", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
-  blurb:"Online. Record the completion date here."},
- {code:"DFPS-RP", title:"DFPS Runaway Prevention Training", hours:2.5, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
-  blurb:"Taken on the DFPS site. Record the completion date here."},
- {code:"CPR", title:"CPR and First Aid", hours:4, who:"All caregivers", freq:"Per certificate expiration", status:"record", group:"Outside Certificates",
-  blurb:"Outside hands-on certification. Record the completion and expiration dates."},
-];
+const CATALOG = window.CATALOG;
 
 /* ============ T3C Core Session slides ============ */
 const T3C_CORE = {
@@ -501,10 +441,11 @@ function toggleRead(btn,el){if(reading){stopRead();return}if(!window.speechSynth
 
 /* ---------- home ---------- */
 function renderHome(){
+ if(S.user&&S.user.cloud&&!window.__bhChecked){$("#userChip").textContent="";$("#view-home").innerHTML=`<div class="card"><p>Loading your trainings…</p></div>`;show("home");return}
  $("#userChip").textContent=userLabel();
  const groups=[...new Set(CATALOG.map(c=>c.group))];
  let h=`<h1>Benevolent House Training Portal</h1><p class="lead">Every Benevolent House training in one place (30 trainings). Complete a training here, or record one you completed live, and your training log stays current automatically.</p>`;
- if(!S.user&&window.BHC&&BHC.available()){h+=`<div class="card" id="bhsHost"></div>`}
+ if((!S.user||!S.user.cloud)&&window.BHC&&BHC.available()){h+=`<div class="card" id="bhsHost"></div>`}
  else if(!S.user){h+=`<div class="card"><h3 style="margin-top:0">Start by telling us who you are</h3><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div>
  <div class="row"><div><label>Foster home or staff role</label><input type="text" id="uHome" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label>I am a</label><select id="uRole"><option>Foster Caregiver</option><option>Kinship Caregiver</option><option>Adoptive Parent</option><option>Foster and Adoptive Caregiver</option><option>Staff</option><option>Contracted Provider</option></select></div></div>
  <p><button class="btn" onclick="signIn()">Continue</button></p><p class="small">Your name and completion records are kept by Benevolent House for licensing and T3C credentialing. No child information is ever entered here.</p></div>`;}
@@ -516,17 +457,17 @@ function renderHome(){
    h+=`<div class="tcard"><div class="code">${c.code}${c.req?' · <span class="pill req">Required</span>':''}</div><h3>${esc(c.title)}</h3><div class="meta">${c.hours} hr · ${esc(c.who)}<br>${esc(c.freq)}</div><p class="small" style="margin:4px 0">${esc(c.blurb)}</p><div class="foot">${pill}${btn}</div></div>`});
   h+=`</div>`});
  h+=`<div class="card" style="margin-top:24px"><h3 style="margin-top:0">Questions?</h3><p>Call or text your case manager, or the Benevolent House on-call line, any hour. If a page will not load, try another browser or ask your case manager to help you complete the training one-on-one.</p></div>`;
- $("#view-home").innerHTML=h;show("home");if(!S.user&&$("#bhsHost"))BHSignIn($("#bhsHost"),adoptUser)}
+ $("#view-home").innerHTML=h;show("home");if($("#bhsHost"))BHSignIn($("#bhsHost"),adoptUser,{profile:window.__bhNeedProfile||null,prefill:S.user&&!S.user.cloud?S.user:null,message:S.user&&!S.user.cloud?"Your trainings are saved on this device. Sign in once with your email so they are kept for good, on any phone or computer.":""})}
 function signIn(){const n=$("#uName").value.trim(),e=$("#uEmail").value.trim(),hm=$("#uHome").value.trim(),r=$("#uRole").value;
  if(!n||!e||!hm){toast("Please fill in your name, email, and home or role");return}if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(e)){toast("Please enter a valid email address");return}
  S.user={name:n,email:e,home:hm,role:r};saveStore(S);renderHome()}
-function signOut(){if(S.user&&S.user.cloud&&window.BHC){BHC.signOut();S={done:{},progress:{}};saveStore(S);renderHome();return}S.user=null;saveStore(S);renderHome()}
+async function signOut(){if(S.user&&S.user.cloud&&window.BHC){await BHC.signOut();S={done:{},progress:{}};renderHome();return}S.user=null;saveStore(S);renderHome()}
 function fmtUS(iso){const d=new Date(iso);return (d.getMonth()+1+"").padStart(2,"0")+"/"+(d.getDate()+"").padStart(2,"0")+"/"+d.getFullYear()}
 async function adoptUser(u){if(!u)return;const same=S.user&&S.user.email&&S.user.email.toLowerCase()===u.email.toLowerCase();if(!same){S={done:{},progress:{}}}S.user=u;
  try{const rows=await BHC.myCompletions();const cloudDone={};rows.forEach(r=>{if(!cloudDone[r.course_code])cloudDone[r.course_code]={date:fmtUS(r.completed_at),iso:r.completed_at,hours:r.hours,source:r.source,verified:!!r.verified_by}});S.done=Object.assign({},same?S.done:{},cloudDone)}catch(e){}
- saveStore(S);renderHome()}
-async function cloudBoot(){if(!window.BHC||!BHC.available())return;const p=await BHC.profile();if(!p){if(S.user&&S.user.cloud){S={done:{},progress:{}};saveStore(S);renderHome()}return}if(!p.full_name||!p.home_label){S.user=null;renderHome();return}await adoptUser(BHC.asUser(p))}
-function nextDue(c,d){if(!d)return null;const f=(c.freq||"").toLowerCase();if(!/annual|every 12 months/.test(f))return null;const t=d.iso?new Date(d.iso):(()=>{const m=(d.date||"").match(/(\d+)\/(\d+)\/(\d{4})/);return m?new Date(+m[3],+m[1]-1,+m[2]):null})();if(!t||isNaN(t))return null;const n=new Date(t);n.setFullYear(n.getFullYear()+1);return n}
+ window.__bhNeedProfile=null;saveStore(S);try{BHC.retryCompletions()}catch(e){}renderHome()}
+async function cloudBoot(){if(!window.BHC||!BHC.available()){window.__bhChecked=true;if(S.user&&S.user.cloud){S={done:{},progress:{}};renderHome()}return}let p;try{p=await BHC.profile()}catch(e){window.__bhChecked=true;renderHome();return}window.__bhChecked=true;if(!p){if(S.user&&S.user.cloud){S={done:{},progress:{}};saveStore(S)}renderHome();return}if(!p.full_name||!p.home_label){window.__bhNeedProfile=p;if(S.user&&S.user.cloud)S.user=null;renderHome();return}await adoptUser(BHC.asUser(p))}
+function nextDue(c,d){if(!d)return null;const f=(c.freq||"").toLowerCase();if(!/annual|every 12 months/.test(f)||/refresher/.test(f))return null;const t=d.iso?new Date(d.iso):(()=>{const m=(d.date||"").match(/(\d+)\/(\d+)\/(\d{4})/);return m?new Date(+m[3],+m[1]-1,+m[2]):null})();if(!t||isNaN(t))return null;const n=new Date(t);n.setFullYear(n.getFullYear()+1);return n}
 
 /* ---------- record a live / outside completion ---------- */
 function recordLive(code){const c=CATALOG.find(x=>x.code===code);
