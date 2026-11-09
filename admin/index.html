@@ -48,15 +48,28 @@ label{display:block;font-weight:600;margin:10px 0 4px}
 .toast.show{opacity:1}
 .hidden{display:none!important}
 .printhead{display:none}
-#cert{border:10px double var(--brown);padding:40px 36px;text-align:center;background:#fff;max-width:900px;margin:0 auto}
-#cert h1{font-size:2.1rem;margin:10px 0}#cert .name{font-size:1.9rem;font-weight:700;margin:12px 0;color:var(--ink)}
+#cert{background:#fff;max-width:980px;margin:0 auto;padding:14px;border:3px solid var(--brown);aspect-ratio:11/8.5}
+#cert .c-in{border:1.5px solid #C9A227;height:100%;padding:34px 48px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 0%,#FBF7F2,#fff 60%)}
+#cert .c-logo{height:74px}#cert .c-org{font-family:Georgia,serif;font-size:1.45rem;color:var(--brown);font-weight:700;margin-top:4px}#cert .c-tag{font-size:.8rem;letter-spacing:.06em;color:var(--muted);font-style:italic}
+#cert .c-title{font-family:Georgia,serif;font-size:2.5rem;color:var(--brown);margin:18px 0 6px;letter-spacing:.02em}#cert .c-small{margin:6px 0;color:var(--muted);font-size:1rem}
+#cert .c-name{font-family:Georgia,serif;font-size:2.3rem;color:var(--ink);border-bottom:1.5px solid #C9A227;padding:0 40px 6px;margin:4px 0 8px}
+#cert .c-course{font-size:1.45rem;font-weight:700;color:var(--green-dk);max-width:760px}#cert .c-meta{margin:10px 0 0;color:var(--ink)}
+#cert .c-sigs{display:flex;gap:70px;justify-content:center;margin-top:34px}#cert .c-sigs div{min-width:240px;font-size:.85rem;color:var(--muted)}#cert .c-sigs span{display:block;font-family:Georgia,serif;font-size:1.05rem;color:var(--ink);min-height:1.4em}#cert .c-sigs b{display:block;border-top:1px solid var(--ink);margin:4px 0}
+#cert .c-foot{margin-top:22px;font-size:.75rem;color:var(--muted)}
+.printdoc{display:none}
+.pd-head{display:flex;align-items:center;gap:14px;border-bottom:3px solid #7B4B2A;padding-bottom:10px}.pd-head img{height:56px}.pd-org{font-family:Georgia,serif;font-size:20px;color:#7B4B2A;font-weight:700}.pd-addr{font-size:10.5px;color:#6B5F58}.pd-title{margin-left:auto;font-family:Georgia,serif;font-size:19px;color:#2B2320}
+.pd-info{width:100%;margin:12px 0;border-collapse:collapse}.pd-info td{border:1px solid #E3D7C9;padding:6px 8px;font-size:12px;font-weight:700}.pd-info span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#6B5F58;font-weight:400}
+.pd-log{width:100%;border-collapse:collapse;font-size:11px}.pd-log th{background:#F1E8DD!important;color:#5E3920;text-transform:uppercase;font-size:9px;letter-spacing:.05em;padding:6px;border:1px solid #E3D7C9;-webkit-print-color-adjust:exact;print-color-adjust:exact}.pd-log td{padding:5px 6px;border:1px solid #E3D7C9}.pd-log .r{text-align:right}.pd-log tr.missing td,.pd-log td.late{color:#9A2F1F}.pd-log td.late{font-weight:700}.pd-log tfoot td{font-weight:700;background:#FBF7F2}
+.pd-sign{display:flex;gap:40px;margin-top:34px;font-size:10.5px;color:#6B5F58}.pd-sign div{flex:1}.pd-sign div:last-child{flex:0 0 160px}.pd-sign b{display:block;border-top:1px solid #2B2320;margin-bottom:3px}.pd-foot{font-size:9.5px;color:#6B5F58;margin-top:14px}
 @media print{
  header.top,.noprint,.bar,.toast{display:none!important}
  body{background:#fff;font-size:12px}main{padding:0}.wrap{max-width:none;padding:0}
  .card,.tscroll{border:0;padding:0;margin:0}.printhead{display:block;margin-bottom:10px}
  th{background:#fff;position:static}table{font-size:11px}thead{display:table-header-group}tr{page-break-inside:avoid}
- #cert{border:10px double #7B4B2A}
+ html,body{background:#fff!important}.printdoc{display:block}.screenonly{display:none}
+ #cert{border:3px solid #7B4B2A;max-width:none;aspect-ratio:auto;height:7.4in;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+@page{margin:.5in}
 </style>
 </head>
 <body>
@@ -91,7 +104,7 @@ async function all(q){let out=[],i=0;for(;;){const{data,error}=await q().range(i
 async function load(){const c=BHC.client();const since=new Date(Date.now()-120*864e5).toISOString();
  const[p,r,l,a,ap]=await Promise.all([all(()=>c.from("profiles").select("id,email,full_name,home_label,caregiver_type,role,created_at").order("full_name").order("id")),
   all(()=>c.from("completions").select("id,user_id,course_code,course_title,hours,completed_at,score,total,attempt,answers,source,verified_by,acknowledgment,trainer,voided,edits,file_path").order("completed_at",{ascending:false}).order("id")),
-  all(()=>c.from("legacy_training").select("id,person_name,home_label,course_code,course_title,completed_on,hours,source").order("id")).catch(()=>[]),
+  all(()=>c.from("legacy_training").select("id,person_name,home_label,course_code,course_title,completed_on,hours,source,trainer,voided,edits").order("id")).catch(()=>[]),
   all(()=>c.from("access_log").select("actor,action,target,at").in("action",["sign_in","visit","course_done"]).gte("at",since).order("at",{ascending:false}).order("id",{ascending:false})).catch(()=>[]),
   c.from("approved_people").select("*").order("home_label")]);
  PEOPLE=p;COMPS=r;LEGACY=l;ACT=a;if(!ap.error)APPROVED=ap.data||[];
@@ -100,7 +113,7 @@ async function load(){const c=BHC.client();const since=new Date(Date.now()-120*8
  const apName={},nameCount={};APPROVED.forEach(x=>{if(x.active&&x.full_name){const k=nm(x.full_name);nameCount[k]=(nameCount[k]||0)+1}});APPROVED.forEach(x=>{if(x.active&&x.full_name&&nameCount[nm(x.full_name)]===1)apName[x.email]=nm(x.full_name)});const byName={},dup=new Set();
  PEOPLE.forEach(x=>{const k=apName[(x.email||"").toLowerCase()];if(!k)return;if(byName[k])dup.add(k);byName[k]=x});dup.forEach(k=>delete byName[k]);const extra={};
  LEGACY.forEach(L=>{let who=byName[nm(L.person_name)];if(!who){const k="legacy:"+nm(L.person_name);who=extra[k]=extra[k]||{id:k,email:"",full_name:L.person_name,home_label:L.home_label,caregiver_type:"",role:"not signed in yet",legacy:true}}
-  COMPS.push({id:"L"+L.id,user_id:who.id,course_code:L.course_code,course_title:L.course_title,hours:L.hours,completed_at:L.completed_on+"T12:00:00",source:"record",trainer:null,record_src:L.source,verified_by:"record",legacy:true})});
+  COMPS.push({id:"L"+L.id,legacyId:L.id,user_id:who.id,course_code:L.course_code,course_title:L.course_title,hours:L.hours,completed_at:L.completed_on+"T12:00:00",source:"record",trainer:L.trainer||null,record_src:L.source,verified_by:"record",legacy:true,voided:!!L.voided,edits:L.edits||[]})});
  PEOPLE=PEOPLE.concat(Object.values(extra)).sort((a,b)=>nm(a.full_name).localeCompare(nm(b.full_name)))}
 function activity(id){const ev=ACT.filter(x=>x.actor===id);const t0=new Date();t0.setHours(0,0,0,0);t0.setDate(t0.getDate()-6);const wk=t0.getTime();const days=new Set(ev.filter(x=>new Date(x.at)>wk).map(x=>new Date(x.at).toDateString()));return{last:ev[0]?ev[0].at:null,week:days.size,ev}}
 const fmtWhen=d=>d?new Date(d).toLocaleString("en-US",{month:"2-digit",day:"2-digit",year:"numeric",hour:"numeric",minute:"2-digit"}):"";
@@ -124,9 +137,20 @@ function renderList(){
 
 function howOf(r){if(r.source==="portal")return "Portal course"+(r.score!=null?` (${esc(r.score)}/${esc(r.total||"")})`:"");if(r.source==="record")return "BH record";const base=r.source==="upload"?"Certificate":r.source==="live"?"Recorded":"Backfill";return base+(!r.verified_by?` <span class="pill self">Self-reported</span>`:` <span class="pill ok">Verified</span>`)}
 const canFix=p=>can("record_trainings")&&p.id!==ME.id&&!p.legacy&&(ME.role==="leadership"||p.role==="caregiver");
+const canFixRec=(p,r)=>r&&(r.legacy?can("record_trainings")&&p.id!==ME.id:canFix(p));
+const CAT_LABEL={"Pre-Service":"Pre-service","T3C Credential":"T3C","Required Annual":"Annual","DFPS Online (record)":"DFPS","Outside Certificates":"Certification","Other":"Other"};
+function printLog(p){const m=latestBy(p.id);const rows=catFor(p).map(c=>({c,r:m[c.code]})).filter(x=>x.r||(x.c.req&&window.BH_FOR(x.c,typeOf(p))));
+ const yr=Date.now()-365*864e5;const hrsYear=rows.filter(x=>x.r&&new Date(x.r.completed_at)>yr).reduce((a,x)=>a+(+x.r.hours||0),0);
+ return `<div class="printdoc"><div class="pd-head"><img src="../bh-logo.png" alt=""><div><div class="pd-org">Benevolent House</div><div class="pd-addr">PO Box 2518, Red Oak, TX 75154 · (214) 774-4871 · benevolenthouse.org</div></div><div class="pd-title">Caregiver Training Record</div></div>
+ <table class="pd-info"><tr><td><span>Name</span>${esc(p.full_name||p.email)}</td><td><span>Home</span>${esc(p.home_label||"")}</td><td><span>Role</span>${esc(p.caregiver_type||"Caregiver")}</td><td><span>Printed</span>${esc(fmtShort(new Date()))}</td></tr></table>
+ <table class="pd-log"><thead><tr><th>Training</th><th>Type</th><th class="r">Hours</th><th>Completed</th><th>Trainer or provider</th><th>Next due</th></tr></thead><tbody>${rows.map(({c,r})=>{const due=dueOf(c,r);const tr=r?(r.trainer||(r.answers&&r.answers.trainer)||(r.source==="portal"?"Benevolent House":"")):"";
+  return `<tr${r?"":` class="missing"`}><td>${esc(c.title)}</td><td>${esc(CAT_LABEL[c.group]||"")}</td><td class="r">${r?esc(+r.hours):""}</td><td>${r?esc(fmtShort(r.completed_at)):"Not on file"}</td><td>${esc(tr)}</td><td${due&&due<new Date()?` class="late"`:""}>${due?esc(fmtShort(due))+(due<new Date()?" (past due)":""):r?"Completed":""}</td></tr>`}).join("")}</tbody>
+ <tfoot><tr><td colspan="2">Training hours in the last 12 months</td><td class="r">${esc(Math.round(hrsYear*100)/100)}</td><td colspan="3"></td></tr></tfoot></table>
+ <div class="pd-sign"><div><b></b>Reviewed by (Benevolent House)</div><div><b></b>Date</div></div>
+ <p class="pd-foot">Training record kept by Benevolent House for licensing and T3C credentialing. Certificates and sign-in sheets are on file.</p></div>`}
 function logTable(p){const m=latestBy(p.id);const mine=!canFix(p);
  return `<div class="tscroll"><table><thead><tr><th>Training</th><th>Hours</th><th>Last completed</th><th>Trainer</th><th class="noprint">How</th><th>Next due</th><th>Status</th><th class="noprint"></th></tr></thead><tbody>${catFor(p).map(c=>{const r=m[c.code];const st=statusOf(c,r);const due=dueOf(c,r);const tr=r?(r.trainer||(r.answers&&r.answers.trainer)||""):"";
-  return `<tr><td><b>${esc(c.title)}</b><br><span class="small muted">${esc(c.code)}${c.req?" · Required":""} · ${esc(c.freq)}</span></td><td class="num">${r?esc(+r.hours):esc(c.hours)}</td><td class="num">${r?esc(fmtShort(r.completed_at)):""}${r&&r.edits&&r.edits.length?`<br><span class="small muted noprint">edited</span>`:""}</td><td class="small">${esc(tr)}</td><td class="noprint">${r?howOf(r):""}</td><td class="num">${due?esc(fmtShort(due)):""}</td><td>${st.t?`<span class="pill ${st.k}">${esc(st.t)}</span>`:""}</td><td class="noprint">${r&&!r.legacy?`<button class="btn ghost sm" data-cert="${esc(r.id)}">Certificate</button> ${r.file_path?`<button class="btn ghost sm" data-file="${esc(r.id)}">Uploaded certificate</button> `:""}${r.answers&&r.answers.items?`<button class="btn ghost sm" data-quiz="${esc(r.id)}">Quiz record</button> `:""}${can("record_trainings")&&!mine?`<button class="btn ghost sm" data-editc="${esc(r.id)}">Edit</button> `:""}${can("record_trainings")&&!mine&&!r.verified_by&&r.source!=="portal"?`<button class="btn sm" data-verify="${esc(r.id)}">Verify</button>`:""}`:r&&r.legacy?`<span class="small muted">${esc(r.record_src||"")}</span>`:""}</td></tr>`}).join("")}</tbody></table></div>`}
+  return `<tr><td><b>${esc(c.title)}</b><br><span class="small muted">${esc(c.code)}${c.req?" · Required":""} · ${esc(c.freq)}</span></td><td class="num">${r?esc(+r.hours):esc(c.hours)}</td><td class="num">${r?esc(fmtShort(r.completed_at)):""}${r&&r.edits&&r.edits.length?`<br><span class="small muted noprint">edited</span>`:""}</td><td class="small">${esc(tr)}</td><td class="noprint">${r?howOf(r):""}</td><td class="num">${due?esc(fmtShort(due)):""}</td><td>${st.t?`<span class="pill ${st.k}">${esc(st.t)}</span>`:""}</td><td class="noprint">${r&&r.legacy?`<button class="btn ghost sm" data-cert="${esc(r.id)}">Certificate</button> ${canFixRec(p,r)?`<button class="btn ghost sm" data-editc="${esc(r.id)}">Edit</button> `:""}<br><span class="small muted">From ${esc(/tracker/i.test(r.record_src||"")?"the BH tracker":"the Drive training record")}</span>`:r?`<button class="btn ghost sm" data-cert="${esc(r.id)}">Certificate</button> ${r.file_path?`<button class="btn ghost sm" data-file="${esc(r.id)}">Uploaded certificate</button> `:""}${r.answers&&r.answers.items?`<button class="btn ghost sm" data-quiz="${esc(r.id)}">Quiz record</button> `:""}${can("record_trainings")&&!mine?`<button class="btn ghost sm" data-editc="${esc(r.id)}">Edit</button> `:""}${can("record_trainings")&&!mine&&!r.verified_by&&r.source!=="portal"?`<button class="btn sm" data-verify="${esc(r.id)}">Verify</button>`:""}`:""}</td></tr>`}).join("")}</tbody></table></div>`}
 
 const CH_LABEL={training_date:"Training date",hours:"Hours",trainer:"Trainer",removed:"Removed",verified:"Verified"};
 function chText(k,v){if(k==="verified")return "Verified";if(k==="removed")return v[1]?"Removed this entry":"Restored this entry";const f=x=>k==="training_date"?fmtShort(x):(x==null||x===""?"(blank)":x);return `${CH_LABEL[k]||k}: ${esc(f(v[0]))} → ${esc(f(v[1]))}`}
@@ -139,10 +163,10 @@ function pageName(t){t=String(t||"");if(/admin/.test(t))return "Admin";if(/t3c-s
 
 function renderPerson(id){sel=PEOPLE.find(p=>p.id===id);if(!sel)return;const p=sel;
  let h=`<div class="noprint bar"><button class="btn ghost sm" id="back">All people</button><span class="spacer"></span><a class="btn ghost sm" href="../?view=${encodeURIComponent(p.id)}" target="_blank" rel="noopener">See their view</a>${can("print_records")?`<button class="btn sm" onclick="window.print()">Print training log</button>`:""}</div>
- <div class="printhead"><b>Benevolent House</b> · Caregiver Training Log · Printed ${esc(fmt(new Date()))}</div>
+ ${printLog(p)}<div class="screenonly">
  <h1>${esc(p.full_name||p.email)}</h1><p class="lead">${esc(p.home_label||"")}${p.caregiver_type?" · "+esc(p.caregiver_type):""} · ${esc(p.email)}</p>${logTable(p)}
  <p class="small muted noprint">"Portal course" trainings are graded and signed in the portal. "BH record" comes from the training records kept before the portal. "Self-reported" means the person recorded the training themselves; it becomes "Verified" once staff checks the sign-in sheet or certificate. Use Edit to correct a date, hours or trainer; every change is kept in the history below. Nobody edits their own records; another leadership member corrects those.</p>
- ${activityHtml(p)}${historyHtml(p)}
+ ${activityHtml(p)}${historyHtml(p)}</div>
  ${canFix(p)?`<div class="card noprint"><h2 style="margin-top:0">Record a training for ${esc(p.full_name||"this person")}</h2><div class="row2"><div><label for="rc">Training</label><select id="rc">${catFor(p).map(c=>`<option value="${esc(c.code)}">${esc(c.title)}</option>`).join("")}</select></div><div><label for="rd">Date completed</label><input id="rd" type="date"></div></div><div class="row2"><div><label for="rh">Hours</label><input id="rh" type="number" min="0.25" max="12" step="0.25"></div><div><label for="rt">Trainer or provider</label><input id="rt" type="text" placeholder="e.g., Haddie Mashburn"></div></div><label for="rf">Certificate or sign-in sheet (optional)</label><input id="rf" type="file" accept="application/pdf,image/*"><p><button class="btn" id="rsave">Save as verified</button></p></div>`:""}
  `;
  $("#view").innerHTML=h;window.scrollTo(0,0);
@@ -161,10 +185,14 @@ function renderPerson(id){sel=PEOPLE.find(p=>p.id===id);if(!sel)return;const p=s
 
  if(!p.legacy)BHC.log("view_person",p.id)}
 
-function renderCert(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x=>x.id===r.user_id);
+function renderCert(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x=>x.id===r.user_id);const tr=r.trainer||(r.answers&&r.answers.trainer)||"";
  $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">Back to ${esc(p.full_name)}</button><span class="spacer"></span>${can("print_records")?`<button class="btn sm" onclick="window.print()">Print certificate</button>`:""}</div>
- <div id="cert"><img src="../bh-logo.png" alt="" style="height:70px"><div style="font-weight:700;color:var(--brown);font-size:1.15rem">Benevolent House</div><h1>Certificate of Completion</h1><p>This certifies that</p><div class="name">${esc(p.full_name)}</div><p>completed</p><div style="font-size:1.35rem;font-weight:700;color:var(--green-dk)">${esc(r.course_title)}</div>
- <p style="margin-top:14px">${esc(fmt(r.completed_at))} · ${esc(+r.hours)} training hour${+r.hours===1?"":"s"}${r.score!=null?` · Knowledge Check ${esc(r.score)} of ${esc(r.total||"")}`:""}</p><p class="small muted">${esc(p.home_label||"")} · Record ${esc(String(r.id).slice(0,8))} on file with Benevolent House</p></div>`;
+ <div id="cert"><div class="c-in"><img src="../bh-logo.png" alt="" class="c-logo"><div class="c-org">Benevolent House</div><div class="c-tag">Building strong foundations for our children</div>
+ <div class="c-title">Certificate of Completion</div><p class="c-small">This certifies that</p><div class="c-name">${esc(p.full_name)}</div>
+ <p class="c-small">has successfully completed</p><div class="c-course">${esc(r.course_title)}</div>
+ <p class="c-meta">${esc(+r.hours)} training hour${+r.hours===1?"":"s"} · Completed ${esc(fmt(r.completed_at))}${r.score!=null?` · Knowledge Check ${esc(r.score)} of ${esc(r.total||"")}`:""}</p>
+ <div class="c-sigs"><div><span>${esc(tr||"Benevolent House")}</span><b></b>Trainer or provider</div><div><span>&nbsp;</span><b></b>Benevolent House</div></div>
+ <p class="c-foot">${esc(p.home_label||"")}${p.home_label?" · ":""}Record ${esc(String(r.legacy?"BH-"+r.legacyId:r.id).slice(0,10).toUpperCase())} · PO Box 2518, Red Oak, TX 75154 · (214) 774-4871</p></div></div>`;
  $("#back").onclick=()=>renderPerson(p.id)}
 
 async function openFile(cid){const r=COMPS.find(x=>x.id===cid);if(!r||!r.file_path)return;const w=window.open("","_blank");
@@ -174,14 +202,15 @@ function editComp(cid){const r=COMPS.find(x=>x.id===cid);if(!r)return;const p=PE
  <div class="row2"><div><label for="ed">Training date</label><input id="ed" type="date" value="${d}"></div><div><label for="eh">Hours</label><input id="eh" type="number" min="0.25" max="12" step="0.25" value="${esc(+r.hours)}"></div></div>
  <label for="et">Trainer or provider</label><input id="et" type="text" maxlength="120" value="${esc(r.trainer||(r.answers&&r.answers.trainer)||"")}">
  <label style="display:flex;gap:8px;align-items:center;font-weight:400;margin-top:14px"><input type="checkbox" id="ev" style="width:auto"> Remove this entry (entered by mistake). It stays in the history.</label>
- <p class="small muted">Example: a training taken in person on 11/5 and entered in the portal on 11/9 can be changed to 11/5. Your name and the time of the change are saved with the record.</p>
+ <p class="small muted">${r.legacy?"This record came from "+(/tracker/i.test(r.record_src||"")?"the BH tracker":"the Drive training record")+". If the paper file shows something different, correct it here. ":"Example: a training taken in person on 11/5 and entered in the portal on 11/9 can be changed to 11/5. "}Your name and the time of the change are saved with the record.</p>
  <p><button class="btn" id="esave">Save changes</button> <button class="btn ghost" id="ecancel">Cancel</button></p></div>`;
  const back=()=>renderPerson(p.id);$("#back").onclick=back;$("#ecancel").onclick=back;
  $("#esave").onclick=async()=>{const nd=$("#ed").value,nh=parseFloat($("#eh").value),nt=$("#et").value.trim(),nv=$("#ev").checked;
   if(!nd||nd>todayStr()){toast("Enter a date that is not in the future");return}if(!(nh>0&&nh<=12)){toast("Hours must be between 0.25 and 12");return}
   const upd={};const newIso=new Date(nd+"T12:00:00").toISOString();if(nd!==d)upd.completed_at=newIso;if(nh!==+r.hours)upd.hours=nh;if(nt!==(r.trainer||(r.answers&&r.answers.trainer)||""))upd.trainer=nt||null;if(nv)upd.voided=true;
   if(!Object.keys(upd).length){back();return}if(nv&&!confirmRemove(r.id))return;const sb=$("#esave");sb.disabled=true;
-  const{error}=await BHC.client().from("completions").update(upd).eq("id",r.id);sb.disabled=false;if(error){toast("Could not save: "+error.message);return}BHC.log("edit_record",r.id);await load();toast("Saved");back()}}
+  let error;if(r.legacy){const lu={};if(upd.completed_at)lu.completed_on=nd;if("hours" in upd)lu.hours=upd.hours;if("trainer" in upd)lu.trainer=upd.trainer;if(upd.voided)lu.voided=true;({error}=await BHC.client().from("legacy_training").update(lu).eq("id",r.legacyId))}
+  else({error}=await BHC.client().from("completions").update(upd).eq("id",r.id));sb.disabled=false;if(error){toast("Could not save: "+error.message);return}BHC.log("edit_record",r.id);await load();toast("Saved");back()}}
 let removeArmed={id:null,t:0};function confirmRemove(id){if(removeArmed.id===id&&Date.now()-removeArmed.t<6000){removeArmed={id:null,t:0};return true}removeArmed={id,t:Date.now()};toast(String(id).startsWith("site:")?"Press Delete again to delete this site":"Press Save again to remove this entry");return false}
 function todayStr(){const t=new Date();return t.getFullYear()+"-"+String(t.getMonth()+1).padStart(2,"0")+"-"+String(t.getDate()).padStart(2,"0")}
 function renderQuiz(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x=>x.id===r.user_id);const picks=(r.answers&&r.answers.items)||[];
@@ -191,7 +220,7 @@ function renderQuiz(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x
  $("#back").onclick=()=>renderPerson(p.id)}
 
 function renderHomeLogs(home){const ps=PEOPLE.filter(p=>p.home_label===home);
- $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">All people</button><span class="spacer"></span><button class="btn sm" onclick="window.print()">Print</button></div>`+ps.map((p,i)=>`<div style="${i?"page-break-before:always;":""}"><div class="printhead"><b>Benevolent House</b> · Caregiver Training Log · Printed ${esc(fmt(new Date()))}</div><h1>${esc(p.full_name)}</h1><p class="lead">${esc(home)} · ${esc(p.caregiver_type||"")} · ${esc(p.email)}</p>${logTable(p)}</div>`).join("");
+ $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">All people</button><span class="spacer"></span><button class="btn sm" onclick="window.print()">Print</button></div>`+ps.map((p,i)=>`<div style="${i?"page-break-before:always;":""}">${printLog(p)}<div class="screenonly"><h1>${esc(p.full_name)}</h1><p class="lead">${esc(home)} · ${esc(p.caregiver_type||"")} · ${esc(p.email)}</p>${logTable(p)}</div></div>`).join("");
  $("#back").onclick=renderList;document.querySelectorAll("[data-cert],[data-quiz],[data-verify],[data-editc],[data-file]").forEach(b=>b.remove())}
 
 let PERMS=[],APPROVED=[];
