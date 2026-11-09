@@ -225,12 +225,14 @@ Deno.serve(async (req) => {
       return json({ ok: true });
     }
     if (mode === "sample") {
-      let ok = tok && tok === admin;
-      if (!ok) {
-        const { data: u } = await sb.auth.getUser(tok);
-        const email = (u?.user?.email || "").toLowerCase();
-        const { data: lead } = email ? await sb.from("approved_people").select("email").eq("email", email).eq("access", "leadership").eq("active", true).maybeSingle() : { data: null };
-        ok = !!lead;
+      // allowed when the caller's own token can read reminder_settings: a leadership account, or the Supabase dashboard
+      let ok = false;
+      if (tok) {
+        try {
+          const asCaller = createClient(Deno.env.get("SUPABASE_URL")!, Deno.env.get("SUPABASE_ANON_KEY") || req.headers.get("apikey") || "", { global: { headers: { Authorization: "Bearer " + tok } }, auth: { persistSession: false } });
+          const { data } = await asCaller.from("reminder_settings").select("id").eq("id", 1).maybeSingle();
+          ok = !!data;
+        } catch (_) { ok = false; }
       }
       if (!ok) return json({ error: "leadership only" }, 403);
     } else if (mode === "send") {
