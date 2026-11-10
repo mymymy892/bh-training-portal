@@ -136,7 +136,7 @@ function t3cPanel(){if(!APPROVED.length)return "";const R=t3cRows();const done=R
  ${open.length?`<p><button class="btn ghost sm noprint" onclick="navigator.clipboard.writeText(${esc(JSON.stringify(open.map(r=>r.a.email).join("; ")))}).then(()=>{this.textContent='Copied ${open.length} emails'})">Copy the emails of those not finished</button> <span class="small muted">Paste into BCC for a reminder.</span></p>`:""}</details></div>`}
 function renderList(){
  const homes=[...new Set(PEOPLE.map(p=>p.home_label).filter(Boolean))].sort();
- const rows=PEOPLE.filter(p=>(!homeFilter||p.home_label===homeFilter)&&(!filter||(p.full_name+" "+p.email+" "+(p.home_label||"")).toLowerCase().includes(filter)));
+ const rows=PEOPLE.filter(p=>seesPerson(p)&&(!homeFilter||p.home_label===homeFilter)&&(!filter||(p.full_name+" "+p.email+" "+(p.home_label||"")).toLowerCase().includes(filter)));
  const S=rows.map(p=>({p,s:summary(p)}));
  const tot={people:rows.length,over:S.filter(x=>x.s.over).length,due:S.filter(x=>x.s.due).length,missing:S.filter(x=>x.s.missing).length};
  let h=nav("records")+`<h1>Training records</h1><p class="lead">Every caregiver and staff member, what is complete, what is coming due, and when they were last in the portal. Earlier records from the BH tracker and Drive are included. Click a name for that person's training log.</p>
@@ -152,7 +152,10 @@ function renderList(){
  document.querySelectorAll("tr.click").forEach(tr=>{const go=()=>renderPerson(tr.dataset.id);tr.onclick=go;tr.onkeydown=e=>{if(e.key==="Enter")go()}})}
 
 function howOf(r){if(r.source==="portal")return "Portal course"+(r.score!=null?` (${esc(r.score)}/${esc(r.total||"")})`:"");if(r.source==="record")return "BH record";const base=r.source==="upload"?"Certificate":r.source==="live"?"Recorded":"Backfill";return base+(!r.verified_by?` <span class="pill self">Self-reported</span>`:` <span class="pill ok">Verified</span>`)}
-const canFix=p=>can("record_trainings")&&p.id!==ME.id&&!p.legacy&&(ME.role==="leadership"||p.role==="caregiver");
+const LEAD=()=>ME&&ME.role==="leadership";
+/* leadership accounts are managed only by leadership, and staff do not see them in their lists */
+const seesPerson=p=>LEAD()||p.role!=="leadership";
+const canFix=p=>can("record_trainings")&&p.id!==ME.id&&!p.legacy&&(LEAD()||p.role!=="leadership");
 const PAPER=[["T3C-PP","T3C Policy and Procedure Training (Core Session)","../paper/t3c-policy-and-procedure-paper.pdf"],["HT","Universal Human Trafficking Prevention Training","../paper/human-trafficking-prevention-paper.pdf"]],PAPER_KEY="https://drive.google.com/drive/folders/1G0S1czG98_YOzFTBPFxpHLMcpB3AXXtl";
 function emailOf(p){if(p.email)return p.email;const a=APPROVED.find(x=>x.active&&!x.alias_of&&x.full_name&&nm(x.full_name)===nm(p.full_name));return a?a.email:""}
 function paperCard(p){if(!can("record_trainings")&&!can("print_records"))return "";const to=emailOf(p);
@@ -267,11 +270,11 @@ async function loadApproved(){const{data,error}=await BHC.client().from("approve
 let pFilter="",pShowOff=false;
 function renderPeople(){
  const signed=new Set(PEOPLE.map(p=>(p.email||"").toLowerCase()));
- const rows=APPROVED.filter(a=>(pShowOff||a.active)&&(!pFilter||((a.email+" "+(a.full_name||"")+" "+(a.home_label||"")).toLowerCase().includes(pFilter))));
- const offN=APPROVED.filter(a=>!a.active).length;
+ const rows=APPROVED.filter(a=>(LEAD()||a.access!=="leadership")&&(pShowOff||a.active)&&(!pFilter||((a.email+" "+(a.full_name||"")+" "+(a.home_label||"")).toLowerCase().includes(pFilter))));
+ const offN=APPROVED.filter(a=>!a.active&&(LEAD()||a.access!=="leadership")).length;
  let h=nav("people")+`<h1>Approved people</h1><p class="lead">Only people on this list can use the portal, and each person's access comes from this list. Turning someone off locks them out of every record right away, including their own; their completed trainings stay on file for inspections.</p>
  <div class="bar"><input id="pq" type="search" placeholder="Search by email, name or home" value="${esc(pFilter)}" aria-label="Search approved people"><label class="small" style="display:flex;gap:6px;align-items:center;margin:0;font-weight:400"><input type="checkbox" id="poff" ${pShowOff?"checked":""} style="width:auto"> Show turned-off (${offN})</label>${can("manage_families")?`<button class="btn sm" id="padd">Add a person</button>`:""}</div>
- <div class="tscroll"><table><thead><tr><th>Email</th><th>Name</th><th>Home</th><th>Access</th><th>Status</th><th class="noprint"></th></tr></thead><tbody>${rows.map(a=>`<tr><td>${esc(a.email)}</td><td>${esc(a.full_name||"")}</td><td>${esc(a.home_label||"")}</td><td>${esc(a.access)}${a.access==="staff"?`<br><span class="small muted">${(a.permissions||[]).map(x=>esc((PERM_LABELS[x]||x).replace(" (coming)",""))).join(", ")||"No switches on"}</span>`:""}</td><td>${a.active?(signed.has(a.email)?`<span class="pill ok">Signed in before</span>`:`<span class="pill none">Not signed in yet</span>`):`<span class="pill over">Turned off</span>`}</td><td class="noprint">${can("manage_families")&&(a.access==="caregiver"||ME.role==="leadership")?`<button class="btn ghost sm" data-edit="${esc(a.email)}">Edit</button>`:""}</td></tr>`).join("")}</tbody></table></div>
+ <div class="tscroll"><table><thead><tr><th>Email</th><th>Name</th><th>Home</th><th>Access</th><th>Status</th><th class="noprint"></th></tr></thead><tbody>${rows.map(a=>`<tr><td>${esc(a.email)}</td><td>${esc(a.full_name||"")}</td><td>${esc(a.home_label||"")}</td><td>${esc(a.access)}${a.access==="staff"&&LEAD()?`<br><span class="small muted">${(a.permissions||[]).map(x=>esc((PERM_LABELS[x]||x).replace(" (coming)",""))).join(", ")||"No switches on"}</span>`:""}</td><td>${a.active?(signed.has(a.email)?`<span class="pill ok">Signed in before</span>`:`<span class="pill none">Not signed in yet</span>`):`<span class="pill over">Turned off</span>`}</td><td class="noprint">${can("manage_families")&&(LEAD()||a.access!=="leadership")?`<button class="btn ghost sm" data-edit="${esc(a.email)}">Edit</button>`:""}</td></tr>`).join("")}</tbody></table></div>
  <p class="small muted">${rows.length} shown. Emails from the BH tracker's Email Distribution List were loaded on November 9, 2026. The full name on each email connects that person's earlier training records, so enter it exactly as it appears on their training record.</p>`;
  $("#view").innerHTML=h;wireNav();
  $("#pq").oninput=e=>{pFilter=e.target.value.toLowerCase();const pos=e.target.selectionStart;renderPeople();const q=$("#pq");q.focus();q.setSelectionRange(pos,pos)};
@@ -283,17 +286,18 @@ function editPerson(a){const isNew=!a;a=a||{email:"",full_name:"",home_label:"",
  <div class="row2"><div><label for="ae">Email</label><input id="ae" type="email" value="${esc(a.email)}" ${isNew?"":"disabled"}></div><div><label for="an">Full name</label><input id="an" type="text" value="${esc(a.full_name||"")}" placeholder="Filled in when they first sign in, if left blank"></div></div>
  <div class="row2"><div><label for="ah">Foster home or staff role</label><input id="ah" type="text" value="${esc(a.home_label||"")}" placeholder="e.g., Johnson, Mark & Lisa"></div><div><label for="at">Type</label><select id="at">${TYPES.map(t=>`<option ${t===a.caregiver_type?"selected":""}>${t}</option>`).join("")}</select></div></div>
  ${lead?`<label for="aa">Access level</label><select id="aa">${["caregiver","staff","leadership"].map(r=>`<option ${r===a.access?"selected":""}>${r}</option>`).join("")}</select>
- <div id="permBox" style="${a.access==="staff"?"":"display:none"}"><label>Permission switches</label>${Object.entries(PERM_LABELS).map(([k,v])=>`<label style="display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0"><input type="checkbox" class="perm" value="${k}" ${(a.permissions||[]).includes(k)?"checked":""} style="width:auto"> ${esc(v)}</label>`).join("")}</div>`:`<p class="small muted">Access level: caregiver. Only leadership can approve staff.</p>`}
+ <div id="permBox" style="${a.access==="staff"?"":"display:none"}"><label>Permission switches</label>${Object.entries(PERM_LABELS).map(([k,v])=>`<label style="display:flex;gap:8px;align-items:center;font-weight:400;margin:6px 0"><input type="checkbox" class="perm" value="${k}" ${(a.permissions||[]).includes(k)?"checked":""} style="width:auto"> ${esc(v)}</label>`).join("")}</div>`:a.email&&a.email===(ME._email||"").toLowerCase()?`<p class="small muted">Access level: ${esc(a.access)}.</p>`:`<label for="aa">Access level</label><select id="aa">${["caregiver","staff"].map(r=>`<option ${r===a.access?"selected":""}>${r}</option>`).join("")}</select>`}
  <label for="ano">Notes (optional, no child information)</label><input id="ano" type="text" maxlength="300" value="${esc(a.notes||"")}">
- <label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="aact" ${a.active?"checked":""} style="width:auto"> Active (can use the portal)</label>
+ <label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="aact" ${a.active?"checked":""} ${!lead&&a.email&&a.email===(ME._email||"").toLowerCase()?"disabled":""} style="width:auto"> Active (can use the portal)</label>
  <p style="margin-top:14px"><button class="btn" id="asave">Save</button> <button class="btn ghost" id="acancel">Cancel</button></p></div>`;
  wireNav();$("#acancel").onclick=renderPeople;
  $("#aa")&&($("#aa").onchange=e=>{$("#permBox").style.display=e.target.value==="staff"?"":"none"});
  $("#asave").onclick=async()=>{const email=(isNew?$("#ae").value:a.email).trim().toLowerCase();if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){toast("Enter a valid email");return}
   const row={full_name:$("#an").value.trim()||null,home_label:$("#ah").value.trim()||null,caregiver_type:$("#at").value,notes:$("#ano").value.trim()||null,active:$("#aact").checked};
+  if(!lead&&$("#aa"))row.access=$("#aa").value;
   if(lead){row.access=$("#aa").value;row.permissions=row.access==="staff"?[...document.querySelectorAll(".perm:checked")].map(x=>x.value):[]}
   if(lead&&email===(ME._email||"").toLowerCase()&&(row.access!=="leadership"||!row.active)){toast("You cannot remove your own leadership access");return}
-  let res;if(isNew){row.email=email;if(!lead)row.access="caregiver";res=await BHC.client().from("approved_people").insert(row)}else res=await BHC.client().from("approved_people").update(row).eq("email",email);
+  let res;if(isNew){row.email=email;if(!lead)row.access=row.access||"caregiver";res=await BHC.client().from("approved_people").insert(row)}else res=await BHC.client().from("approved_people").update(row).eq("email",email);
   if(res.error){toast(/duplicate|unique/i.test(res.error.message)?"That email is already on the list":"Could not save: "+res.error.message);return}
   BHC.log(isNew?"approve_add":"approve_edit",email);await loadApproved();await load().catch(()=>{});toast("Saved");renderPeople()}}
 
@@ -323,7 +327,7 @@ async function start(u){
  let p;try{p=await BHC.profile(true)}catch(e){}
  if(!p){$("#view").innerHTML=`<div class="card"><h1>This page is for Benevolent House staff</h1><p>Your email is not set up for the admin page. Your own trainings are on the <a href="../">portal home</a>.</p><p><button class="btn ghost sm" id="so">Sign out</button></p></div>`;$("#so").onclick=async()=>{await BHC.signOut();location.reload()};return}
  ME=p;try{const r=await BHC.client().rpc("my_permissions");PERMS=r.data||[]}catch(e){PERMS=[]}
- $("#who").textContent=(p.full_name||p._email)+" · "+p.role;
+ $("#who").textContent=(p.full_name||p._email);
  if(!(can("view_training")||can("manage_families"))){$("#view").innerHTML=`<div class="card"><h1>This page is for Benevolent House staff</h1><p>You are signed in as ${esc(p.full_name||p._email)}. Your own trainings and certificates are on the <a href="../">portal home</a>.</p><p><button class="btn ghost sm" id="so">Sign out</button></p></div>`;$("#so").onclick=async()=>{await BHC.signOut();location.reload()};return}
  idle();try{BHC.visit()}catch(e){}$("#view").innerHTML=`<div class="card">Loading…</div>`;
  try{await Promise.all([can("view_training")?load():Promise.resolve(),loadApproved()])}catch(e){$("#view").innerHTML=`<div class="card">Could not load records: ${esc(e.message||e)}</div>`;return}
