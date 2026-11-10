@@ -155,7 +155,7 @@ function howOf(r){if(r.source==="portal")return "Portal course"+(r.score!=null?`
 const LEAD=()=>ME&&ME.role==="leadership";
 /* leadership accounts are managed only by leadership, and staff do not see them in their lists */
 const seesPerson=p=>LEAD()||p.role!=="leadership";
-const canFix=p=>can("record_trainings")&&p.id!==ME.id&&!p.legacy&&(LEAD()||p.role!=="leadership");
+const canFix=p=>can("record_trainings")&&p.id!==ME.id&&!p.legacy;
 const PAPER=[["T3C-PP","T3C Policy and Procedure Training (Core Session)","../paper/t3c-policy-and-procedure-paper.pdf"],["HT","Universal Human Trafficking Prevention Training","../paper/human-trafficking-prevention-paper.pdf"]],PAPER_KEY="https://drive.google.com/drive/folders/1G0S1czG98_YOzFTBPFxpHLMcpB3AXXtl";
 function emailOf(p){if(p.email)return p.email;const a=APPROVED.find(x=>x.active&&!x.alias_of&&x.full_name&&nm(x.full_name)===nm(p.full_name));return a?a.email:""}
 function paperCard(p){if(!can("record_trainings")&&!can("print_records"))return "";const to=emailOf(p);
@@ -270,8 +270,8 @@ async function loadApproved(){const{data,error}=await BHC.client().from("approve
 let pFilter="",pShowOff=false;
 function renderPeople(){
  const signed=new Set(PEOPLE.map(p=>(p.email||"").toLowerCase()));
- const rows=APPROVED.filter(a=>(pShowOff||a.active)&&(!pFilter||((a.email+" "+(a.full_name||"")+" "+(a.home_label||"")).toLowerCase().includes(pFilter))));
- const offN=APPROVED.filter(a=>!a.active).length;
+ const rows=APPROVED.filter(a=>(LEAD()||a.access!=="leadership")&&(pShowOff||a.active)&&(!pFilter||((a.email+" "+(a.full_name||"")+" "+(a.home_label||"")).toLowerCase().includes(pFilter))));
+ const offN=APPROVED.filter(a=>!a.active&&(LEAD()||a.access!=="leadership")).length;
  let h=nav("people")+`<h1>Approved people</h1><p class="lead">Only people on this list can use the portal, and each person's access comes from this list. Turning someone off locks them out of every record right away, including their own; their completed trainings stay on file for inspections.</p>
  <div class="bar"><input id="pq" type="search" placeholder="Search by email, name or home" value="${esc(pFilter)}" aria-label="Search approved people"><label class="small" style="display:flex;gap:6px;align-items:center;margin:0;font-weight:400"><input type="checkbox" id="poff" ${pShowOff?"checked":""} style="width:auto"> Show turned-off (${offN})</label>${can("manage_families")?`<button class="btn sm" id="padd">Add a person</button>`:""}</div>
  <div class="tscroll"><table><thead><tr><th>Email</th><th>Name</th><th>Home</th><th>Access</th><th>Status</th><th class="noprint"></th></tr></thead><tbody>${rows.map(a=>`<tr><td>${esc(a.email)}</td><td>${esc(a.full_name||"")}</td><td>${esc(a.home_label||"")}</td><td>${esc(LEAD()?a.access:(a.access==="caregiver"?"caregiver":"staff"))}${a.access==="staff"&&LEAD()?`<br><span class="small muted">${(a.permissions||[]).map(x=>esc((PERM_LABELS[x]||x).replace(" (coming)",""))).join(", ")||"No switches on"}</span>`:""}</td><td>${a.active?(signed.has(a.email)?`<span class="pill ok">Signed in before</span>`:`<span class="pill none">Not signed in yet</span>`):`<span class="pill over">Turned off</span>`}</td><td class="noprint">${can("manage_families")&&(LEAD()||a.access!=="leadership")?`<button class="btn ghost sm" data-edit="${esc(a.email)}">Edit</button>`:""}</td></tr>`).join("")}</tbody></table></div>
