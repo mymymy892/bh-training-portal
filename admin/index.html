@@ -48,14 +48,6 @@ label{display:block;font-weight:600;margin:10px 0 4px}
 .toast.show{opacity:1}
 .hidden{display:none!important}
 .printhead{display:none}
-#cert{background:#fff;max-width:980px;margin:0 auto;padding:14px;border:3px solid var(--brown);aspect-ratio:11/8.5}
-#cert .c-in{border:1.5px solid #C9A227;height:100%;padding:34px 48px;text-align:center;display:flex;flex-direction:column;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 0%,#FBF7F2,#fff 60%)}
-#cert .c-logo{height:74px}#cert .c-org{font-family:Georgia,serif;font-size:1.45rem;color:var(--brown);font-weight:700;margin-top:4px}#cert .c-tag{font-size:.8rem;letter-spacing:.06em;color:var(--muted);font-style:italic}
-#cert .c-title{font-family:Georgia,serif;font-size:2.5rem;color:var(--brown);margin:18px 0 6px;letter-spacing:.02em}#cert .c-small{margin:6px 0;color:var(--muted);font-size:1rem}
-#cert .c-name{font-family:Georgia,serif;font-size:2.3rem;color:var(--ink);border-bottom:1.5px solid #C9A227;padding:0 40px 6px;margin:4px 0 8px}
-#cert .c-course{font-size:1.45rem;font-weight:700;color:var(--green-dk);max-width:760px}#cert .c-meta{margin:10px 0 0;color:var(--ink)}
-#cert .c-sigs{display:flex;gap:70px;justify-content:center;margin-top:34px}#cert .c-sigs div{min-width:240px;font-size:.85rem;color:var(--muted)}#cert .c-sigs span{display:block;font-family:Georgia,serif;font-size:1.05rem;color:var(--ink);min-height:1.4em}#cert .c-sigs b{display:block;border-top:1px solid var(--ink);margin:4px 0}
-#cert .c-foot{margin-top:22px;font-size:.75rem;color:var(--muted)}
 .printdoc{display:none}
 .pd-head{display:flex;align-items:center;gap:14px;border-bottom:3px solid #7B4B2A;padding-bottom:10px}.pd-head img{height:56px}.pd-org{font-family:Georgia,serif;font-size:20px;color:#7B4B2A;font-weight:700}.pd-addr{font-size:10.5px;color:#6B5F58}.pd-title{margin-left:auto;font-family:Georgia,serif;font-size:19px;color:#2B2320}
 .pd-info{width:100%;margin:12px 0;border-collapse:collapse}.pd-info td{border:1px solid #E3D7C9;padding:6px 8px;font-size:12px;font-weight:700}.pd-info span{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.06em;color:#6B5F58;font-weight:400}
@@ -67,8 +59,24 @@ label{display:block;font-weight:600;margin:10px 0 4px}
  .card,.tscroll{border:0;padding:0;margin:0}.printhead{display:block;margin-bottom:10px}
  th{background:#fff;position:static}table{font-size:11px}thead{display:table-header-group}tr{page-break-inside:avoid}
  html,body{background:#fff!important}.printdoc{display:block}.screenonly{display:none}
- #cert{border:3px solid #7B4B2A;max-width:none;aspect-ratio:auto;height:7.1in;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 }
+.cert{background:#fff;width:11in;height:8.5in;margin:0 auto 18px;padding:.32in;box-sizing:border-box;box-shadow:0 1px 6px rgba(0,0,0,.12);font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;color:#2B2320}
+.cert .ct-in{height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.ct-logo{height:.78in}.ct-org{letter-spacing:.42em;font-size:13px;color:#5E3920;margin-top:2px;padding-left:.42em}.ct-tag{font-size:10.5px;color:#6B5F58}
+.ct-title{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:34px;color:#2F4A2A;margin:10px 0 4px}
+.ct-small{font-size:12.5px;color:#6B5F58}.ct-name{font-family:Georgia,serif;font-size:27px;color:#5B7F45;font-weight:700;border-bottom:1px solid #B9B2A8;padding:2px 60px 3px;margin-top:4px;min-width:4.2in}
+.ct-lab{font-size:9.5px;color:#8A8079;margin-top:2px}.ct-has{font-size:13px;margin-top:9px}
+.ct-head{font-family:Georgia,serif;font-weight:700;font-size:20px;color:#2B2320;margin-top:3px;max-width:9in}.ct-sub{font-style:italic;color:#B8741A;font-size:13.5px}.ct-by{font-size:10.5px;color:#6B5F58;margin-top:1px}
+.ct-on{font-size:13px;margin-top:4px}.ct-cc{letter-spacing:.3em;font-size:9.5px;color:#6B5F58;margin:9px 0 5px}
+.ct-cols{display:grid;gap:14px;width:100%;background:#F3F5F0;border-radius:3px;padding:9px 12px;box-sizing:border-box;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ct-cols.n1,.ct-cols.n2{font-size:12px}.ct-cols.n1 ul,.ct-cols.n2 ul{font-size:12px;line-height:1.45}.ct-cols.n1{grid-template-columns:1fr;max-width:6in}.ct-cols.n2{grid-template-columns:1fr 1fr;max-width:8in}.ct-cols.n3{grid-template-columns:repeat(3,1fr)}.ct-cols.n4{grid-template-columns:repeat(4,1fr)}
+.ct-cols h5{margin:0 0 4px;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#4E7A3E;font-weight:700}.ct-cols ul{margin:0;padding-left:12px;font-size:10.5px;line-height:1.32}.ct-cols li{margin:0 0 1px}
+.ct-kc{display:flex;gap:28px;font-size:10.5px;color:#6B5F58;margin-top:8px}.ct-kc b{color:#2B2320}
+.ct-bot{margin-top:auto;width:100%;display:flex;justify-content:space-between;align-items:flex-end}.ct-addr{font-size:9.5px;color:#6B5F58;text-align:left;padding-bottom:12px}
+.ct-sig{width:3.6in;text-align:center;font-size:10px;color:#6B5F58}.ct-sig img{height:.62in;display:block;margin:0 auto -6px}.ct-blank{height:.62in}.ct-sig b{display:block;border-top:1px solid #2B2320;margin-bottom:2px}.ct-sig strong{display:block;color:#2B2320;font-size:11.5px}
+.ct-foot{font-size:8.5px;color:#8A8079;margin-top:8px;line-height:1.45}
+@media screen and (max-width:1100px){.cert{zoom:.48}}
+@media print{.cert{box-shadow:none;margin:0;page-break-after:always;break-after:page}.cert:last-child{page-break-after:auto;break-after:auto}}
 @page{margin:0}
 @media print{main{padding:.5in!important;-webkit-box-decoration-break:clone;box-decoration-break:clone}}
 </style>
@@ -78,6 +86,7 @@ label{display:block;font-weight:600;margin:10px 0 4px}
 <main class="wrap"><section id="view"></section></main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="../catalog.js"></script>
+<script src="certs.js"></script>
 <script src="../vendor/supabase-2.117.3.js"></script>
 <script src="../bh-cloud.js"></script>
 <script>
@@ -196,7 +205,7 @@ function activityHtml(p){if(p.legacy)return `<div class="card noprint"><b>Not si
 function pageName(t){t=String(t||"");if(/admin/.test(t))return "Admin";if(/t3c-staff/.test(t))return "T3C staff session";if(/t3c/.test(t))return "T3C core session";if(/sir/.test(t))return "Serious Incident Reporting";return "Portal home"}
 
 function renderPerson(id){sel=PEOPLE.find(p=>p.id===id);if(!sel)return;const p=sel;
- let h=`<div class="noprint bar"><button class="btn ghost sm" id="back">All people</button><span class="spacer"></span><a class="btn ghost sm" href="../?view=${encodeURIComponent(p.id)}" target="_blank" rel="noopener">See their view</a>${can("print_records")?`<button class="btn sm" onclick="window.print()">Print training log</button>`:""}</div>
+ let h=`<div class="noprint bar"><button class="btn ghost sm" id="back">All people</button><span class="spacer"></span><a class="btn ghost sm" href="../?view=${encodeURIComponent(p.id)}" target="_blank" rel="noopener">See their view</a>${can("print_records")?`<button class="btn ghost sm" id="allCerts">Print all certificates</button><button class="btn sm" onclick="window.print()">Print training log</button>`:""}</div>
  ${printLog(p)}<div class="screenonly">
  <h1>${esc(p.full_name||p.email)}</h1><p class="lead">${esc(p.home_label||"")}${p.caregiver_type?" · "+esc(p.caregiver_type):""} · ${esc(p.email)}</p>${logTable(p)}
  <p class="small muted noprint">"Portal course" trainings are graded and signed in the portal. "BH record" comes from the training records kept before the portal. "Self-reported" means the person recorded the training themselves; it becomes "Verified" once staff checks the sign-in sheet or certificate. Use Edit to correct a date, hours or trainer; every change is kept in the history below. Nobody edits their own records; another leadership member corrects those.</p>
@@ -215,22 +224,53 @@ function renderPerson(id){sel=PEOPLE.find(p=>p.id===id);if(!sel)return;const p=s
   if(error){toast("Could not save: "+error.message);return}BHC.log("record_live",c.code);await load();toast("Saved");renderPerson(p.id)});
  document.querySelectorAll("[data-verify]").forEach(b=>b.onclick=async()=>{const{error}=await BHC.client().from("completions").update({verified_by:ME.id}).eq("id",b.dataset.verify);if(error){toast("Could not verify: "+error.message);return}BHC.log("verify",b.dataset.verify);await load();toast("Verified");renderPerson(p.id)});
  document.querySelectorAll("[data-cert]").forEach(b=>b.onclick=()=>renderCert(b.dataset.cert));
+ $("#allCerts")&&($("#allCerts").onclick=()=>renderAllCerts(p.id));
  document.querySelectorAll("[data-editc]").forEach(b=>b.onclick=()=>editComp(b.dataset.editc));
  document.querySelectorAll("[data-file]").forEach(b=>b.onclick=()=>openFile(b.dataset.file));
  document.querySelectorAll("[data-quiz]").forEach(b=>b.onclick=()=>renderQuiz(b.dataset.quiz));
 
  if(!p.legacy)BHC.log("view_person",p.id)}
 
-function renderCert(cid){const r=COMPS.find(x=>x.id===cid);const p=PEOPLE.find(x=>x.id===r.user_id);const cc=CAT.find(x=>x.code===r.course_code);const title=(cc&&cc.title)||r.course_title;
- const tr=r.trainer||(r.answers&&r.answers.trainer)||(cc&&/^DFPS/.test(cc.group||"")?"Texas Department of Family and Protective Services":cc&&cc.group==="Outside Certificates"?"":"Benevolent House");{let st=document.getElementById("pgsize");if(!st){st=document.createElement("style");st.id="pgsize";document.head.appendChild(st)}st.textContent="@page{size:letter landscape;margin:0}"}
- $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">Back to ${esc(p.full_name)}</button><span class="spacer"></span>${can("print_records")?`<button class="btn sm" onclick="window.print()">Print certificate</button>`:""}</div>
- <div id="cert"><div class="c-in"><img src="../bh-logo.png" alt="" class="c-logo"><div class="c-org">Benevolent House</div><div class="c-tag">Building strong foundations for our children</div>
- <div class="c-title">Certificate of Completion</div><p class="c-small">This certifies that</p><div class="c-name">${esc(p.full_name)}</div>
- <p class="c-small">has successfully completed</p><div class="c-course">${esc(title)}</div>
- <p class="c-meta">${esc(+r.hours)} training hour${+r.hours===1?"":"s"} · Completed ${esc(fmt(r.completed_at))}${r.score!=null?` · Knowledge Check ${esc(r.score)} of ${esc(r.total||"")}`:""}</p>
- <div class="c-sigs"><div><span>${esc(tr||"Benevolent House")}</span><b></b>Trainer or provider</div><div><span>&nbsp;</span><b></b>Authorized representative, Benevolent House</div></div>
- <p class="c-foot">${esc(p.home_label||"")}${p.home_label?" · ":""}Record ${esc(String(r.legacy?"BH-"+r.legacyId:r.id).slice(0,10).toUpperCase())} · PO Box 2518, Red Oak, TX 75154 · (214) 774-4871</p></div></div>`;
- $("#back").onclick=()=>{const st=document.getElementById("pgsize");if(st)st.remove();renderPerson(p.id)}}
+/* suggested trainer for Record a training: Christopher R. Orr for Benevolent House trainings, the provider for outside ones */
+function trainerFor(c){if(!c)return "";const l=c.link||"";if(/dfps\.texas\.gov/.test(l))return "Texas Department of Family and Protective Services";if(/tamu\.edu/.test(l))return "Texas A&M AgriLife Extension";if(/texassuicideprevention/.test(l))return "Texas Suicide Prevention Collaborative";if(/jotform/.test(l))return "";
+ if(/^DFPS/.test(c.code||""))return "Texas Department of Family and Protective Services";if(c.group==="Outside Certificates")return "";return "Christopher R. Orr"}
+/* certificates, in the Benevolent House TST-FC layout. The signature image is kept in the database (cert_assets), readable only by people who can print records. */
+let SIG="";async function loadSig(){if(SIG)return SIG;try{const{data}=await BHC.client().from("cert_assets").select("data").eq("key","sig_corr").maybeSingle();const v=(data&&data.data)||"";if(/^data:image\/(png|jpe?g|webp);base64,[A-Za-z0-9+\/=]+$/.test(v))SIG=v}catch(e){}return SIG}
+const isCOrr=n=>/^christopher( r\.?)? orr$/.test(nm(n||"").replace(/\s+/g," ").trim());
+function certHrs(h){h=+h||0;return (h%1===0?h.toFixed(1):String(h))+" hour"+(h===1?"":"s")}
+const certDay=r=>{const d=new Date(r.completed_at);return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0")};
+const certFuture=r=>certDay(r)>todayStr();
+function certOk(r){return !!r&&!r.voided&&(+r.hours>0)&&!certFuture(r)}
+function certHtml(r,p){const cc=CAT.find(x=>x.code===r.course_code)||{};const I=(window.CERT_INFO||{})[r.course_code]||{head:cc.title||r.course_title,sub:"",kind:"training in",cols:[]};
+ const ap=APPROVED.find(x=>x.active&&nm(x.full_name||"")===nm(p.full_name||""));const staffish=ap&&(ap.access==="staff"||ap.access==="leadership");
+ const self=isCOrr(p.full_name);const sName=self?"Tanya J. Orr":"Christopher R. Orr";const sTitle=self?"Certified Trainer/LCPAA/Chief Executive Director":(I.sigTitle||"Certified Trainer/LCPAA/Chief Operating Officer");
+ const online=/^online/.test(I.kind);const d=new Date(r.completed_at);const ds=d.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
+ const cols=(I.cols||[]).filter(c=>c[1]&&c[1].length);
+ return `<div class="cert"><div class="ct-in">
+ <img src="../bh-logo.png" alt="" class="ct-logo"><div class="ct-org">BENEVOLENT HOUSE</div><div class="ct-tag">Licensed Child-Placing Agency &bull; Red Oak, Texas</div>
+ <div class="ct-title">Certificate of Completion</div><div class="ct-small"><i>This certifies that</i></div>
+ <div class="ct-name">${esc(p.full_name)}</div><div class="ct-lab">${staffish?"Staff member":"Caregiver name"}</div>
+ <div class="ct-has">has successfully completed ${esc(certHrs(r.hours))} of ${esc(I.kind)}</div>
+ <div class="ct-head">${esc(I.head)}</div>${I.sub?`<div class="ct-sub">${esc(I.sub)}</div>`:""}${I.by?`<div class="ct-by">${esc(I.by)}</div>`:""}
+ <div class="ct-on">${online?"completed on":"delivered on"} <b>${esc(ds)}</b></div>
+ ${cols.length?`<div class="ct-cc">CONTENT COVERED</div><div class="ct-cols n${cols.length}">${cols.map(c=>`<div>${c[0]?`<h5>${esc(c[0])}</h5>`:`<h5>&nbsp;</h5>`}<ul>${c[1].map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</div>`:""}
+ ${r.score!=null?`<div class="ct-kc"><span>Final Knowledge Check: <b>completed and passed</b></span><span>Score is recorded on the copy filed with Benevolent House.</span></div>`:""}
+ <div class="ct-bot"><div class="ct-addr">504 SH-342<br>Red Oak, TX 75154</div><div class="ct-sig">${!self&&SIG?`<img src="${esc(SIG)}" alt="">`:`<div class="ct-blank"></div>`}<b></b><strong>${esc(sName)}</strong><span>${esc(sTitle)}</span></div></div>
+ <div class="ct-foot">Retain this certificate for your training record. A copy is filed with Benevolent House.${I.note?`<br>${esc(I.note)}`:""}<br>Record ${esc(String(r.legacy?"BH-"+r.legacyId:r.id).slice(0,10).toUpperCase())} &middot; Date from the ${r.legacy?"Benevolent House training record":"Benevolent House training portal"}</div>
+ </div></div>`}
+function pageLandscape(on){let st=document.getElementById("pgsize");if(on){if(!st){st=document.createElement("style");st.id="pgsize";document.head.appendChild(st)}st.textContent="@page{size:letter landscape;margin:0}@media print{main{padding:0!important}.wrap{padding:0!important;max-width:none}}"}else if(st)st.remove()}
+async function renderCerts(list,p,label){await loadSig();pageLandscape(true);
+ $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">Back to ${esc(p.full_name)}</button><span class="spacer"></span>${can("print_records")?`<button class="btn sm" onclick="window.print()">${esc(label)}</button>`:""}</div>
+ ${list.length?list.map(r=>certHtml(r,p)).join(""):`<div class="card">No certificates to print.</div>`}`;window.scrollTo(0,0);
+ $("#back").onclick=()=>{pageLandscape(false);renderPerson(p.id)}}
+function renderCert(cid){const r=COMPS.find(x=>x.id===cid);if(!r)return;const p=PEOPLE.find(x=>x.id===r.user_id);if(!p)return;
+ if(!certOk(r)){toast(certFuture(r)?"This record's date is in the future. Fix the date first.":"No certificate for this record.");return}
+ renderCerts([r],p,"Print certificate")}
+function renderAllCerts(pid){const p=PEOPLE.find(x=>x.id===pid);if(!p)return;const best={},skip=new Set();
+ COMPS.filter(r=>r.user_id===pid&&!r.voided&&+r.hours>0).forEach(r=>{if(!certOk(r)){skip.add(r.course_code);return}if(!best[r.course_code]||new Date(r.completed_at)>new Date(best[r.course_code].completed_at))best[r.course_code]=r});
+ const list=catFor(p).map(c=>best[c.code]).filter(Boolean);const fut=[...skip].filter(k=>!best[k]).length;
+ if(skip.size)toast(skip.size+" record"+(skip.size>1?"s":"")+" with a future date "+(skip.size>1?"were":"was")+" left out"+(fut?"":"; an earlier certificate was used"));
+ renderCerts(list,p,"Print all "+list.length+" certificates")}
 
 async function openFile(cid){const r=COMPS.find(x=>x.id===cid);if(!r||!r.file_path)return;const w=window.open("","_blank");
  const{data,error}=await BHC.client().storage.from("certificates").createSignedUrl(r.file_path,300);if(error||!data){if(w)w.close();toast("Could not open the file: "+((error&&error.message)||""));return}if(w)w.location=data.signedUrl;else location.href=data.signedUrl;BHC.log("view_file",r.id)}
