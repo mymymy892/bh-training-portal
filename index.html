@@ -461,7 +461,7 @@ function toggleRead(btn,el){if(reading){stopRead();return}if(!window.speechSynth
 function renderHome(){
  if(S.user&&S.user.cloud&&!window.__bhChecked){$("#userChip").textContent="";$("#view-home").innerHTML=`<div class="card"><p>Loading your trainings…</p></div>`;show("home");return}
  $("#userChip").textContent=userLabel();
- const LIST=CATALOG.filter(c=>window.BH_FOR(c,S.user&&S.user.cloud?S.user.role:"")||(S.user&&S.done[c.code]));const groups=(window.BH_GROUPS||[]).map(g=>g[0]).filter(g=>LIST.some(c=>c.group===g)).concat([...new Set(LIST.map(c=>c.group))].filter(g=>!(window.BH_GROUPS||[]).some(x=>x[0]===g)));const gNote=g=>((window.BH_GROUPS||[]).find(x=>x[0]===g)||[])[1]||"";
+ const LIST=CATALOG.filter(c=>window.BH_FOR(c,S.user&&S.user.cloud?S.user.role:"")||(S.user&&S.done[c.code]&&c.aud!=="none"));const groups=(window.BH_GROUPS||[]).map(g=>g[0]).filter(g=>LIST.some(c=>c.group===g)).concat([...new Set(LIST.map(c=>c.group))].filter(g=>!(window.BH_GROUPS||[]).some(x=>x[0]===g)));const gNote=g=>((window.BH_GROUPS||[]).find(x=>x[0]===g)||[])[1]||"";
  const forWho=S.user&&S.user.cloud?(BH_GROUP(S.user.role)==="staff"?"your staff trainings":BH_GROUP(S.user.role)==="provider"?"your trainings":"your caregiver trainings"):"every Benevolent House training";
  let h=`<div class="hero"><div><h1>Benevolent House Training Portal</h1><p>Your trainings, what is due, and your record, all in one place.</p></div></div>`;
  if((!S.user||!S.user.cloud)&&window.BHC&&BHC.available()){h+=`<div class="card" id="bhsHost"></div>`}
