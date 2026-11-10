@@ -160,7 +160,7 @@ window.BH_WINDOW=function(c){return +(c&&c.window)||90};
   const groups=[[30,"Due in 30 days"],[14,"Due in 2 weeks"],[1,"Due tomorrow"]];
   const body=groups.map(([d,l])=>section(l,list.filter(i=>i.days===d))).join("")+section("Past due (Monday list)",past);
   const n=list.length+past.length;
-  return{subject:`Benevolent House training due list for ${fmtLong(p.today)}`,html:`<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.45;color:#2B2320;max-width:720px"><p>These trainings reach 30 days, 2 weeks or 1 day before their due date today${past.length?", and on Mondays the list also shows everything past due":""}. Families receive their own reminder emails.</p>${body}<p style="margin-top:18px">See everyone's records in <a href="${PORTAL}admin/">Training Admin</a>.</p></div>`,items:list.concat(past),count:n}}
+  return{subject:`Benevolent House training due list for ${fmtLong(p.today)}`,html:`<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.45;color:#2B2320;max-width:720px"><p>These trainings reach 30 days, 2 weeks or 1 day before their due date today${past.length?", and on Mondays the list also shows everything past due":""}. Families receive their own reminder emails.</p>${body}<p style="margin-top:18px">See everyone's records in <a href="${PORTAL}admin/">Staff Dashboard</a>.</p></div>`,items:list.concat(past),count:n}}
  W.BH_REMIND={plan,familyEmails,staffEmail,ymd,fmtLong,FAMILY_MARKS,STAFF_MARKS,CATCH_UP};
 })();
 

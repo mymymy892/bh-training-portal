@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8"><link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png"><link rel="icon" type="image/png" sizes="192x192" href="/favicon-192.png"><link rel="apple-touch-icon" href="/apple-touch-icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Benevolent House Training Admin</title>
+<title>Benevolent House Staff Dashboard</title>
 <meta name="robots" content="noindex">
 <style>
 :root{--brown:#7B4B2A;--brown-dk:#5E3920;--green:#2E7D4F;--green-dk:#226040;--cream:#FBF7F2;--sand:#F1E8DD;--ink:#2B2320;--muted:#6B5F58;--line:#E3D7C9;--red:#B23A3A;--amber:#9A6A00;--amber-bg:#FFF4D6;--red-bg:#FBE9E7;--green-bg:#E3F3E9}
@@ -74,7 +74,7 @@ label{display:block;font-weight:600;margin:10px 0 4px}
 </style>
 </head>
 <body>
-<header class="top"><div class="wrap topbar"><img src="../bh-logo.png" alt="Benevolent House"><div class="brand">Benevolent House<small>Training Admin</small></div><span class="spacer"></span><span class="chip" id="who">Not signed in</span><a class="btn ghost sm noprint" href="../">Portal home</a></div></header>
+<header class="top"><div class="wrap topbar"><img src="../bh-logo.png" alt="Benevolent House"><div class="brand">Benevolent House<small>Staff Dashboard</small></div><span class="spacer"></span><span class="chip" id="who">Not signed in</span><a class="btn ghost sm noprint" href="../">Portal home</a></div></header>
 <main class="wrap"><section id="view"></section></main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="../catalog.js"></script>
@@ -329,7 +329,7 @@ async function start(u){
  if(!window.BHC||!BHC.available()){$("#view").innerHTML=`<div class="card">The admin page needs an internet connection. Please check your connection and refresh.</div>`;return}
  const s=await BHC.session();
  if(s){start();return}
- $("#view").innerHTML=`<h1>Training Admin</h1><p class="lead">Sign in with your Benevolent House email to see every caregiver's training records.</p><div class="card" id="host"></div>`;
+ $("#view").innerHTML=`<h1>Staff Dashboard</h1><p class="lead">Sign in with your Benevolent House email to see every caregiver's training records.</p><div class="card" id="host"></div>`;
  BHSignIn($("#host"),()=>start(),{roles:["Staff","Foster Caregiver","Kinship Caregiver","Adoptive Parent","Foster and Adoptive Caregiver","Contracted Provider"]});
 })();
 </script>
