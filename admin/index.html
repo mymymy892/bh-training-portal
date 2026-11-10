@@ -60,8 +60,13 @@ label{display:block;font-weight:600;margin:10px 0 4px}
  th{background:#fff;position:static}table{font-size:11px}thead{display:table-header-group}tr{page-break-inside:avoid}
  html,body{background:#fff!important}.printdoc{display:block}.screenonly{display:none}
 }
-.cert{background:#fff;width:11in;height:8.5in;margin:0 auto 18px;padding:.32in;box-sizing:border-box;box-shadow:0 1px 6px rgba(0,0,0,.12);font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;color:#2B2320}
-.cert .ct-in{height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
+.cert{background:#fff;width:11in;height:8.5in;margin:0 auto 18px;padding:.22in;box-sizing:border-box;box-shadow:0 1px 6px rgba(0,0,0,.12);font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;color:#2B2320}
+.ct-frame{position:relative;height:100%;border:2.5px solid #5E3920;outline:1px solid #B08A2E;outline-offset:-7px;padding:.16in .3in .12in;box-sizing:border-box;overflow:hidden;background:radial-gradient(ellipse at 50% 38%,#FFFDF8 0%,#fff 70%);-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.ct-frame:before,.ct-frame:after{content:"";position:absolute;width:.55in;height:.55in;border:2px solid #B08A2E;pointer-events:none}.ct-frame:before{top:12px;left:12px;border-right:0;border-bottom:0}.ct-frame:after{bottom:12px;right:12px;border-left:0;border-top:0}
+.ct-wm{position:absolute;left:50%;top:54%;width:5.2in;transform:translate(-50%,-50%);opacity:.045;pointer-events:none}
+.ct-mid{flex:1;width:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:0}
+.ct-seal{width:1.05in;height:1.05in;flex:0 0 auto;margin-bottom:2px}
+.cert .ct-in{position:relative;height:100%;display:flex;flex-direction:column;align-items:center;text-align:center;position:relative}
 .ct-logo{height:.78in}.ct-org{letter-spacing:.42em;font-size:13px;color:#5E3920;margin-top:2px;padding-left:.42em}.ct-tag{font-size:10.5px;color:#6B5F58}
 .ct-title{font-family:Georgia,"Times New Roman",serif;font-weight:700;font-size:34px;color:#2F4A2A;margin:10px 0 4px}
 .ct-small{font-size:12.5px;color:#6B5F58}.ct-name{font-family:Georgia,serif;font-size:27px;color:#5B7F45;font-weight:700;border-bottom:1px solid #B9B2A8;padding:2px 60px 3px;margin-top:4px;min-width:4.2in}
@@ -69,10 +74,10 @@ label{display:block;font-weight:600;margin:10px 0 4px}
 .ct-head{font-family:Georgia,serif;font-weight:700;font-size:20px;color:#2B2320;margin-top:3px;max-width:9in}.ct-sub{font-style:italic;color:#B8741A;font-size:13.5px}.ct-by{font-size:10.5px;color:#6B5F58;margin-top:1px}
 .ct-on{font-size:13px;margin-top:4px}.ct-cc{letter-spacing:.3em;font-size:9.5px;color:#6B5F58;margin:9px 0 5px}
 .ct-cols{display:grid;gap:14px;width:100%;background:#F3F5F0;border-radius:3px;padding:9px 12px;box-sizing:border-box;text-align:left;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-.ct-cols.n1,.ct-cols.n2{font-size:12px}.ct-cols.n1 ul,.ct-cols.n2 ul{font-size:12px;line-height:1.45}.ct-cols.n1{grid-template-columns:1fr;max-width:6in}.ct-cols.n2{grid-template-columns:1fr 1fr;max-width:8in}.ct-cols.n3{grid-template-columns:repeat(3,1fr)}.ct-cols.n4{grid-template-columns:repeat(4,1fr)}
+.ct-cols.n1,.ct-cols.n2{padding:14px 22px}.ct-cols.n1 ul,.ct-cols.n2 ul{font-size:13px;line-height:1.6}.ct-cols.n1 h5,.ct-cols.n2 h5{font-size:10.5px}.ct-cols.n1{grid-template-columns:1fr;max-width:6in}.ct-cols.n2{grid-template-columns:1fr 1fr;max-width:8in}.ct-cols.n3{grid-template-columns:repeat(3,1fr)}.ct-cols.n4{grid-template-columns:repeat(4,1fr)}
 .ct-cols h5{margin:0 0 4px;font-size:9.5px;letter-spacing:.12em;text-transform:uppercase;color:#4E7A3E;font-weight:700}.ct-cols ul{margin:0;padding-left:12px;font-size:10.5px;line-height:1.32}.ct-cols li{margin:0 0 1px}
 .ct-kc{display:flex;gap:28px;font-size:10.5px;color:#6B5F58;margin-top:8px}.ct-kc b{color:#2B2320}
-.ct-bot{margin-top:auto;width:100%;display:flex;justify-content:space-between;align-items:flex-end}.ct-addr{font-size:9.5px;color:#6B5F58;text-align:left;padding-bottom:12px}
+.ct-bot{margin-top:4px;width:100%;display:flex;justify-content:space-between;align-items:flex-end}.ct-addr{font-size:9.5px;color:#6B5F58;text-align:left;padding-bottom:12px}
 .ct-sig{width:3.6in;text-align:center;font-size:10px;color:#6B5F58}.ct-sig img{max-height:.6in;max-width:3.1in;height:auto;width:auto;display:block;margin:0 auto -4px}.ct-blank{height:.62in}.ct-sig b{display:block;border-top:1px solid #2B2320;margin-bottom:2px}.ct-sig strong{display:block;color:#2B2320;font-size:11.5px}
 .ct-foot{font-size:8.5px;color:#8A8079;margin-top:8px;line-height:1.45}
 @media screen and (max-width:1100px){.cert{zoom:.48}}
@@ -249,18 +254,19 @@ function certHtml(r,p){const cc=CAT.find(x=>x.code===r.course_code)||{};const I=
  if((S.k==="sig_corr"&&isCOrr(p.full_name))||(S.k==="sig_haddie"&&isName(p.full_name,/^haddie( [a-z]\.?)? mashburn$/)))S=TORR;const sName=S.n,sTitle=S.t,sImg=SIGS[S.k]||"";
  const online=/^online/.test(I.kind);const d=new Date(r.completed_at);const ds=d.toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"});
  const cols=(I.cols||[]).filter(c=>c[1]&&c[1].length);
- return `<div class="cert"><div class="ct-in">
+ return `<div class="cert"><div class="ct-frame"><img src="../bh-logo.png" alt="" class="ct-wm"><div class="ct-in">
  <img src="../bh-logo.png" alt="" class="ct-logo"><div class="ct-org">BENEVOLENT HOUSE</div><div class="ct-tag">Licensed Child-Placing Agency &bull; Red Oak, Texas</div>
  <div class="ct-title">Certificate of Completion</div><div class="ct-small"><i>This certifies that</i></div>
  <div class="ct-name">${esc(p.full_name)}</div><div class="ct-lab">${staffish?"Staff member":"Caregiver name"}</div>
  <div class="ct-has">has successfully completed ${esc(certHrs(r.hours))} of ${esc(I.kind)}</div>
  <div class="ct-head">${esc(I.head)}</div>${I.sub?`<div class="ct-sub">${esc(I.sub)}</div>`:""}${I.by?`<div class="ct-by">${esc(I.by)}</div>`:""}
  <div class="ct-on">${online?"completed on":"delivered on"} <b>${esc(ds)}</b></div>
- ${cols.length?`<div class="ct-cc">CONTENT COVERED</div><div class="ct-cols n${cols.length}">${cols.map(c=>`<div>${c[0]?`<h5>${esc(c[0])}</h5>`:`<h5>&nbsp;</h5>`}<ul>${c[1].map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</div>`:""}
- ${r.score!=null?`<div class="ct-kc"><span>Final Knowledge Check: <b>completed and passed</b></span><span>Score is recorded on the copy filed with Benevolent House.</span></div>`:""}
- <div class="ct-bot"><div class="ct-addr">504 SH-342<br>Red Oak, TX 75154</div><div class="ct-sig">${sImg?`<img src="${esc(sImg)}" alt="">`:`<div class="ct-blank"></div>`}<b></b><strong>${esc(sName)}</strong><span>${esc(sTitle)}</span></div></div>
- <div class="ct-foot">Retain this certificate for your training record. A copy is filed with Benevolent House.${I.note?`<br>${esc(I.note)}`:""}<br>Record ${esc(String(r.legacy?"BH-"+r.legacyId:r.id).slice(0,10).toUpperCase())} &middot; Date from the ${r.legacy?"Benevolent House training record":"Benevolent House training portal"}</div>
- </div></div>`}
+ <div class="ct-mid">${cols.length?`<div class="ct-cc">CONTENT COVERED</div><div class="ct-cols n${cols.length}">${cols.map(c=>`<div>${c[0]?`<h5>${esc(c[0])}</h5>`:`<h5>&nbsp;</h5>`}<ul>${c[1].map(t=>`<li>${esc(t)}</li>`).join("")}</ul></div>`).join("")}</div>`:""}
+ ${r.score!=null?`<div class="ct-kc"><span>Final Knowledge Check: <b>completed and passed</b></span><span>Score is recorded on the copy filed with Benevolent House.</span></div>`:""}</div>
+ <div class="ct-bot"><div class="ct-addr">504 SH-342<br>Red Oak, TX 75154</div>${certSeal(d)}<div class="ct-sig">${sImg?`<img src="${esc(sImg)}" alt="">`:`<div class="ct-blank"></div>`}<b></b><strong>${esc(sName)}</strong><span>${esc(sTitle)}</span></div></div>
+ <div class="ct-foot">Retain this certificate for your training record. A copy is filed with Benevolent House.${I.note?`<br>${esc(I.note)}`:""}</div>
+ </div></div></div>`}
+function certSeal(d){const t="BENEVOLENT HOUSE \u2022 RED OAK, TEXAS \u2022 TRAINING RECORD \u2022 ";return `<svg class="ct-seal" viewBox="0 0 120 120" aria-hidden="true"><defs><path id="sealp" d="M60,60 m-44,0 a44,44 0 1,1 88,0 a44,44 0 1,1 -88,0"/></defs><circle cx="60" cy="60" r="57" fill="#F7F1E3" stroke="#B08A2E" stroke-width="2.5"/><circle cx="60" cy="60" r="52" fill="none" stroke="#B08A2E" stroke-width=".8"/><circle cx="60" cy="60" r="35" fill="#2F4A2A"/><circle cx="60" cy="60" r="32" fill="none" stroke="#D9C27A" stroke-width=".8"/><text font-family="Georgia,serif" font-size="7.6" fill="#5E3920"><textPath href="#sealp" textLength="272" lengthAdjust="spacing">${t}</textPath></text><text x="60" y="52" text-anchor="middle" font-family="Georgia,serif" font-size="8" fill="#F3E6BF" letter-spacing=".8">TRAINING</text><text x="60" y="63" text-anchor="middle" font-family="Georgia,serif" font-size="8" fill="#F3E6BF" letter-spacing=".8">COMPLETE</text><text x="60" y="76" text-anchor="middle" font-family="Georgia,serif" font-size="9" font-weight="700" fill="#D9C27A">${d.getFullYear()}</text></svg>`}
 function pageLandscape(on){let st=document.getElementById("pgsize");if(on){if(!st){st=document.createElement("style");st.id="pgsize";document.head.appendChild(st)}st.textContent="@page{size:letter landscape;margin:0}@media print{main{padding:0!important}.wrap{padding:0!important;max-width:none}}"}else if(st)st.remove()}
 async function renderCerts(list,p,label){await loadSig();pageLandscape(true);
  $("#view").innerHTML=`<div class="noprint bar"><button class="btn ghost sm" id="back">Back to ${esc(p.full_name)}</button><span class="spacer"></span>${can("print_records")?`<button class="btn sm" onclick="window.print()">${esc(label)}</button>`:""}</div>
