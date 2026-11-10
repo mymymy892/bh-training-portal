@@ -67,7 +67,7 @@ window.BHSignIn=function(host,onDone,opts){
  opts=opts||{};const roles=opts.roles||["Foster Caregiver","Kinship Caregiver","Adoptive Parent","Foster and Adoptive Caregiver","Staff","Contracted Provider"];
  const e=s=>String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
  let email="",meta={};
- function step1(msg){host.innerHTML=`<div class="bhs"><h2>Sign in to save your place</h2><p class="bhs-sub">We email you a 6-digit code. No password to remember. Your place is saved, so you can stop and finish later on any phone or computer.</p>
+ function step1(msg){host.innerHTML=`<div class="bhs"><h2>Sign in to save your place</h2><p class="bhs-sub">We email you a sign-in code. No password to remember. Your place is saved, so you can stop and finish later on any phone or computer.</p>
   <div class="bhs-row"><div><label for="bhsName">Full name</label><input id="bhsName" type="text" autocomplete="name" placeholder="First and last name"></div><div><label for="bhsEmail">Email</label><input id="bhsEmail" type="email" autocomplete="email" inputmode="email" placeholder="you@example.com"></div></div>
   <div class="bhs-row"><div><label for="bhsHome">Foster home or staff role</label><input id="bhsHome" type="text" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label for="bhsRole">I am a</label><select id="bhsRole">${roles.map(r=>`<option>${e(r)}</option>`).join("")}</select></div></div>
   ${msg?`<p class="bhs-note">${e(msg)}</p>`:""}<p class="bhs-err" id="bhsErr"></p><p><button class="btn" id="bhsSend" type="button">Email me a code</button></p>
@@ -78,12 +78,12 @@ window.BHSignIn=function(host,onDone,opts){
    try{await BHC.sendCode(em,meta);step2()}catch(x){if(x&&(x.status===403||x.status===422||/not set up|not allowed|signups/i.test(x.message||""))){step2();return}b.disabled=false;b.textContent="Email me a code";
     err.textContent=/rate|security purposes|seconds/i.test(x&&x.message||"")?"A code was just sent. Please wait a minute, then try again.":"We could not send the code just now. Check your connection and try again."}};
   host.querySelector("#bhsSend").onclick=go;host.querySelectorAll("input").forEach(i=>i.addEventListener("keydown",ev=>{if(ev.key==="Enter")go()}))}
- function step2(msg){host.innerHTML=`<div class="bhs"><h2>Check your email</h2><p class="bhs-sub">If <b>${e(email)}</b> is set up with Benevolent House, a 6-digit code from Benevolent House Training is on its way. It can take a minute; check your spam or junk folder too. No code after five minutes? Call Benevolent House at (214) 774-4871 so we can add you.</p>
-  <label for="bhsCode">Your 6-digit code</label><input id="bhsCode" class="bhs-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="123456">
+ function step2(msg){host.innerHTML=`<div class="bhs"><h2>Check your email</h2><p class="bhs-sub">If <b>${e(email)}</b> is set up with Benevolent House, a sign-in code from Benevolent House Training is on its way. It can take a minute; check your spam or junk folder too. No code after five minutes? Call Benevolent House at (214) 774-4871 so we can add you.</p>
+  <label for="bhsCode">Your sign-in code</label><input id="bhsCode" class="bhs-code" type="text" inputmode="numeric" autocomplete="one-time-code" maxlength="8" placeholder="Code from email">
   <p class="bhs-err" id="bhsErr">${e(msg||"")}</p><p><button class="btn" id="bhsVerify" type="button">Sign in</button> <button class="btn ghost" id="bhsBack" type="button">Use a different email</button></p>
   <p class="bhs-fine">You can also tap the link in the email if you opened it on this same device.</p></div>`;
   const code=host.querySelector("#bhsCode");code.focus();
-  const go=async()=>{const t=code.value.replace(/\D/g,"");const err=host.querySelector("#bhsErr");if(t.length<6){err.textContent="Please enter the 6-digit code.";return}
+  const go=async()=>{const t=code.value.replace(/\D/g,"");const err=host.querySelector("#bhsErr");if(t.length<6){err.textContent="Please enter the full code from your email.";return}
    const b=host.querySelector("#bhsVerify");b.disabled=true;b.textContent="Checking…";
    try{await BHC.verify(email,t);let p=await BHC.profile(true);for(let i=0;!p&&i<4;i++){await new Promise(r=>setTimeout(r,700));p=await BHC.profile(true)}if(!p)throw new Error("noprofile");
     const upd={};if(meta.full_name&&!p.full_name)upd.name=meta.full_name;if(meta.home_label&&!p.home_label)upd.home=meta.home_label;if(meta.caregiver_type&&!p.caregiver_type)upd.role=meta.caregiver_type;
