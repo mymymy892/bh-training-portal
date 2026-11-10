@@ -1,0 +1,63 @@
+// Benevolent House: email a caregiver the paper version of a training, as a PDF attachment.
+// The packets are kept in private storage (bucket staff-files, folder paper/). Only staff with
+// "record trainings" (or leadership) can send, and only to an active email on the approved list.
+// mode=import (one time): copies the packets from the portal into private storage if they are not already there.
+import { createClient } from "jsr:@supabase/supabase-js@2";
+const FROM = "Benevolent House Training <training@notify.benevolenthouse.org>";
+const CORS = { "Access-Control-Allow-Origin": "https://portal.benevolenthouse.org", "Access-Control-Allow-Headers": "authorization, apikey, content-type", "Access-Control-Allow-Methods": "POST, OPTIONS" };
+const json = (b: unknown, s = 200) => new Response(JSON.stringify(b), { status: s, headers: { ...CORS, "Content-Type": "application/json" } });
+const PAPER: Record<string, { title: string; file: string; name: string }> = {
+  "T3C-PP": { title: "T3C Policy and Procedure Training (Core Session)", file: "paper/t3c-policy-and-procedure-paper.pdf", name: "T3C Policy and Procedure Training - Paper Version.pdf" },
+  "HT": { title: "Universal Human Trafficking Prevention Training", file: "paper/human-trafficking-prevention-paper.pdf", name: "Universal Human Trafficking Prevention - Paper Version.pdf" },
+};
+const e2 = (x: string) => String(x || "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as any)[c]);
+function b64(buf: Uint8Array) { let s = ""; const n = 0x8000; for (let i = 0; i < buf.length; i += n) s += String.fromCharCode(...buf.subarray(i, i + n)); return btoa(s); }
+
+Deno.serve(async (req) => {
+  if (req.method === "OPTIONS") return new Response("ok", { headers: CORS });
+  if (req.method !== "POST") return json({ error: "POST only" }, 405);
+  let body: any = {}; try { body = await req.json(); } catch (_) { /* empty */ }
+  let admin = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+  if (!admin) { try { const k = JSON.parse(Deno.env.get("SUPABASE_SECRET_KEYS") || "{}"); admin = k.default || Object.values(k)[0] as string || ""; } catch (_) { /* none */ } }
+  const sb = createClient(Deno.env.get("SUPABASE_URL")!, admin, { auth: { persistSession: false } });
+  // setup: copy the packets from the portal into private storage (the source is fixed to the portal itself)
+  if (body.mode === "import") {
+    const out: string[] = [];
+    for (const [code, p] of Object.entries(PAPER)) {
+      const r = await fetch("https://portal.benevolenthouse.org/" + p.file, { cache: "no-store" }); if (!r.ok) { out.push(code + ": fetch " + r.status); continue; }
+      const bytes = new Uint8Array(await r.arrayBuffer());
+      const { error } = await sb.storage.from("staff-files").upload(p.file, bytes, { contentType: "application/pdf", upsert: true });
+      out.push(code + ": " + (error ? error.message : "stored " + bytes.length + " bytes"));
+    }
+    return json({ ok: true, out });
+  }
+  const tok = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
+  const { data: u } = await sb.auth.getUser(tok);
+  const me = (u?.user?.email || "").toLowerCase();
+  if (!me) return json({ error: "Please sign in again." }, 401);
+  const { data: meRow } = await sb.from("approved_people").select("email,full_name,access,permissions,active").eq("email", me).maybeSingle();
+  const lead = !!meRow?.active && meRow.access === "leadership";
+  const canSend = lead || (!!meRow?.active && meRow.access === "staff" && (meRow.permissions || []).includes("record_trainings"));
+  if (!canSend) return json({ error: "You do not have access to send paper copies." }, 403);
+
+  const p = PAPER[body.course]; if (!p) return json({ error: "Unknown training." }, 400);
+  const to = String(body.email || "").trim().toLowerCase();
+  const { data: ap } = await sb.from("approved_people").select("email,full_name,active,alias_of").eq("email", to).maybeSingle();
+  if (!ap || !ap.active) return json({ error: "That email is not an active Benevolent House caregiver." }, 400);
+  const key = Deno.env.get("RESEND_API_KEY") || ""; if (!key) return json({ error: "Email is not set up." }, 500);
+  const { data: f, error: fe } = await sb.storage.from("staff-files").download(p.file);
+  if (fe || !f) return json({ error: "The paper copy is not in storage yet." }, 500);
+  const pdf = new Uint8Array(await f.arrayBuffer());
+  const { data: ah } = await sb.from("portal_settings").select("value").eq("key", "after_hours").maybeSingle();
+  const name = String(body.name || ap.full_name || "").trim();
+  const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#2B2320">
+<p>Hello${name ? " " + e2(name) : ""},</p>
+<p>Attached is your paper copy of the ${e2(p.title)}. Please print it, read each section, then complete the Knowledge Check and sign the Acknowledgment at the end.</p>
+<p>When you are finished, give the signed pages to your case manager, or take a photo of them and reply to this email. If you would like a printed copy brought to you, or if you have any questions, please call the Benevolent House office at (214) 774-4871.${ah?.value ? " " + e2(ah.value) : ""}</p>
+<p>Thank you,<br>Benevolent House</p></div>`;
+  const msg = { from: FROM, to: [to], reply_to: [me], subject: p.title + " (paper copy)", html, attachments: [{ filename: p.name, content: b64(pdf) }] };
+  const r = await fetch("https://api.resend.com/emails", { method: "POST", headers: { Authorization: "Bearer " + key, "Content-Type": "application/json" }, body: JSON.stringify(msg) });
+  if (!r.ok) return json({ error: "The email could not be sent (" + r.status + ")." }, 502);
+  try { await sb.from("access_log").insert({ actor: u!.user!.id, action: "paper_sent", target: body.course + " to " + to }); } catch (_) { /* best effort */ }
+  return json({ ok: true, sentTo: to });
+});
