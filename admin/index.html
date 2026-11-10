@@ -122,8 +122,9 @@ const whoName=id=>{const x=PEOPLE.find(p=>p.id===id);return x?(x.full_name||x.em
 
 /* T3C rollout: each active caregiver on the approved list, and whether they finished the two online T3C trainings in the portal */
 const T3C_CODES=[["T3C-PP","T3C Policy and Procedure"],["HT","Universal Human Trafficking"]],T3C_SINCE="2026-11-09";
-function t3cRows(){return APPROVED.filter(a=>a.active&&a.access==="caregiver").map(a=>{const p=PEOPLE.find(x=>(x.email||"").toLowerCase()===a.email);
- const got=T3C_CODES.map(([c])=>{if(!p)return null;const r=COMPS.filter(x=>x.user_id===p.id&&x.course_code===c&&!x.voided&&!x.legacy&&x.completed_at>=T3C_SINCE).sort((x,y)=>y.completed_at.localeCompare(x.completed_at))[0];return r?r.completed_at:null});
+/* a second email for the same caregiver (alias_of) counts toward that caregiver, not as another person */
+function t3cRows(){return APPROVED.filter(a=>a.active&&a.access==="caregiver"&&!a.alias_of).map(a=>{const mails=[a.email].concat(APPROVED.filter(x=>x.alias_of===a.email).map(x=>x.email));const ps=PEOPLE.filter(x=>mails.includes((x.email||"").toLowerCase()));const ids=ps.map(x=>x.id);const p=ps[0];
+ const got=T3C_CODES.map(([c])=>{if(!p)return null;const r=COMPS.filter(x=>ids.includes(x.user_id)&&x.course_code===c&&!x.voided&&!x.legacy&&x.completed_at>=T3C_SINCE).sort((x,y)=>y.completed_at.localeCompare(x.completed_at))[0];return r?r.completed_at:null});
  return{a,p,got,done:got.every(Boolean)}}).sort((x,y)=>(x.done-y.done)||(x.a.home_label||"").localeCompare(y.a.home_label||""))}
 function t3cPanel(){if(!APPROVED.length)return "";const R=t3cRows();const done=R.filter(r=>r.done).length;const open=R.filter(r=>!r.done);
  return `<div class="card" id="t3cCard"><h2 style="margin-top:0">T3C trainings due Tuesday, November 17</h2><p class="muted" style="margin-top:0">Every active caregiver completes both online trainings in the portal: ${T3C_CODES.map(x=>x[1]).join(" and ")}. Earlier human trafficking records do not count here, because the T3C credential calls for the DFPS Universal course.</p>
