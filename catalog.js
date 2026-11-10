@@ -2,7 +2,7 @@
 window.CATALOG=[
  {code:"T3C-PP", dueBy:"2026-11-17", renew:0, aud:"both", title:"T3C Policy and Procedure Training (Core Session)", hours:2, who:"All caregivers, all staff, contracted providers", freq:"Once, then annual 1-hour refresher", status:"live", group:"T3C Credential", module:"t3c_core", req:true,
   blurb:"What changes and what stays the same under Texas Child-Centered Care. Required before Benevolent House operates under its Active Full Credential."},
- {code:"T3C-PP-S", renew:12, aud:"staff", title:"T3C Policy and Procedure Training (Staff Session)", hours:1, who:"Directors and case managers", freq:"Once, then annual", status:"live", group:"T3C Credential", module:"t3c_staff", req:true,
+ {code:"T3C-PP-S", dueBy:"2026-11-17", renew:12, aud:"staff", title:"T3C Policy and Procedure Training (Staff Session)", hours:1, who:"Directors and case managers", freq:"Once, then annual", status:"live", group:"T3C Credential", module:"t3c_staff", req:true,
   blurb:"The procedures staff carry out: referrals, reviews and confirmations, documenting engagement, aftercare, credentialing homes, and CQI data."},
  {code:"TST-8", renew:0, aud:"both", title:"Trauma Systems Therapy for Foster Care (TST-FC) Pre-Service", hours:8, who:"All caregivers and staff", freq:"Once, before serving a child under T3C", status:"record", group:"T3C Credential", req:true,
   blurb:"Benevolent House's Treatment Model. Four modules: The Alarm System, Find the Pattern, In the Moment, Safe and Responsive."},
