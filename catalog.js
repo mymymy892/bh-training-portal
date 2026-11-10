@@ -10,6 +10,8 @@ window.CATALOG=[
   blurb:"Q1 The Alarm System · Q2 Find the Pattern · Q3 In the Moment · Q4 Safe and Responsive. One session each quarter."},
  {code:"CWB", renew:3, cycle:"quarter", window:45, aud:"caregiver", link:"https://form.jotform.com/252847200087052", linkNote:"Fill it out any time during the quarter, by the last day of March, June, September or December.", linkLabel:"Open the check-in", title:"Quarterly Caregiver Well-Being and Support Check-In", hours:0, who:"All caregivers", freq:"Once each quarter, same cycle for every family", status:"record", group:"T3C Credential", req:true,
   blurb:"A short check-in on how you and your household are doing, so Benevolent House can support you."},
+ {code:"HT-BTO", renew:0, aud:"none", title:"Human Trafficking Training (Be The One, earlier course)", hours:2, who:"Earlier records only", freq:"Replaced by the DFPS Universal course in November 2026", status:"record", group:"Required Annual",
+  blurb:"Kept on the training log for the record. The Universal Human Trafficking Prevention course replaces it."},
  {code:"HT", renew:12, aud:"both", title:"Universal Human Trafficking Prevention", hours:1.5, who:"All caregivers and staff", freq:"Pre-service or orientation, then every 12 months", status:"live", module:"ht", group:"Required Annual", req:true,
   blurb:"The DFPS Universal Human Trafficking Prevention curriculum, taught by Haddie Mashburn, a DFPS-trained Benevolent House trainer. Narrated, with videos and a knowledge check."},
  {code:"LT-OR", renew:12, aud:"provider", title:"Licensed Therapist Orientation", hours:2, who:"Contracted Licensed Therapist", freq:"Once, then annual refresher", status:"soon", group:"T3C Credential",
