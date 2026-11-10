@@ -1,6 +1,6 @@
 /* Benevolent House training catalog: shared by the portal home and the admin page */
 window.CATALOG=[
- {code:"T3C-PP", renew:0, aud:"both", title:"T3C Policy and Procedure Training (Core Session)", hours:2, who:"All caregivers, all staff, contracted providers", freq:"Once, then annual 1-hour refresher", status:"live", group:"T3C Credential", module:"t3c_core", req:true,
+ {code:"T3C-PP", dueBy:"2026-11-17", renew:0, aud:"both", title:"T3C Policy and Procedure Training (Core Session)", hours:2, who:"All caregivers, all staff, contracted providers", freq:"Once, then annual 1-hour refresher", status:"live", group:"T3C Credential", module:"t3c_core", req:true,
   blurb:"What changes and what stays the same under Texas Child-Centered Care. Required before Benevolent House operates under its Active Full Credential."},
  {code:"T3C-PP-S", renew:12, aud:"staff", title:"T3C Policy and Procedure Training (Staff Session)", hours:1, who:"Directors and case managers", freq:"Once, then annual", status:"live", group:"T3C Credential", module:"t3c_staff", req:true,
   blurb:"The procedures staff carry out: referrals, reviews and confirmations, documenting engagement, aftercare, credentialing homes, and CQI data."},
@@ -12,7 +12,7 @@ window.CATALOG=[
   blurb:"A short check-in on how you and your household are doing, so Benevolent House can support you."},
  {code:"HT-BTO", renew:0, aud:"none", title:"Human Trafficking Training (Be The One, earlier course)", hours:2, who:"Earlier records only", freq:"Replaced by the DFPS Universal course in November 2026", status:"record", group:"Required Annual",
   blurb:"Kept on the training log for the record. The Universal Human Trafficking Prevention course replaces it."},
- {code:"HT", renew:12, aud:"both", title:"Universal Human Trafficking Prevention", hours:1.5, who:"All caregivers and staff", freq:"Pre-service or orientation, then every 12 months", status:"live", module:"ht", group:"Required Annual", req:true,
+ {code:"HT", dueBy:"2026-11-17", renew:12, aud:"both", title:"Universal Human Trafficking Prevention", hours:1.5, who:"All caregivers and staff", freq:"Pre-service or orientation, then every 12 months", status:"live", module:"ht", group:"Required Annual", req:true,
   blurb:"The DFPS Universal Human Trafficking Prevention curriculum, taught by Haddie Mashburn, a DFPS-trained Benevolent House trainer. Narrated, with videos and a knowledge check."},
  {code:"LT-OR", renew:12, aud:"provider", title:"Licensed Therapist Orientation", hours:2, who:"Contracted Licensed Therapist", freq:"Once, then annual refresher", status:"soon", group:"T3C Credential",
   blurb:"Orientation to the oversight role for the Mental & Behavioral Health Support Services Package."},
