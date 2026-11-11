@@ -141,6 +141,7 @@ footer{border-top:1px solid var(--line);padding:18px 0;color:var(--muted);font-s
 .stepper b.cur{background:var(--brown);color:#fff}
 .readbtn{background:#fff;border:2px solid var(--green);color:var(--green-dk);border-radius:999px;padding:.4rem .9rem;font-weight:700}
 .readbtn.on{background:var(--green);color:#fff}
+.hero .each{font-size:.92rem;opacity:.92;margin-top:6px}
 </style>
 </head>
 <body>
@@ -463,7 +464,7 @@ function renderHome(){
  $("#userChip").textContent=userLabel();
  const LIST=CATALOG.filter(c=>window.BH_FOR(c,S.user&&S.user.cloud?S.user.role:"")||(S.user&&S.done[c.code]&&c.aud!=="none"));const groups=(window.BH_GROUPS||[]).map(g=>g[0]).filter(g=>LIST.some(c=>c.group===g)).concat([...new Set(LIST.map(c=>c.group))].filter(g=>!(window.BH_GROUPS||[]).some(x=>x[0]===g)));const gNote=g=>((window.BH_GROUPS||[]).find(x=>x[0]===g)||[])[1]||"";
  const forWho=S.user&&S.user.cloud?(BH_GROUP(S.user.role)==="staff"?"your staff trainings":BH_GROUP(S.user.role)==="provider"?"your trainings":"your caregiver trainings"):"every Benevolent House training";
- let h=`<div class="hero"><div><h1>Benevolent House Training Portal</h1><p>Your trainings, what is due, and your record, all in one place.</p></div></div>`;
+ let h=`<div class="hero"><div><h1>Benevolent House Training Portal</h1><p>Your trainings, what is due, and your record, all in one place.</p><p class="each">Every caregiver in your home completes each training under their own email. Training is per person, not per household, and each certificate shows only your name.</p></div></div>`;
  if((!S.user||!S.user.cloud)&&window.BHC&&BHC.available()){h+=`<div class="card" id="bhsHost"></div>`}
  else if(!S.user||!S.user.cloud){h+=`<div class="card"><h3 style="margin-top:0">The training portal could not load</h3><p>Please check your internet connection and refresh this page. If it still will not load, call Benevolent House at (214) 774-4871.</p></div>`}else if(false){h+=`<div class="card"><h3 style="margin-top:0">Start by telling us who you are</h3><div class="row"><div><label>Full name</label><input type="text" id="uName" placeholder="First and last name"></div><div><label>Email</label><input type="email" id="uEmail" placeholder="you@example.com"></div></div>
  <div class="row"><div><label>Foster home or staff role</label><input type="text" id="uHome" placeholder="e.g., Johnson Home, or Case Manager"></div><div><label>I am a</label><select id="uRole"><option>Foster Caregiver</option><option>Kinship Caregiver</option><option>Adoptive Parent</option><option>Foster and Adoptive Caregiver</option><option>Staff</option><option>Contracted Provider</option></select></div></div>
