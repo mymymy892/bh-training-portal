@@ -14,9 +14,9 @@ const g: any = globalThis; g.window = g;
 // ---- catalog.js (copied from the portal at build time) ----
 /* Benevolent House training catalog: shared by the portal home and the admin page */
 window.CATALOG=[
- {code:"T3C-PP", renew:0, aud:"both", title:"T3C Policy and Procedure Training (Core Session)", hours:2, who:"All caregivers, all staff, contracted providers", freq:"Once, then annual 1-hour refresher", status:"live", group:"T3C Credential", module:"t3c_core", req:true,
+ {code:"T3C-PP", dueBy:"2026-11-17", renew:0, aud:"both", title:"T3C Policy and Procedure Training (Core Session)", hours:2, who:"All caregivers, all staff, contracted providers", freq:"Once, then annual 1-hour refresher", status:"live", group:"T3C Credential", module:"t3c_core", req:true,
   blurb:"What changes and what stays the same under Texas Child-Centered Care. Required before Benevolent House operates under its Active Full Credential."},
- {code:"T3C-PP-S", renew:12, aud:"staff", title:"T3C Policy and Procedure Training (Staff Session)", hours:1, who:"Directors and case managers", freq:"Once, then annual", status:"live", group:"T3C Credential", module:"t3c_staff", req:true,
+ {code:"T3C-PP-S", dueBy:"2026-11-17", renew:0, aud:"staff", title:"T3C Policy and Procedure Training (Staff Session)", hours:1, who:"Every staff member who carries out a T3C function", freq:"Once, before carrying out a T3C function; then the annual 1-hour refresher", status:"live", group:"T3C Credential", module:"t3c_staff", req:true,
   blurb:"The procedures staff carry out: referrals, reviews and confirmations, documenting engagement, aftercare, credentialing homes, and CQI data."},
  {code:"TST-8", renew:0, aud:"both", title:"Trauma Systems Therapy for Foster Care (TST-FC) Pre-Service", hours:8, who:"All caregivers and staff", freq:"Once, before serving a child under T3C", status:"record", group:"T3C Credential", req:true,
   blurb:"Benevolent House's Treatment Model. Four modules: The Alarm System, Find the Pattern, In the Moment, Safe and Responsive."},
@@ -24,10 +24,12 @@ window.CATALOG=[
   blurb:"Q1 The Alarm System · Q2 Find the Pattern · Q3 In the Moment · Q4 Safe and Responsive. One session each quarter."},
  {code:"CWB", renew:3, cycle:"quarter", window:45, aud:"caregiver", link:"https://form.jotform.com/252847200087052", linkNote:"Fill it out any time during the quarter, by the last day of March, June, September or December.", linkLabel:"Open the check-in", title:"Quarterly Caregiver Well-Being and Support Check-In", hours:0, who:"All caregivers", freq:"Once each quarter, same cycle for every family", status:"record", group:"T3C Credential", req:true,
   blurb:"A short check-in on how you and your household are doing, so Benevolent House can support you."},
- {code:"HT", renew:12, aud:"both", link:"https://learninghub.dfps.texas.gov/course/index.php", linkNote:"Search the DFPS Learning Hub for the Universal Human Trafficking Prevention Training.", title:"Human Trafficking Prevention (DFPS Universal)", hours:2, who:"All caregivers and staff", freq:"Pre-service or orientation, then every 12 months", status:"record", group:"Required Annual", req:true,
-  blurb:"Delivered by a Benevolent House trainer who completed the DFPS Train-the-Trainer course. Recorded here after the live session."},
- {code:"LT-OR", renew:12, aud:"provider", title:"Licensed Therapist Orientation", hours:2, who:"Contracted Licensed Therapist", freq:"Once, then annual refresher", status:"soon", group:"T3C Credential",
-  blurb:"Orientation to the oversight role for the Mental & Behavioral Health Support Services Package."},
+ {code:"HT-BTO", renew:0, aud:"none", title:"Human Trafficking Training (Be The One, earlier course)", hours:2, who:"Earlier records only", freq:"Replaced by the DFPS Universal course in November 2026", status:"record", group:"Required Annual",
+  blurb:"Kept on the training log for the record. The Universal Human Trafficking Prevention course replaces it."},
+ {code:"HT", dueBy:"2026-11-17", renew:12, aud:"both", title:"Universal Human Trafficking Prevention", hours:1.5, who:"All caregivers and staff", freq:"Pre-service or orientation, then every 12 months", status:"live", module:"ht", group:"Required Annual", req:true,
+  blurb:"The DFPS Universal Human Trafficking Prevention curriculum, taught by Haddie Mashburn, a DFPS-trained Benevolent House trainer. Narrated, with videos and a knowledge check."},
+ {code:"LT-OR", renew:0, aud:"provider", title:"Licensed Therapist Orientation", hours:2, who:"Contracted Licensed Therapist", freq:"Once, before giving input on any child's plan; then TST-FC quarterly Sessions 2 and 3 each year", status:"live", group:"T3C Credential", module:"lt-or",
+  blurb:"Nine months with Malik: the TST-FC model, the Managing Emotions Guide, safety and crisis plans, and your input at each 90-day review."},
  {code:"ORI", renew:0, aud:"both", title:"Benevolent House Orientation", hours:1, who:"New caregivers and staff", freq:"Once", status:"soon", group:"Pre-Service",
   blurb:"Who we are, how we work, who to call, and what the first 30 days look like."},
  {code:"PAPH", renew:12, aud:"both", title:"Prevention of Aggression and Physical Holds (PAPH)", hours:8, who:"All caregivers and staff", freq:"Pre-service, then as required", status:"soon", group:"Required Annual",
@@ -52,9 +54,9 @@ window.CATALOG=[
   blurb:"Safe sleep practices required for every infant in care."},
  {code:"SIR", renew:12, aud:"both", title:"Serious Incident Reporting", hours:1.5, who:"All caregivers and staff", freq:"Within 14 days of verification or hire, then annual", status:"live", group:"Required Annual", module:"sir",
   blurb:"One week with the Delgado family: what counts as a serious incident, who to call, how fast, and what to write down."},
- {code:"SCPC", renew:12, aud:"caregiver", title:"Supporting Children Through Purposeful Care", hours:2, who:"All caregivers", freq:"Annual", status:"soon", group:"Required Annual",
-  blurb:"Purposeful, trauma-informed daily care."},
- {code:"MC", renew:12, aud:"caregiver", link:"https://www.dfps.texas.gov/Training/Medical_Consent/index.asp", linkNote:"Also sign and turn in Form 2759 (Acknowledgement of Completion).", title:"Medical Consent (Form 2759)", hours:2.5, who:"Caregivers who are medical consenters", freq:"Before serving as medical consenter", status:"record", group:"Pre-Service",
+ {code:"SCPC", renew:12, aud:"caregiver", title:"Supporting Children Through Purposeful Care", hours:2, who:"All caregivers", freq:"Annual", status:"live", group:"Required Annual", module:"scpc",
+  blurb:"Six weeks with the Bennett family: supervision, discipline that teaches, and the rights of every child in care."},
+ {code:"MC", renew:12, aud:"caregiver", link:"https://www.dfps.texas.gov/Training/Medical_Consent/index.asp", linkNote:"Also sign and turn in Form 2759 (Acknowledgement of Completion).", title:"Medical Consent (Form 2759)", hours:1, who:"Caregivers who are medical consenters", freq:"Before serving as medical consenter", status:"record", group:"Pre-Service",
   blurb:"DFPS medical consent training. Record the completion date here."},
  {code:"DFPS-MR", renew:12, aud:"both", link:"https://learninghub.dfps.texas.gov/course/index.php", linkNote:"Search the DFPS Learning Hub for Mandatory Reporting: A Community Response.", title:"DFPS Mandatory Reporting Community Response Training", hours:1, who:"All caregivers and staff", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
   blurb:"Taken on the DFPS site. Record the completion date here."},
@@ -64,7 +66,7 @@ window.CATALOG=[
   blurb:"Taken on the DFPS site. Record the completion date here."},
  {code:"DFPS-NOR", renew:12, aud:"caregiver", link:"https://www.dfps.texas.gov/training/normalcy/index.asp", title:"DFPS Normalcy Training", hours:2, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
   blurb:"Taken on the DFPS site. Record the completion date here."},
- {code:"DFPS-SA", renew:12, window:30, aud:"caregiver", link:"https://traininghub.dfps.texas.gov", linkNote:"DFPS only lets you take this training within 30 days of your due date.", title:"DFPS Preventing and Recognizing Sexual Abuse Training", hours:1, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
+ {code:"DFPS-SA", renew:12, window:30, aud:"caregiver", link:"https://traininghub.dfps.texas.gov", linkNote:"DFPS only lets you take this training within 30 days of your due date.", title:"DFPS Preventing and Recognizing Sexual Abuse Training", hours:1.5, who:"All caregivers", freq:"Pre-service, then annual", status:"record", group:"DFPS Online (record)", req:true,
   blurb:"Taken on the DFPS site. Record the completion date here."},
  {code:"DFPS-TS", renew:0, aud:"caregiver", link:"https://agrilifelearn.tamu.edu/s/product/part-1-transporting-children-safely-in-child-care/01t4x000002ciMdAAI", linkNote:"Part 1 only.", title:"Transportation Safety Training", hours:2, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
   blurb:"Online. Record the completion date here."},
@@ -74,8 +76,8 @@ window.CATALOG=[
   blurb:"Online. Record the completion date here."},
  {code:"DFPS-RP", renew:0, aud:"caregiver", link:"https://www.dfps.texas.gov/Training/Runaway_Prevention/default.asp", title:"DFPS Runaway Prevention Training", hours:2.5, who:"All caregivers", freq:"Pre-service", status:"record", group:"DFPS Online (record)",
   blurb:"Taken on the DFPS site. Record the completion date here."},
- {code:"CPR", renew:24, aud:"caregiver", title:"CPR and First Aid", hours:2, who:"All caregivers", freq:"Per certificate expiration", status:"record", group:"Outside Certificates",
-  blurb:"Outside hands-on certification. Record the completion and expiration dates."},
+ {code:"CPR", renew:24, aud:"caregiver", bhOffer:"Benevolent House offers First Aid and CPR for $40 per caregiver, taught by our HSI-certified trainers. You may also use another approved provider.", title:"CPR and First Aid", hours:2, who:"All caregivers", freq:"Per certificate expiration", status:"record", group:"Outside Certificates",
+  blurb:"Hands-on certification every two years. Take it with Benevolent House or another approved provider, then add your date and upload your card."},
 ];
 
 /* When a training is due again: renew = months between completions (0 = once). */
@@ -117,17 +119,25 @@ window.BH_WINDOW=function(c){return +(c&&c.window)||90};
   const legByName={};(o.legacy||[]).forEach(l=>{if(l.voided)return;(legByName[nm(l.person_name)]=legByName[nm(l.person_name)]||[]).push(l)});
   const compsBy={};(o.comps||[]).forEach(r=>{if(!r.voided)(compsBy[r.user_id]=compsBy[r.user_id]||[]).push(r)});
   const out=[];
-  (o.people||[]).filter(a=>a.active&&a.email).forEach(a=>{const prof=profByEmail[nm(a.email)];const type=(prof&&prof.caregiver_type)||a.caregiver_type||(a.access==="caregiver"?"Foster Caregiver":"Staff");
+  /* a second email for the same caregiver (alias_of) follows that caregiver's home status */
+  const mainOf={};(o.people||[]).forEach(a=>{if(!a.alias_of)mainOf[nm(a.email)]=a});const stOf=a=>{const m=a.alias_of&&mainOf[nm(a.alias_of)];return (m?m.standing:a.standing)||"Active"};
+  (o.people||[]).filter(a=>a.active&&a.email&&(stOf(a)==="Active"||stOf(a)==="Applicant")).forEach(a=>{const applicant=stOf(a)==="Applicant";const prof=profByEmail[nm(a.email)];const type=(prof&&prof.caregiver_type)||a.caregiver_type||(a.access==="caregiver"?"Foster Caregiver":"Staff");
    const name=(prof&&prof.full_name)||a.full_name||"";const latest={};
    const add=(code,iso)=>{if(!latest[code]||new Date(iso)>new Date(latest[code]))latest[code]=iso};
    if(prof)(compsBy[prof.id]||[]).forEach(r=>add(r.course_code,r.completed_at));
    if(a.full_name&&nameCount[nm(a.full_name)]===1)(legByName[nm(a.full_name)]||[]).forEach(l=>add(l.course_code,l.completed_on+"T18:00:00Z"));
-   CAT.forEach(c=>{if(!W.BH_FOR(c,type))return;const iso=latest[c.code];if(!iso&&c.cycle!=="quarter")return;
+   CAT.forEach(c=>{if(!W.BH_FOR(c,type))return;if(applicant&&c.code==="CWB")return;const iso=latest[c.code];if(!iso&&c.cycle!=="quarter")return;
     const due=W.BH_DUE(c,iso||null,now);if(!due)return;const dueStr=ymd(due);const days=dayNum(dueStr)-t0;
     const marks=marksFor(c).filter(m=>m>=days&&m-days<=CATCH_UP);
     out.push({email:nm(a.email),name,home:(prof&&prof.home_label)||a.home_label||"",type,code:c.code,title:c.title,link:c.link||"",linkLabel:c.linkLabel||"Go to the training",linkNote:c.linkNote||"",status:c.status,hours:c.hours,due:dueStr,days,
      window:+(c.window)||60,marks,staff:STAFF_MARKS.includes(days)})})});
-  return{today,items:out}}
+  /* inactive homes: how long each has been inactive (one line per home) */
+  const inactive={};(o.people||[]).forEach(a=>{if(!a.active||a.alias_of||a.access!=="caregiver"||a.caregiver_type==="Contracted Provider"||a.standing!=="Inactive"||!a.standing_since)return;const h=a.home_label||a.full_name||a.email;
+   if(!inactive[h]||a.standing_since<inactive[h].since){const span=W.BH_SPAN(a.standing_since,today);const rev=a.review_after||null;
+    /* the flag date: the day it reaches 6 months, or the review date someone set with "Keep inactive for now" */
+    const flagDate=rev&&rev>span.sixDate?rev:span.sixDate;const flagDays=dayNum(today)-dayNum(flagDate);
+    inactive[h]={home:h,since:a.standing_since,span,reviewAfter:rev,paused:!!(rev&&today<rev),flagDate,flagDays}}});
+  return{today,items:out,inactive:Object.values(inactive).sort((x,y)=>x.since.localeCompare(y.since))}}
  function fmtLong(s){const[a,b,c]=s.split("-").map(Number);return new Date(Date.UTC(a,b-1,c,12)).toLocaleDateString("en-US",{timeZone:"UTC",month:"long",day:"numeric",year:"numeric"})}
  const esc=s=>String(s==null?"":s).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
  const PORTAL="https://portal.benevolenthouse.org/";
@@ -153,14 +163,30 @@ window.BH_WINDOW=function(c){return +(c&&c.window)||90};
 <p style="font-size:12px;color:#6B5F58">You receive these reminders because you are a Benevolent House caregiver or staff member. Replies go to Ms. Orr and Ms. Mashburn.</p></div>`;
    out.push({to:email,subject,html,items:hits})});return out}
  /* one list for staff: who reaches 30 days, 2 weeks or 1 day before a due date today; on Mondays, everything past due too */
- function staffEmail(p){const list=p.items.filter(i=>i.staff);const monday=new Date(p.today+"T12:00:00Z").getUTCDay()===1;const past=monday?p.items.filter(i=>i.days<0):[];if(!list.length&&!past.length)return null;
+ function staffEmail(p,opt){const list=p.items.filter(i=>i.staff);const monday=new Date(p.today+"T12:00:00Z").getUTCDay()===1;const past=monday?p.items.filter(i=>i.days<0):[];
+  /* inactive homes: listed every Monday; a home that reaches 6 months inactive is flagged that day (up to CATCH_UP days late) */
+  const inact=p.inactive||[];opt=opt||{};const crossed=inact.filter(x=>x.flagDays>=0&&x.flagDays<=CATCH_UP&&(!opt.claimed||opt.claimed.has(x.home+"|"+x.flagDate)));const showInact=monday?inact:crossed;
+  if(!list.length&&!past.length&&!showInact.length)return null;
   const section=(label,g)=>{if(!g.length)return "";const by={};g.forEach(i=>{const k=i.email;(by[k]=by[k]||{name:i.name,email:i.email,home:i.home,items:[]}).items.push(i)});
    const rows=Object.values(by).sort((a,b)=>(a.home||"~").localeCompare(b.home||"~")||(a.name||"~").localeCompare(b.name||"~"));
    return `<h3 style="color:#7B4B2A;margin:18px 0 6px">${label} (${rows.length} ${rows.length===1?"person":"people"})</h3><table style="border-collapse:collapse;width:100%;font-size:14px">${rows.map(r=>`<tr><td style="border-bottom:1px solid #E3D7C9;padding:6px 8px;vertical-align:top;width:40%"><b>${esc(r.name||r.email)}</b><br><span style="color:#6B5F58">${esc([r.home,r.name?r.email:""].filter(Boolean).join(" · "))}</span></td><td style="border-bottom:1px solid #E3D7C9;padding:6px 8px">${r.items.map(i=>`${esc(i.title)} <span style="color:#6B5F58">(due ${esc(fmtLong(i.due))})</span>`).join("<br>")}</td></tr>`).join("")}</table>`};
   const groups=[[30,"Due in 30 days"],[14,"Due in 2 weeks"],[1,"Due tomorrow"]];
-  const body=groups.map(([d,l])=>section(l,list.filter(i=>i.days===d))).join("")+section("Past due (Monday list)",past);
-  const n=list.length+past.length;
-  return{subject:`Benevolent House training due list for ${fmtLong(p.today)}`,html:`<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.45;color:#2B2320;max-width:720px"><p>These trainings reach 30 days, 2 weeks or 1 day before their due date today${past.length?", and on Mondays the list also shows everything past due":""}. Families receive their own reminder emails.</p>${body}<p style="margin-top:18px">See everyone's records in <a href="${PORTAL}admin/">Staff Dashboard</a>.</p></div>`,items:list.concat(past),count:n}}
+  const inactHtml=showInact.length?`<h3 style="color:#7B4B2A;margin:18px 0 6px">Inactive homes${monday?" (Monday list)":""}</h3><table style="border-collapse:collapse;width:100%;font-size:14px">${showInact.map(x=>`<tr><td style="border-bottom:1px solid #E3D7C9;padding:6px 8px;width:40%"><b>${esc(x.home)}</b><br><span style="color:#6B5F58">Inactive since ${esc(fmtLong(x.since))}</span></td><td style="border-bottom:1px solid #E3D7C9;padding:6px 8px">${x.span.six&&!x.paused?`<b style="color:#B23A3A">Inactive ${esc(x.span.text)}. It has reached 6 months, so consider closing this home.</b>`:x.span.six?`Inactive ${esc(x.span.text)}. Kept inactive; review again on ${esc(fmtLong(x.reviewAfter))}.`:`Inactive ${esc(x.span.text)}. Reaches 6 months on ${esc(fmtLong(x.span.sixDate))}.`}</td></tr>`).join("")}</table>`:"";
+  const body=groups.map(([d,l])=>section(l,list.filter(i=>i.days===d))).join("")+section("Past due (Monday list)",past)+inactHtml;
+  const n=list.length+past.length+showInact.length;
+  const sixHit=crossed.length?`. Inactive 6 months or more: ${crossed.map(x=>x.home).join("; ")}`:"";
+  return{subject:`Benevolent House training due list for ${fmtLong(p.today)}${sixHit}`,html:`<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.45;color:#2B2320;max-width:720px"><p>${list.length||past.length?`These trainings reach 30 days, 2 weeks or 1 day before their due date today${past.length?", and on Mondays the list also shows everything past due":""}. Families receive their own reminder emails. Inactive homes do not receive training reminders.`:"No trainings reach a reminder date today."}</p>${body}<p style="margin-top:18px">See everyone's records in <a href="${PORTAL}admin/">Staff Dashboard</a>.</p></div>`,items:list.concat(past),count:n}}
+ /* how long since a date, in words ("2 weeks", "1 month and 3 days"), and when 6 months is reached. Dates are YYYY-MM-DD. */
+ W.BH_SPAN=function(since,today){const[sy,sm,sd]=since.split("-").map(Number),[ty,tm,td]=today.split("-").map(Number);
+  const addM=(y,m,d,n)=>{const t=new Date(Date.UTC(y,m-1+n,1));const last=new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth()+1,0)).getUTCDate();return new Date(Date.UTC(t.getUTCFullYear(),t.getUTCMonth(),Math.min(d,last)))};
+  const T=Date.UTC(ty,tm-1,td);let months=(ty-sy)*12+(tm-sm);if(months<0)months=0;while(months>0&&addM(sy,sm,sd,months).getTime()>T)months--;
+  const days=Math.max(0,Math.round((T-addM(sy,sm,sd,months).getTime())/864e5));const total=Math.max(0,Math.round((T-Date.UTC(sy,sm-1,sd))/864e5));
+  const pl=(n,w)=>n+" "+w+(n===1?"":"s");let parts=[];
+  if(months===0){if(days<7)parts=[pl(days,"day")];else{parts=[pl(Math.floor(days/7),"week")];if(days%7)parts.push(pl(days%7,"day"))}}
+  else{const y=Math.floor(months/12),m=months%12;if(y)parts.push(pl(y,"year"));if(m)parts.push(pl(m,"month"));if(days)parts.push(pl(days,"day"))}
+  const text=parts.length>1?parts.slice(0,-1).join(", ")+" and "+parts[parts.length-1]:parts[0];
+  const six=addM(sy,sm,sd,6);const sixYmd=six.toISOString().slice(0,10);const sixDays=Math.round((T-six.getTime())/864e5);
+  return{text,months,days,total,six:sixDays>=0,sixDays,sixDate:sixYmd,level:sixDays>=0?"red":months>=5?"amber":"ok"}};
  W.BH_REMIND={plan,familyEmails,staffEmail,ymd,fmtLong,FAMILY_MARKS,STAFF_MARKS,CATCH_UP};
 })();
 
@@ -236,7 +262,7 @@ Deno.serve(async (req) => {
     }
 
     const [people, profiles, comps, legacy] = await Promise.all([
-      all(() => sb.from("approved_people").select("email,full_name,home_label,caregiver_type,access,active").order("email")),
+      all(() => sb.from("approved_people").select("email,full_name,home_label,caregiver_type,access,active,standing,standing_since,review_after,alias_of").order("email")),
       all(() => sb.from("profiles").select("id,email,full_name,home_label,caregiver_type").order("id")),
       all(() => sb.from("completions").select("id,user_id,course_code,completed_at,voided").order("id")),
       all(() => sb.from("legacy_training").select("id,person_name,course_code,completed_on,voided").order("id")),
@@ -276,14 +302,29 @@ Deno.serve(async (req) => {
       else { await sb.from("reminder_log").update({ status: "sent" }).in("id", ids); sent++; }
       await sleep(600);
     }
-    if (staff && !stopped) {
+    // an inactive home reaching 6 months (or its review date) is flagged once: claim it in the log first
+    const due6 = (plan.inactive || []).filter((x: any) => x.flagDays >= 0 && x.flagDays <= R.CATCH_UP);
+    let sixIds: number[] = [];
+    const sixClaimed = new Set<string>();
+    if (due6.length && !stopped) {
+      const { data: c6 } = await sb.from("reminder_log").upsert(due6.map((x: any) => ({ sent_on: plan.today, kind: "six", email: x.home, course_code: "", due_date: x.flagDate, mark: -2, status: "sending" })), { onConflict: "kind,email,course_code,due_date,mark", ignoreDuplicates: true }).select("id,email,due_date");
+      (c6 || []).forEach((c: any) => { sixIds.push(c.id); sixClaimed.add(c.email + "|" + c.due_date); });
+    }
+    const staffSend = R.staffEmail(plan, { claimed: sixClaimed });
+    if (staffSend && !stopped) {
       const { data: claimed } = await sb.from("reminder_log").upsert([{ sent_on: plan.today, kind: "staff", email: "staff", course_code: "", due_date: plan.today, mark: -1 }], { onConflict: "kind,email,course_code,due_date,mark", ignoreDuplicates: true }).select("id");
       if (claimed && claimed.length) {
-        const r = await send(key, { from: FROM, to: staffTo, reply_to: replyTo, subject: staff.subject, html: staff.html });
-        if (r) await sb.from("reminder_log").delete().in("id", claimed.map((c: any) => c.id));
-        else await sb.from("reminder_log").update({ status: "sent" }).in("id", claimed.map((c: any) => c.id));
+        const r = await send(key, { from: FROM, to: staffTo, reply_to: replyTo, subject: staffSend.subject, html: staffSend.html });
+        if (r) { await sb.from("reminder_log").delete().in("id", claimed.map((c: any) => c.id).concat(sixIds)); sixIds = []; }
+        else await sb.from("reminder_log").update({ status: "sent" }).in("id", claimed.map((c: any) => c.id).concat(sixIds));
+      } else if (sixIds.length) {
+        // today's staff list already went out earlier; send the 6-month flag on its own
+        const only = R.staffEmail({ today: plan.today, items: [], inactive: plan.inactive }, { claimed: sixClaimed });
+        const r = only ? await send(key, { from: FROM, to: staffTo, reply_to: replyTo, subject: only.subject, html: only.html }) : null;
+        if (r) await sb.from("reminder_log").delete().in("id", sixIds);
+        else await sb.from("reminder_log").update({ status: "sent" }).in("id", sixIds);
       }
-    }
+    } else if (sixIds.length) await sb.from("reminder_log").delete().in("id", sixIds);
     return json({ today: plan.today, family_sent: sent, family_failed: failed, stopped_for_daily_limit: stopped });
   } catch (e) {
     return json({ error: "reminder run failed" , detail: String((e as Error).message || e).slice(0, 200) }, 500);
