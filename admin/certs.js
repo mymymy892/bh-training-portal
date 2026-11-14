@@ -673,26 +673,43 @@ window.CERT_INFO={
 },
 "LT-OR": {
 "head": "Licensed Therapist Orientation",
-"sub": "Texas Child-Centered Care (T3C)",
-"kind": "orientation in",
+"sub": "TST-FC orientation and function orientation for the contracted Licensed Therapist",
+"kind": "T3C credential training in",
 "cols": [
 [
-"Topics covered",
+"The role",
 [
-"Benevolent House treatment model: TST-FC",
-"The Managing Emotions Guide",
-"T3C Service Packages and the CANS"
+"Oversight of treatment and service planning (T3C Blueprint)",
+"Mental & Behavioral Health package requirements",
+"Function orientation (Licensed Therapist Agreement 6(d))"
 ]
 ],
 [
-"",
+"TST-FC model",
 [
-"Service Plan and 90-day reviews",
-"Documentation and communication with the case manager",
-"Crisis response and reporting"
+"The trauma system and survival-in-the-moment states",
+"The four R's and three A's",
+"Moment-by-Moment Assessment and the priority problem"
+]
+],
+[
+"The plans",
+[
+"The Managing Emotions Guide",
+"Safety and crisis plans and emotional hotspots (T3C-5)",
+"90-day review, written justification, continued stay (T3C-6)"
+]
+],
+[
+"Working with Benevolent House",
+[
+"Confidentiality and reporting",
+"Practice: safety plan and review input",
+"Ongoing: TST-FC Sessions 2 and 3 each year"
 ]
 ]
-]
+],
+"kc": true
 },
 "MC": {
 "head": "Medical Consent Training",
