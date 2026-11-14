@@ -130,6 +130,7 @@ input[type=checkbox]{width:20px!important;height:20px;flex:0 0 20px;accent-color
 @media print{.alert6,.tabs{display:none!important}}
 @media screen and (max-width:900px){.hometable thead{display:none}.hometable tr{display:block;border-bottom:1px solid var(--line);padding:8px 0}.hometable td{display:block;border:0;padding:3px 14px}.hometable td[data-l]:before{content:attr(data-l);display:block;font-size:.7rem;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}.hometable td.acts{padding-top:8px;white-space:normal!important}.hometable td.num{white-space:normal}.hometable td.acts .btn{margin:0 4px 6px 0}}
 @media print{main{padding:.5in!important;-webkit-box-decoration-break:clone;box-decoration-break:clone}}
+.actlist{list-style:none;margin:0;padding:0}.actlist li{display:grid;grid-template-columns:86px 1fr;gap:10px;padding:9px 0;border-bottom:1px solid #E8DED4;overflow-wrap:anywhere}.actlist li.actv{color:#5A4E46}.acttime{font-variant-numeric:tabular-nums;color:#5A4E46;font-size:.92rem}.actlist li.actc .acttime{color:var(--brown);font-weight:700}.actdiff{margin-top:6px;font-size:.92rem}.actdiff th[scope=row]{text-align:left;font-weight:700;white-space:nowrap}.actdiff td{overflow-wrap:anywhere}@media(max-width:560px){.actlist li{grid-template-columns:1fr;gap:2px}}
 </style>
 </head>
 <body>
@@ -567,11 +568,97 @@ function editDetails(x){const t=todayYmd();const pr=x.prefs||{};const o=(v,c)=>`
   const prefs={};const put=(k,v)=>{if(v!==null&&v!=="")prefs[k]=v};put("type",$("#pt").value);put("gender",$("#pg").value);put("age_min",a1);put("age_max",a2);put("count",num("#pn"));put("county",$("#pc").value.trim());put("ethnicity",$("#pe").value.trim());put("level",$("#pl").value.trim());put("notes",$("#pno").value.trim());
   const b=$("#dsave");b.disabled=true;const{data,error}=await BHC.client().rpc("set_home_details",{p_emails:x.emails,p_initial:i,p_current:c,p_prefs:prefs});b.disabled=false;
   if(error){toast("Could not save: "+error.message);return}BHC.log("home_details",x.home);await loadApproved();toast(data?"Saved":"No changes to save");const nx=homesList().find(h=>h.home===x.home)||x;homeHistory(nx)}}
-function nav(active){const any=can("manage_families")||can("view_training");const late=any?homesList().filter(h=>h.standing==="Inactive"&&h.span&&h.span.six&&!h.paused).length:0;
+function nav(active){CURPAGE=active||CURPAGE;const any=can("manage_families")||can("view_training");const late=any?homesList().filter(h=>h.standing==="Inactive"&&h.span&&h.span.six&&!h.paused).length:0;
  const b=(id,key,label,extra)=>`<button id="${id}" ${active===key?'aria-current="page"':""}>${label}${extra||""}</button>`;
  const qn=openQs().length;
- return `<nav class="navbar noprint" aria-label="Staff Dashboard">${any?b("navToday","today","Today"):""}${any&&(qn||QUESTIONS.length)?b("navQs","questions","Questions",qn?` <span class="count" title="${qn} unanswered">${qn}<span class="sr-only"> unanswered</span></span>`:""):""}${any?b("navHomes","homes","Homes",late?` <span class="count" title="${late} inactive ${late===1?"home needs":"homes need"} review">${late}<span class="sr-only"> inactive ${late===1?"home needs":"homes need"} review</span></span>`:""):""}${can("view_training")?b("navRec","records","Training"):""}${any?b("navPeople","people","People"):""}${can("manage_staff")?b("navSites","sites","Sites"):""}</nav>`}
-function wireNav(){$("#navToday")&&($("#navToday").onclick=async()=>{await loadQuestions();renderToday()});$("#navQs")&&($("#navQs").onclick=()=>showQuestions());$("#navRec")&&($("#navRec").onclick=()=>{listFilter="";renderList()});$("#navPeople")&&($("#navPeople").onclick=()=>renderPeople());$("#navHomes")&&($("#navHomes").onclick=()=>renderHomes());$("#navSites")&&($("#navSites").onclick=()=>renderSites());window.scrollTo(0,0)}
+ return `<nav class="navbar noprint" aria-label="Staff Dashboard">${any?b("navToday","today","Today"):""}${any&&(qn||QUESTIONS.length)?b("navQs","questions","Questions",qn?` <span class="count" title="${qn} unanswered">${qn}<span class="sr-only"> unanswered</span></span>`:""):""}${any?b("navHomes","homes","Homes",late?` <span class="count" title="${late} inactive ${late===1?"home needs":"homes need"} review">${late}<span class="sr-only"> inactive ${late===1?"home needs":"homes need"} review</span></span>`:""):""}${can("view_training")?b("navRec","records","Training"):""}${any?b("navPeople","people","People"):""}${can("manage_staff")?b("navSites","sites","Sites"):""}${LEAD()||can("manage_staff")?b("navAct","activity","Activity"):""}</nav>`}
+function wireNav(){$("#navToday")&&($("#navToday").onclick=async()=>{await loadQuestions();renderToday()});$("#navQs")&&($("#navQs").onclick=()=>showQuestions());$("#navRec")&&($("#navRec").onclick=()=>{listFilter="";renderList()});$("#navPeople")&&($("#navPeople").onclick=()=>renderPeople());$("#navHomes")&&($("#navHomes").onclick=()=>renderHomes());$("#navSites")&&($("#navSites").onclick=()=>renderSites());$("#navAct")&&($("#navAct").onclick=()=>showActivity());window.scrollTo(0,0)}
+/* ---------- time tracking: the dashboard checks in once a minute; only minutes with real use count ---------- */
+let SESS=null,LASTACT=Date.now(),CURPAGE="today";
+function beat(active){if(!SESS)return;try{BHC.client().rpc("portal_heartbeat",{p_session:SESS,p_page:CURPAGE,p_active:!!active}).then(()=>{},()=>{})}catch(e){}}
+function startBeats(){if(SESS)return;SESS=(window.crypto&&crypto.randomUUID)?crypto.randomUUID():"10000000-1000-4000-8000-100000000000".replace(/[018]/g,c=>(c^Math.random()*16>>c/4).toString(16));
+ ["pointerdown","keydown","scroll","mousemove","touchstart"].forEach(ev=>addEventListener(ev,()=>{LASTACT=Date.now()},{passive:true}));
+ const used=()=>document.visibilityState==="visible"&&Date.now()-LASTACT<90000;beat(false);setInterval(()=>beat(used()),60000);
+ document.addEventListener("visibilitychange",()=>{if(document.visibilityState==="hidden")beat(Date.now()-LASTACT<90000)})}
+
+/* ---------- Activity (leadership only): who did what, when, and what changed ---------- */
+const ACT_PAGES={today:"Today",questions:"Questions",homes:"Homes",records:"Training",people:"People",sites:"Sites",activity:"Activity"};
+const F_LABEL={standing:"status",standing_since:"status date",active:"portal access on",access:"access level",permissions:"permissions",home_label:"home",full_name:"name",email:"email",caregiver_type:"caregiver type",adoption_motivated:"adoption motivated",initial_verified:"initial verification date",current_verified:"current verification date",prefs:"placement preferences",review_after:"review date",notes:"notes",alias_of:"linked to",voided:"voided",edits:"edit history",hours:"hours",completed_at:"completion date",completed_on:"completion date",course_title:"training",course_code:"training",trainer:"trainer",score:"score",file_path:"attached file",answered_at:"answered",answer_note:"answer note",question:"question",prev_note:"earlier answer",edited:"edited",on_date:"date",event:"event",note:"note",value:"value",state:"progress",name:"name",url:"web address",login:"login",owner:"owner",enabled:"reminders on",staff_to:"staff email list",reply_to:"reply-to list",role:"role"};
+let actRange="7",actWho="staff",actShowViews=true,actSearch="",actFrom="",actTo="",ACTDATA=null;
+const ACT_SKIP=["id","created_at","added_at","updated_at","qhash","alerted_at","attempts","last_error","answered_by","added_by","recorded_by","verified_by","user_id","jotform_submission_id","answers","acknowledgment","attempt","total","source","edits"];
+function actVal(v){if(v===null||v===undefined||v==="")return "(blank)";if(v===true)return "yes";if(v===false)return "no";if(typeof v==="string"&&/^\d{4}-\d{2}-\d{2}(T|$)/.test(v))return v.length>10?fmtDT(v):fmt(v+"T12:00:00");if(Array.isArray(v))return v.length?v.join(", "):"(none)";if(typeof v==="object"){const t=Object.entries(v).filter(([k,x])=>x!==null&&x!==""&&!(Array.isArray(x)&&!x.length)).map(([k,x])=>k+": "+(Array.isArray(x)?x.join(", "):typeof x==="object"?"…":x)).join("; ");return t?(t.length>160?t.slice(0,160)+"…":t):"(none)"}const t=String(v);return t.length>160?t.slice(0,160)+"…":t}
+const fmtDT=d=>new Date(d).toLocaleString("en-US",{month:"short",day:"numeric",year:"numeric",hour:"numeric",minute:"2-digit"});
+const fmtTime=d=>new Date(d).toLocaleTimeString("en-US",{hour:"numeric",minute:"2-digit"});
+const fmtDur=sec=>{const m=Math.round((sec||0)/60);if(m<1)return "under 1 minute";const h=Math.floor(m/60),r=m%60;return (h?h+(h===1?" hour":" hours"):"")+(h&&r?" ":"")+(r?r+(r===1?" minute":" minutes"):"")};
+function actPerson(id){return(ACTDATA&&ACTDATA.people||[]).find(p=>p.id===id)}
+function actName(id,fallback){const p=actPerson(id);return p?(p.name||p.email):(fallback||"System")}
+function actSubject(r){const x=r.new_row||r.old_row||{};
+ if(r.tbl==="approved_people")return x.full_name||x.email||"a person";
+ if(r.tbl==="completions"||r.tbl==="course_progress"||r.tbl==="caregiver_questions"){const p=actPerson(x.user_id);return (p?(p.name||p.email):"a caregiver")}
+ if(r.tbl==="legacy_training")return x.person_name||"a person";
+ if(r.tbl==="home_events")return x.home_label||"a home";
+ if(r.tbl==="profiles")return x.full_name||x.email||"a person";
+ return x.name||x.key||x.home_label||""}
+function actSentence(r){const x=r.new_row||r.old_row||{},o=r.old_row||{},n=r.new_row||{},who=esc(r.actor?actName(r.actor,r.actor_name):(r.actor_name||"System")),sub=`<b>${esc(actSubject(r))}</b>`,course=esc(x.course_title||courseTitle(x.course_code||"")||"");
+ const T=r.tbl,op=r.op,ch=r.changed||[];
+ if(T==="approved_people"){if(op==="insert")return `${who} added ${sub} to the portal (${esc(x.access||"")}${x.standing?", "+esc(x.standing):""}).`;if(op==="delete")return `${who} removed ${sub} from the portal.`;
+  if(ch.length===1&&ch[0]==="standing")return `${who} changed ${sub}'s status from ${esc(actVal(o.standing))} to ${esc(actVal(n.standing))}.`;return `${who} changed ${sub}'s record (${esc(ch.map(c=>F_LABEL[c]||c).join(", "))}).`}
+ if(T==="completions"){if(op==="insert")return r.actor&&r.actor===x.user_id?`${who} completed ${course}.`:`${who} recorded ${course} as completed for ${sub}.`;if(op==="delete")return `${who} deleted ${sub}'s ${course} completion.`;if(ch.includes("voided"))return n.voided?`${who} voided ${sub}'s ${course} completion.`:`${who} restored ${sub}'s ${course} completion.`;return `${who} edited ${sub}'s ${course} completion (${esc(ch.map(c=>F_LABEL[c]||c).join(", "))}).`}
+ if(T==="legacy_training"){if(op==="insert")return `${who} added a training record for ${sub}: ${course} on ${esc(actVal(x.completed_on))}.`;if(op==="delete")return `${who} deleted ${sub}'s training record: ${course}.`;if(ch.includes("voided"))return n.voided?`${who} voided ${sub}'s training record: ${course}.`:`${who} restored ${sub}'s training record: ${course}.`;return `${who} edited ${sub}'s training record: ${course} (${esc(ch.map(c=>F_LABEL[c]||c).join(", "))}).`}
+ if(T==="home_events"){if(op==="insert")return `${who} added a path entry for ${sub}: ${esc(x.event||"")} on ${esc(actVal(x.on_date))}.`;if(op==="delete")return `${who} deleted a path entry for ${sub}: ${esc(x.event||"")} on ${esc(actVal(x.on_date))}.`;return `${who} edited a path entry for ${sub}.`}
+ if(T==="caregiver_questions"){if(op==="insert")return `${sub} asked a question in ${course}.`;if(ch.includes("answered_at"))return n.answered_at?`${who} marked ${sub}'s question answered${n.answer_note?": "+esc(n.answer_note):"."}`:`${who} reopened ${sub}'s question.`;if(ch.includes("question"))return `${sub} changed a question in ${course}.`;return `${who} updated ${sub}'s question.`}
+ if(T==="course_progress")return `${who} changed ${sub}'s progress in ${course}.`;
+ if(T==="profiles")return op==="insert"?`${sub} created a portal account.`:`${who} changed ${sub}'s account (${esc(ch.map(c=>F_LABEL[c]||c).join(", "))}).`;
+ if(T==="reminder_settings")return `${who} changed the reminder settings (${esc(ch.map(c=>F_LABEL[c]||c).join(", "))}).`;
+ if(T==="portal_settings")return `${who} changed a portal setting: ${esc(x.key||"")}.`;
+ if(T==="bh_sites")return `${who} ${op==="insert"?"added":op==="delete"?"deleted":"changed"} the BH site entry ${sub}.`;
+ if(T==="cert_assets")return `${who} ${op==="insert"?"added":op==="delete"?"deleted":"changed"} a certificate file.`;
+ return `${who} ${op==="insert"?"added":op==="delete"?"deleted":"changed"} a record in ${esc(T)}.`}
+function actDetail(r){const o=r.old_row||{},n=r.new_row||{};let keys=r.op==="update"?(r.changed||[]):Object.keys(r.new_row||r.old_row||{});keys=keys.filter(k=>r.op==="update"||!ACT_SKIP.includes(k)).filter(k=>!(k==="course_code"&&(r.new_row||r.old_row||{}).course_title)).filter(k=>!(r.op!=="update"&&(((r.new_row||r.old_row)[k])===null||((r.new_row||r.old_row)[k])==="")));
+ if(r.tbl==="course_progress")keys=keys.filter(k=>k!=="state").concat(r.op==="update"&&(r.changed||[]).includes("state")?["state"]:[]);
+ if(!keys.length)return "";
+ const rows=keys.map(k=>r.op==="update"?`<tr><th scope="row">${esc(F_LABEL[k]||k)}</th><td>${esc(k==="state"?"(training progress changed)":actVal(o[k]))}</td><td>${esc(k==="state"?"":actVal(n[k]))}</td></tr>`:`<tr><th scope="row">${esc(F_LABEL[k]||k)}</th><td colspan="2">${esc(actVal((r.new_row||r.old_row)[k]))}</td></tr>`).join("");
+ return `<details class="small"><summary>${r.op==="update"?"What changed":r.op==="insert"?"What was added":"What was deleted"}</summary><div class="tscroll"><table class="actdiff">${r.op==="update"?`<thead><tr><th>Item</th><th>Before</th><th>After</th></tr></thead>`:""}<tbody>${rows}</tbody></table></div></details>`}
+const EV_TEXT={sign_in:"signed in",open_admin:"opened the Staff Dashboard",view_person:"opened a training record",view_preview:"previewed a training",view_file:"opened a file",record_live:"recorded a live training",verify:"verified a training",edit_record:"edited a training record",approve_add:"added portal access",approve_edit:"changed portal access",site_edit:"changed a BH site entry",site_delete:"deleted a BH site entry",question_answered:"marked a question answered",view_activity:"opened the Activity page",course_done:"finished a training"};
+function evSentence(e){const who=esc(actName(e.actor,"Someone"));let t=EV_TEXT[e.action]||e.action.replace(/_/g," ");let extra="";
+ if(e.action==="visit")return `${who} opened ${esc(e.target==="/"?"the portal home page":"the page "+e.target)}.`;
+ if(e.action==="view_person"){const p=actPerson(e.target);extra=p?`: <b>${esc(p.name||p.email)}</b>`:""}
+ else if(e.action==="course_done")extra=e.target?`: ${esc(courseTitle(e.target))}`:"";
+ else if(e.target&&!/^[0-9a-f-]{30,}$/.test(e.target))extra=`: ${esc(e.target)}`;
+ return `${who} ${t}${extra}.`}
+function actRangeDates(){const now=new Date();let from,to=new Date(now.getTime()+60000);if(actRange==="custom"&&actFrom){from=new Date(actFrom+"T00:00:00");to=actTo?new Date(new Date(actTo+"T00:00:00").getTime()+86400000):to}else{const d=new Date();d.setHours(0,0,0,0);from=new Date(d.getTime()-(actRange==="1"?0:(+actRange-1))*86400000)}return{from,to}}
+async function showActivity(){if(!(LEAD()||can("manage_staff"))){renderToday();return}const{from,to}=actRangeDates();$("#view").innerHTML=nav("activity")+`<h1>Activity</h1><p class="lead">Loading…</p>`;wireNav();
+ const{data,error}=await BHC.client().rpc("staff_activity",{p_from:from.toISOString(),p_to:to.toISOString(),p_actor:null});
+ if(error){$("#view").innerHTML=nav("activity")+`<h1>Activity</h1><div class="card">Could not load activity: ${esc(error.message)}</div>`;wireNav();return}
+ ACTDATA=data||{changes:[],events:[],sessions:[],people:[]};BHC.log("view_activity","");renderActivity()}
+function renderActivity(){const D=ACTDATA;const role=id=>{const p=actPerson(id);return p?p.role:null};const isStaff=id=>!id||["staff","leadership"].includes(role(id));
+ const whoOk=id=>actWho==="all"?true:actWho==="staff"?isStaff(id):actWho==="caregivers"?!isStaff(id):id===actWho;
+ const items=[];
+ D.changes.forEach(r=>{if(!whoOk(r.actor))return;items.push({at:r.at,k:"c",html:actSentence(r),detail:actDetail(r)})});
+ if(actShowViews)D.events.forEach(e=>{if(!whoOk(e.actor))return;if(e.action==="course_done")return;items.push({at:e.at,k:"v",html:evSentence(e)})});
+ const q=actSearch.trim().toLowerCase();const shown=(q?items.filter(i=>(i.html+(i.detail||"")).replace(/<[^>]+>/g," ").toLowerCase().includes(q)):items).sort((a,b)=>a.at<b.at?1:-1);
+ const staffPeople=(D.people||[]).filter(p=>["staff","leadership"].includes(p.role)).sort((a,b)=>(a.name||"").localeCompare(b.name||""));
+ const sess=D.sessions.filter(s=>whoOk(s.user_id));
+ const byPerson={};sess.forEach(s=>{const b=byPerson[s.user_id]=byPerson[s.user_id]||{n:0,sec:0,last:null};b.n++;b.sec+=s.active_seconds||0;if(!b.last||s.last_seen>b.last)b.last=s.last_seen});
+ D.changes.forEach(r=>{if(r.actor&&byPerson[r.actor])byPerson[r.actor].ch=(byPerson[r.actor].ch||0)+1});
+ const days={};shown.slice(0,600).forEach(i=>{const d=new Date(i.at).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"});(days[d]=days[d]||[]).push(i)});
+ let h=nav("activity")+`<h1>Activity</h1><p class="lead">Who signed in, how long they used the Staff Dashboard, what they opened and every change made to portal records, with what it said before and after. The change log is kept by the database itself and cannot be edited or deleted. Only leadership can see this page.</p>
+ <div class="card noprint"><div class="grid2" style="gap:10px">
+ <div><label for="actWho">Whose activity</label><select id="actWho"><option value="staff" ${actWho==="staff"?"selected":""}>All staff and leadership</option>${staffPeople.map(p=>`<option value="${esc(p.id)}" ${actWho===p.id?"selected":""}>${esc(p.name||p.email)}</option>`).join("")}<option value="caregivers" ${actWho==="caregivers"?"selected":""}>Caregivers</option><option value="all" ${actWho==="all"?"selected":""}>Everyone</option></select></div>
+ <div><label for="actRange">Dates</label><select id="actRange">${[["1","Today"],["7","Last 7 days"],["30","Last 30 days"],["90","Last 90 days"],["custom","Choose dates"]].map(([v,t])=>`<option value="${v}" ${actRange===v?"selected":""}>${t}</option>`).join("")}</select></div>
+ ${actRange==="custom"?`<div><label for="actFrom">From</label><input type="date" id="actFrom" value="${esc(actFrom)}"></div><div><label for="actTo">Through</label><input type="date" id="actTo" value="${esc(actTo)}"></div>`:""}
+ <div><label for="actSearch">Search</label><input type="search" id="actSearch" value="${esc(actSearch)}" placeholder="A name, home or training"></div>
+ <div style="align-self:end"><label style="display:flex;gap:8px;align-items:center;font-weight:400"><input type="checkbox" id="actViews" ${actShowViews?"checked":""}> Include sign-ins and pages opened</label></div>
+ </div>${actRange==="custom"?`<button class="btn sm" id="actGo" style="margin-top:10px">Show these dates</button>`:""}</div>`;
+ const ppl=Object.entries(byPerson).sort((a,b)=>b[1].sec-a[1].sec);
+ h+=`<h2>Time in the Staff Dashboard</h2>${ppl.length?`<div class="tscroll"><table class="hometable"><thead><tr><th>Person</th><th>Sessions</th><th>Time actively using it</th><th>Changes made</th><th>Last active</th></tr></thead><tbody>${ppl.map(([id,b])=>`<tr><td data-l="Person"><b>${esc(actName(id))}</b></td><td data-l="Sessions">${b.n}</td><td data-l="Active time">${esc(fmtDur(b.sec))}</td><td data-l="Changes">${b.ch||0}</td><td data-l="Last active">${esc(fmtDT(b.last))}</td></tr>`).join("")}</tbody></table></div><p class="small muted">Time counts only minutes when the person was actually clicking, typing or scrolling with the dashboard on screen, so it is approximate. Time tracking began November 14, 2026.</p>`:`<div class="card muted">No Staff Dashboard sessions in these dates.</div>`}`;
+ h+=`<h2>What happened</h2>`+(shown.length?Object.entries(days).map(([d,list])=>`<h3 style="margin:16px 0 6px">${esc(d)}</h3><ul class="actlist">${list.map(i=>`<li class="${i.k==="c"?"actc":"actv"}"><span class="acttime">${esc(fmtTime(i.at))}</span><div>${i.html}${i.detail||""}</div></li>`).join("")}</ul>`).join("")+(shown.length>600?`<p class="small muted">Showing the 600 most recent. Narrow the dates or search to see more.</p>`:""):`<div class="card muted">Nothing found for these choices.</div>`)+`<p class="small muted" style="margin-top:14px">The detailed change log began November 14, 2026. Earlier status changes still appear on each home's page.</p>`;
+ $("#view").innerHTML=h;wireNav();
+ $("#actWho").onchange=e=>{actWho=e.target.value;renderActivity()};
+ $("#actRange").onchange=e=>{actRange=e.target.value;if(actRange==="custom")renderActivity();else showActivity()};
+ $("#actViews").onchange=e=>{actShowViews=e.target.checked;renderActivity()};
+ $("#actSearch").oninput=e=>{actSearch=e.target.value;clearTimeout(window._asT);window._asT=setTimeout(()=>{const pos=e.target.selectionStart;renderActivity();const i=$("#actSearch");i.focus();try{i.setSelectionRange(pos,pos)}catch(x){}},350)};
+ $("#actGo")&&($("#actGo").onclick=()=>{actFrom=($("#actFrom")||{}).value||"";actTo=($("#actTo")||{}).value||"";if(!actFrom){toast("Choose a start date");return}showActivity()})}
 async function loadQuestions(){try{const r=await BHC.client().rpc("staff_questions");if(!r.error&&Array.isArray(r.data)){QUESTIONS=r.data;return}const{data,error}=await BHC.client().from("caregiver_questions").select("*").order("asked_at",{ascending:false}).order("id",{ascending:false});if(!error)QUESTIONS=data||[]}catch(e){}}
 const courseTitle=c=>{const x=CAT.find(k=>k.code===c);return x?x.title:c};
 const openQs=()=>QUESTIONS.filter(q=>!q.answered_at);
@@ -660,7 +747,7 @@ async function start(u){
  if(!(can("view_training")||can("manage_families"))){$("#view").innerHTML=`<div class="card"><h1>This page is for Benevolent House staff</h1><p>You are signed in as ${esc(p.full_name||p._email)}. Your own trainings and certificates are on the <a href="../">portal home</a>.</p><p><button class="btn ghost sm" id="so">Sign out</button></p></div>`;$("#so").onclick=async()=>{await BHC.signOut();location.reload()};return}
  idle();try{BHC.visit()}catch(e){}$("#view").innerHTML=`<div class="card">Loading…</div>`;
  try{await Promise.all([can("view_training")?load():Promise.resolve(),loadApproved(),loadQuestions()])}catch(e){$("#view").innerHTML=`<div class="card">Could not load records: ${esc(e.message||e)}</div>`;return}
- BHC.log("open_admin","");renderToday()}
+ BHC.log("open_admin","");startBeats();renderToday()}
 
 (async function(){
  if(!window.BHC||!BHC.available()){$("#view").innerHTML=`<div class="card">The admin page needs an internet connection. Please check your connection and refresh.</div>`;return}
