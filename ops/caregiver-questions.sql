@@ -73,3 +73,12 @@ alter table public.reminder_log add constraint reminder_log_kind_check check (ki
 select json_agg(json_build_object('p',p.full_name,'c',q.course_code,'s',q.scene,'q',left(q.question,80)))::text from public.caregiver_questions q left join public.profiles p on p.id=q.user_id;
 
 -- alerts: pg_cron job 'caregiver-question-alerts' runs every 10 minutes, calling training-reminders?mode=questions with the same headers as training-reminders-am
+
+-- Reviewer fixes (11/14/2026), applied live:
+-- * capture_questions and the trigger functions: execute revoked from public, anon, authenticated (no direct calls)
+-- * one row per (user, course, scene); an edited question updates that row, reopens it, and re-alerts as "Updated question" if staff already got the first email
+-- * broader non-answer filter (no ma'am, no sir, I have no questions, not really, nothing to add, all good, none so far, curly apostrophes)
+-- * attempts / last_error: a question stops retrying email after 5 non-quota failures (it still shows on the dashboard)
+-- * trigger wrappers raise a warning instead of failing silently
+-- * staff_questions(): returns questions with asker and answerer names for any staff with view_training or manage_families
+-- * reopen_question keeps the earlier answer in prev_note

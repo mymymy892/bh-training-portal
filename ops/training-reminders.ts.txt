@@ -235,7 +235,7 @@ Deno.serve(async (req) => {
       // a caregiver typed a question in a training: tell staff once, with replies going straight to the caregiver
       if (!key) return json({ error: "email is not set up" }, 500);
       const e3 = (x: unknown) => String(x ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" } as any)[c]);
-      const { data: qs } = await sb.from("caregiver_questions").select("id,user_id,course_code,question,asked_at").is("alerted_at", null).order("id").limit(20);
+      const { data: qs } = await sb.from("caregiver_questions").select("id,user_id,course_code,question,asked_at,edited,attempts").is("alerted_at", null).lt("attempts", 5).order("id").limit(20);
       let sentQ = 0;
       for (const q of qs || []) {
         const { data: mine } = await sb.from("caregiver_questions").update({ alerted_at: new Date().toISOString() }).eq("id", q.id).is("alerted_at", null).select("id");
@@ -244,9 +244,13 @@ Deno.serve(async (req) => {
         const course = ((g.CATALOG || []) as any[]).find((c) => c.code === q.course_code);
         const title = course ? course.title : q.course_code;
         const name = pr?.full_name || pr?.email || "A caregiver";
-        const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#2B2320;max-width:640px"><p><b>${e3(name)}</b>${pr?.home_label ? " (" + e3(pr.home_label) + ")" : ""} asked a question in <b>${e3(title)}</b>:</p><blockquote style="margin:0 0 14px;padding:10px 14px;border-left:4px solid #7B4B2A;background:#FBF7F2">${e3(q.question).replace(/\n/g, "<br>")}</blockquote><p>Replying to this email goes straight to ${e3(name)}${pr?.email ? " (" + e3(pr.email) + ")" : ""}. After it is answered, mark it answered on the Today page of the <a href="https://portal.benevolenthouse.org/admin/">Staff Dashboard</a>.</p></div>`;
-        const r = await send(key, { from: FROM, to: staffTo, reply_to: pr?.email ? [pr.email] : replyTo, subject: `Question from ${name}: ${title}`, html });
-        if (r) { await sb.from("caregiver_questions").update({ alerted_at: null }).eq("id", q.id); if (r.quota) break; continue; }
+        const html = `<div style="font-family:Arial,Helvetica,sans-serif;font-size:15px;line-height:1.5;color:#2B2320;max-width:640px"><p><b>${e3(name)}</b>${pr?.home_label ? " (" + e3(pr.home_label) + ")" : ""} ${q.edited ? "changed a question" : "asked a question"} in <b>${e3(title)}</b>:</p><blockquote style="margin:0 0 14px;padding:10px 14px;border-left:4px solid #7B4B2A;background:#FBF7F2">${e3(q.question).replace(/\n/g, "<br>")}</blockquote><p>Replying to this email goes straight to ${e3(name)}${pr?.email ? " (" + e3(pr.email) + ")" : ""}. After it is answered, mark it answered on the Today page of the <a href="https://portal.benevolenthouse.org/admin/">Staff Dashboard</a>.</p></div>`;
+        const r = await send(key, { from: FROM, to: staffTo, reply_to: pr?.email ? [pr.email] : replyTo, subject: `${q.edited ? "Updated question" : "Question"} from ${name}: ${title}`, html });
+        if (r) {
+          // quota: try again next run; any other error counts toward 5 tries, and the question still shows on the dashboard
+          await sb.from("caregiver_questions").update({ alerted_at: null, attempts: r.quota ? q.attempts : (q.attempts || 0) + 1, last_error: r.err.slice(0, 300) }).eq("id", q.id);
+          if (r.quota) break; continue;
+        }
         sentQ++;
         await sleep(600);
       }
