@@ -148,7 +148,7 @@ function toast(m){const t=$("#toast");t.textContent=m;t.classList.add("show");se
 const fmt=d=>d?new Date(d).toLocaleDateString("en-US",{year:"numeric",month:"long",day:"numeric"}):"";
 const fmtShort=d=>d?new Date(d).toLocaleDateString("en-US",{month:"2-digit",day:"2-digit",year:"numeric"}):"";
 const CAT=window.CATALOG||[];
-let ME=null,PEOPLE=[],COMPS=[],LEGACY=[],ACT=[],filter="",homeFilter="",stFilter="current",listFilter="",sel=null;
+let QUESTIONS=[];let ME=null,PEOPLE=[],COMPS=[],LEGACY=[],ACT=[],filter="",homeFilter="",stFilter="current",listFilter="",sel=null;
 
 function dueOf(c,comp){return comp?window.BH_DUE(c,comp.completed_at):c.cycle==="quarter"?window.BH_DUE(c,null):null}
 const nm=s=>String(s||"").trim().toLowerCase().replace(/\s+/g," ");
@@ -190,8 +190,7 @@ const T3C_CODES=[["T3C-PP","T3C Policy and Procedure"],["HT","Universal Human Tr
 function t3cRows(){return APPROVED.filter(a=>a.active&&a.access==="caregiver"&&!a.alias_of&&a.caregiver_type!=="Contracted Provider"&&(a.standing||"Active")==="Active").map(a=>{const mails=[a.email].concat(APPROVED.filter(x=>x.alias_of===a.email).map(x=>x.email));const ps=PEOPLE.filter(x=>mails.includes((x.email||"").toLowerCase()));const ids=ps.map(x=>x.id);if(a.full_name)ids.push("legacy:"+nm(a.full_name));const p=ps[0];
  const got=T3C_CODES.map(([c])=>{const r=COMPS.filter(x=>ids.includes(x.user_id)&&x.course_code===c&&!x.voided&&(!x.legacy||x.record_src==="staff entry")&&x.completed_at>=T3C_SINCE).sort((x,y)=>y.completed_at.localeCompare(x.completed_at))[0];return r?r.completed_at:null});
  return{a,p,got,done:got.every(Boolean)}}).sort((x,y)=>(x.done-y.done)||(x.a.home_label||"").localeCompare(y.a.home_label||""))}
-function t3cQuestions(){const qs=[];COMPS.filter(x=>!x.voided&&!x.legacy&&T3C_CODES.some(c=>c[0]===x.course_code)).forEach(x=>reflectRows(x).filter(y=>y[2]&&!/^\s*(n\/?a|none|no|nope|nothing|not at this time|no questions?)(\s+(at this time|right now|for now|thank you|thanks))*[\s.!]*$/i.test(String(y[1]||""))).forEach(y=>{const p=PEOPLE.find(z=>z.id===x.user_id);qs.push({p,x,q:y[1]})}));if(!qs.length)return "";
- return `<div style="margin:10px 0"><b>Questions from caregivers (${qs.length})</b><ul style="margin:6px 0 0 18px">${qs.map(o=>`<li><a href="#" data-qperson="${esc(o.p?o.p.id:"")}">${esc(o.p?o.p.full_name||o.p.email:"Caregiver")}</a>, ${esc((T3C_CODES.find(c=>c[0]===o.x.course_code)||[0,o.x.course_code])[1])}: ${esc(o.q)}</li>`).join("")}</ul></div>`}
+function t3cQuestions(){const n=openQs().length;return n?`<p style="margin:10px 0"><a href="#" data-tgoq="1"><b>${n} unanswered caregiver ${n===1?"question":"questions"}</b></a> <span class="small muted">See the Questions page.</span></p>`:""}
 function t3cPanel(){if(!APPROVED.length)return "";const R=t3cRows();const done=R.filter(r=>r.done).length;const open=R.filter(r=>!r.done);
  return `<div class="card" id="t3cCard"><h2 style="margin-top:0">T3C trainings due Tuesday, November 17</h2><p class="muted" style="margin-top:0">Every active caregiver completes both trainings, in the portal or on paper with staff entering the completion: ${T3C_CODES.map(x=>x[1]).join(" and ")}. Earlier human trafficking records do not count here, because the T3C credential calls for the DFPS Universal course. Only Active homes are counted; applicants and inactive homes are on the Homes page.</p>
  <p style="margin:10px 0 0"><b style="font-size:1.4rem;color:var(--brown-dk)">${done} of ${R.length}</b> caregivers finished both. <span class="muted">${(n=>n+(n===1?" has":" have"))(R.filter(r=>r.p).length)} signed in; ${open.length} still to finish.</span></p><div class="prog" role="progressbar" aria-label="T3C trainings finished" aria-valuemin="0" aria-valuemax="${R.length}" aria-valuenow="${done}"><i style="width:${R.length?Math.round(done/R.length*100):0}%"></i></div>
@@ -215,7 +214,7 @@ function renderList(){
  $("#q")&&($("#q").oninput=e=>{filter=e.target.value.toLowerCase();const pos=e.target.selectionStart;renderList();const q=$("#q");q.focus();q.setSelectionRange(pos,pos)});
  $("#hf")&&($("#hf").onchange=e=>{homeFilter=e.target.value;renderList()});document.querySelectorAll("[data-lf]").forEach(b=>b.onclick=()=>{listFilter=b.dataset.lf===listFilter?"":b.dataset.lf;renderList()});$("#lfclear")&&($("#lfclear").onclick=e=>{e.preventDefault();listFilter="";renderList()});$("#sf")&&($("#sf").onchange=e=>{stFilter=e.target.value;renderList()});wireAlert();
  $("#homeLog")&&($("#homeLog").onclick=()=>renderHomeLogs(homeFilter));
- document.querySelectorAll("[data-qperson]").forEach(a=>a.onclick=e=>{e.preventDefault();if(a.dataset.qperson)renderPerson(a.dataset.qperson)});
+ document.querySelectorAll("[data-tgoq]").forEach(a=>a.onclick=e=>{e.preventDefault();renderQuestions()});
  document.querySelectorAll("tr.click").forEach(tr=>{const go=()=>renderPerson(tr.dataset.id);tr.onclick=go;tr.onkeydown=e=>{if(e.key==="Enter")go()}})}
 
 function howOf(r){if(r.source==="portal")return "Portal course"+(r.score!=null?` (${esc(r.score)}/${esc(r.total||"")})`:"");if(r.source==="record")return "BH record";const base=r.source==="upload"?"Certificate":r.source==="live"?"Recorded":"Backfill";return base+(!r.verified_by?` <span class="pill self">Self-reported</span>`:` <span class="pill ok">Verified</span>`)}
@@ -264,7 +263,7 @@ function renderPerson(id){sel=PEOPLE.find(p=>p.id===id);if(!sel)return;const p=s
  ${printLog(p)}<div class="screenonly">
  <h1>${esc(p.full_name||p.email)}</h1><p class="lead">${esc(p.home_label||"")}${p.caregiver_type?" · "+esc(p.caregiver_type):""} · ${esc(p.email)}</p>${(()=>{const s=summary(p);return `<div class="strip">${s.over?`<span class="pill over">${s.over} past due</span>`:""}${s.due?`<span class="pill due">${s.due} due within 90 days</span>`:""}${s.missing?`<span class="pill none">${s.missing} required, not done yet</span>`:""}${!s.over&&!s.due&&!s.missing?`<span class="pill ok">All required trainings current</span>`:""}</div>`})()}${logTable(p)}
  <p class="small muted noprint">"Portal course" trainings are graded and signed in the portal. "BH record" comes from the training records kept before the portal. "Self-reported" means the person recorded the training themselves; it becomes "Verified" once staff checks the sign-in sheet or certificate. Use Edit to correct a date, hours or trainer; every change is kept in the history below. Nobody edits their own records; another leadership member corrects those.</p>
- ${activityHtml(p)}${historyHtml(p)}</div>
+ ${(()=>{const qs=QUESTIONS.filter(q=>q.user_id===p.id);return qs.length?`<div class="noprint"><h2>Questions from ${esc(p.full_name||"this person")}</h2>${qs.map(q=>qCard(q,true)).join("")}</div>`:""})()}${activityHtml(p)}${historyHtml(p)}</div>
  ${canRecord(p)?`<div class="card noprint"><h2 style="margin-top:0">Record a training for ${esc(p.full_name||"this person")}</h2><div class="row2"><div><label for="rc">Training</label><select id="rc">${catFor(p).map(c=>`<option value="${esc(c.code)}">${esc(c.title)}</option>`).join("")}</select></div><div><label for="rd">Date completed</label><input id="rd" type="date"></div></div><div class="row2"><div><label for="rh">Hours</label><input id="rh" type="number" min="0.25" max="12" step="0.25"></div><div><label for="rt">Trainer or provider</label><input id="rt" type="text" placeholder="e.g., Haddie Mashburn"></div></div>${p.legacy?`<p class="small muted" style="margin-top:0">Use this for a paper or in-person training. It shows on their portal page once they sign in.</p>`:""}<label for="rf">Supporting document, such as a certificate, sign-in sheet or completed paper packet (optional)</label><input id="rf" type="file" accept="application/pdf,image/*"><p><button class="btn" id="rsave">Save as verified</button></p></div>`:""}
  ${paperCard(p)}`;
  $("#view").innerHTML=h;window.scrollTo(0,0);
@@ -284,7 +283,7 @@ function renderPerson(id){sel=PEOPLE.find(p=>p.id===id);if(!sel)return;const p=s
  document.querySelectorAll("[data-file]").forEach(b=>b.onclick=()=>openFile(b.dataset.file));
  document.querySelectorAll("[data-quiz]").forEach(b=>b.onclick=()=>renderQuiz(b.dataset.quiz));
 
- wireNav();if(!p.legacy)BHC.log("view_person",p.id)}
+ wireNav();wireQs(()=>renderPerson(p.id));if(!p.legacy)BHC.log("view_person",p.id)}
 
 /* suggested trainer for Record a training: Christopher R. Orr for Benevolent House trainings, the provider for outside ones */
 function trainerFor(c){if(!c)return "";const l=c.link||"";if(/dfps\.texas\.gov/.test(l))return "Texas Department of Family and Protective Services";if(/tamu\.edu/.test(l))return "Texas A&M AgriLife Extension";if(/texassuicideprevention/.test(l))return "Texas Suicide Prevention Collaborative";if(/jotform/.test(l))return "";
@@ -396,7 +395,8 @@ function renderToday(){const H=homesList();const by=k=>H.filter(h=>h.standing===
  const t3=tr&&APPROVED.length?t3cRows():[];const t3open=t3.filter(r=>!r.done);
  const quiet=!tr?[]:app.filter(x=>{const ids=PEOPLE.filter(p=>x.people.some(a=>a.email===(p.email||"").toLowerCase())).map(p=>p.id);const last=ids.map(id=>activity(id).last).filter(Boolean).sort().pop();return !last||Date.now()-new Date(last)>30*864e5});
  const noPref=act.filter(x=>!x.prefs);
- const items=[];
+ const items=[];const oq=openQs();
+ if(oq.length)items.push({c:"r",h:`<a href="#" data-tgo="qs">${oq.length===1?"1 caregiver question needs":oq.length+" caregiver questions need"} an answer.</a> ${oq.slice(0,3).map(q=>{const p=qPerson(q);return `${esc(p?(p.full_name||p.email):"A caregiver")} (${esc(courseTitle(q.course_code))}): "${esc(q.question.length>90?q.question.slice(0,90)+"…":q.question)}"`}).join("; ")}${oq.length>3?"; and more":""}`});
  six.forEach(x=>items.push({c:"r",h:`<a href="#" data-thome="${esc(x.home)}">${esc(x.home)}</a> has been inactive ${esc(x.span.text)}. Consider closing or keeping it inactive.`}));
  five.forEach(x=>items.push({c:"",h:`<a href="#" data-thome="${esc(x.home)}">${esc(x.home)}</a> reaches 6 months inactive on ${esc(fmtYmd(x.span.sixDate))}.`}));
  if(over.length)items.push({c:"r",h:`<a href="#" data-tgo="over">${over.length} ${over.length===1?"person has":"people have"} a past-due training.</a> ${over.slice(0,6).map(x=>esc(x.p.full_name||x.p.email)).join(", ")}${over.length>6?", and more":""}`});
@@ -410,7 +410,7 @@ function renderToday(){const H=homesList();const by=k=>H.filter(h=>h.standing===
  <div class="card"><h2 style="margin-top:0">Needs attention</h2>${items.length?`<ul class="attn">${items.map(i=>`<li><span class="dot ${i.c}" aria-hidden="true"></span><div>${i.h}</div></li>`).join("")}</ul>`:`<p class="muted" style="margin:0">Nothing needs attention right now.</p>`}</div>`;
  $("#view").innerHTML=h;wireNav();
  document.querySelectorAll("[data-thome]").forEach(a=>a.onclick=e=>{e.preventDefault();const x=homesList().find(z=>z.home===a.dataset.thome);if(x)homeHistory(x)});
- document.querySelectorAll("[data-tgo]").forEach(a=>a.onclick=e=>{e.preventDefault();const g=a.dataset.tgo;if(["Active","Applicant","Inactive"].includes(g)){hTab=g;hSearch="";hMatch=null;hMatchOpen=false;hAdopt=false;renderHomes()}else if(g==="homes"){hTab="Active";hSearch="";hMatch=null;hMatchOpen=false;hAdopt=false;renderHomes()}else if(g==="over"){listFilter="over";stFilter="current";filter="";homeFilter="";renderList()}else if(g==="t3c"){listFilter="";renderList();setTimeout(()=>{const c=$("#t3cCard");c&&c.scrollIntoView({behavior:"smooth"})},50)}})}
+ document.querySelectorAll("[data-tgo]").forEach(a=>a.onclick=e=>{e.preventDefault();const g=a.dataset.tgo;if(g==="qs"){renderQuestions();return}if(["Active","Applicant","Inactive"].includes(g)){hTab=g;hSearch="";hMatch=null;hMatchOpen=false;hAdopt=false;renderHomes()}else if(g==="homes"){hTab="Active";hSearch="";hMatch=null;hMatchOpen=false;hAdopt=false;renderHomes()}else if(g==="over"){listFilter="over";stFilter="current";filter="";homeFilter="";renderList()}else if(g==="t3c"){listFilter="";renderList();setTimeout(()=>{const c=$("#t3cCard");c&&c.scrollIntoView({behavior:"smooth"})},50)}})}
 function prefSummary(p){const a=[];if(p.type)a.push(p.type.toLowerCase());if(p.age_min!=null||p.age_max!=null)a.push(`ages ${p.age_min!=null?p.age_min:"?"} to ${p.age_max!=null?p.age_max:"?"}`);if(p.gender&&p.gender!=="Any")a.push(p.gender.toLowerCase());if(p.count)a.push(p.count+(+p.count===1?" child":" children"));if(p.county)a.push(p.county+" County");return a.join(", ")}
 const COUNTIES=["Collin","Dallas","Denton","Ellis","Grayson","Hunt","Johnson","Kaufman","Navarro","Rockwall","Tarrant"];
 function prefMiss(p,m){const r=[];if(!p)return ["no preferences on file"];
@@ -569,8 +569,26 @@ function editDetails(x){const t=todayYmd();const pr=x.prefs||{};const o=(v,c)=>`
   if(error){toast("Could not save: "+error.message);return}BHC.log("home_details",x.home);await loadApproved();toast(data?"Saved":"No changes to save");const nx=homesList().find(h=>h.home===x.home)||x;homeHistory(nx)}}
 function nav(active){const any=can("manage_families")||can("view_training");const late=any?homesList().filter(h=>h.standing==="Inactive"&&h.span&&h.span.six&&!h.paused).length:0;
  const b=(id,key,label,extra)=>`<button id="${id}" ${active===key?'aria-current="page"':""}>${label}${extra||""}</button>`;
- return `<nav class="navbar noprint" aria-label="Staff Dashboard">${any?b("navToday","today","Today"):""}${any?b("navHomes","homes","Homes",late?` <span class="count" title="${late} inactive ${late===1?"home needs":"homes need"} review">${late}<span class="sr-only"> inactive ${late===1?"home needs":"homes need"} review</span></span>`:""):""}${can("view_training")?b("navRec","records","Training"):""}${any?b("navPeople","people","People"):""}${can("manage_staff")?b("navSites","sites","Sites"):""}</nav>`}
-function wireNav(){$("#navToday")&&($("#navToday").onclick=()=>renderToday());$("#navRec")&&($("#navRec").onclick=()=>{listFilter="";renderList()});$("#navPeople")&&($("#navPeople").onclick=()=>renderPeople());$("#navHomes")&&($("#navHomes").onclick=()=>renderHomes());$("#navSites")&&($("#navSites").onclick=()=>renderSites());window.scrollTo(0,0)}
+ const qn=openQs().length;
+ return `<nav class="navbar noprint" aria-label="Staff Dashboard">${any?b("navToday","today","Today"):""}${any&&(qn||QUESTIONS.length)?b("navQs","questions","Questions",qn?` <span class="count" title="${qn} unanswered">${qn}<span class="sr-only"> unanswered</span></span>`:""):""}${any?b("navHomes","homes","Homes",late?` <span class="count" title="${late} inactive ${late===1?"home needs":"homes need"} review">${late}<span class="sr-only"> inactive ${late===1?"home needs":"homes need"} review</span></span>`:""):""}${can("view_training")?b("navRec","records","Training"):""}${any?b("navPeople","people","People"):""}${can("manage_staff")?b("navSites","sites","Sites"):""}</nav>`}
+function wireNav(){$("#navToday")&&($("#navToday").onclick=()=>renderToday());$("#navQs")&&($("#navQs").onclick=()=>renderQuestions());$("#navRec")&&($("#navRec").onclick=()=>{listFilter="";renderList()});$("#navPeople")&&($("#navPeople").onclick=()=>renderPeople());$("#navHomes")&&($("#navHomes").onclick=()=>renderHomes());$("#navSites")&&($("#navSites").onclick=()=>renderSites());window.scrollTo(0,0)}
+async function loadQuestions(){try{const{data,error}=await BHC.client().from("caregiver_questions").select("*").order("asked_at",{ascending:false}).order("id",{ascending:false});if(!error)QUESTIONS=data||[]}catch(e){}}
+const courseTitle=c=>{const x=CAT.find(k=>k.code===c);return x?x.title:c};
+const openQs=()=>QUESTIONS.filter(q=>!q.answered_at);
+const qPerson=q=>PEOPLE.find(p=>p.id===q.user_id);
+function qCard(q,full){const p=qPerson(q);const nmTxt=p?(p.full_name||p.email):"A caregiver";
+ return `<article class="card" style="margin:10px 0"><div style="display:flex;gap:10px;flex-wrap:wrap;align-items:baseline"><b>${p?`<a href="#" data-qp="${esc(p.id)}">${esc(nmTxt)}</a>`:esc(nmTxt)}</b><span class="small muted">${esc(p&&p.home_label||"")}</span><span class="spacer"></span><span class="small muted">${esc(courseTitle(q.course_code))}, ${esc(fmt(q.asked_at))}</span></div>
+ <blockquote style="margin:8px 0;padding:10px 14px;border-left:4px solid var(--brown);background:var(--cream);white-space:pre-wrap">${esc(q.question)}</blockquote>
+ ${q.answered_at?`<p class="small" style="margin:0"><span class="pill ok">Answered</span> ${esc(fmt(q.answered_at))} by ${esc(q.answered_by?whoName(q.answered_by):"staff")}${q.answer_note?`: ${esc(q.answer_note)}`:""} ${full?`<a href="#" class="small" data-qreopen="${esc(q.id)}">Reopen</a>`:""}</p>`:
+ `<div class="noprint" style="display:flex;gap:8px;flex-wrap:wrap;align-items:center"><input type="text" maxlength="300" id="qn_${esc(q.id)}" placeholder="How it was answered, e.g., emailed the handouts 11/14" aria-label="How this question was answered" style="flex:1 1 260px;padding:.55rem .7rem;border:1px solid #8A7B70;border-radius:8px;min-height:44px"><button class="btn sm" data-qans="${esc(q.id)}">Mark answered</button></div>`}</article>`}
+function wireQs(after){document.querySelectorAll("[data-qp]").forEach(a=>a.onclick=e=>{e.preventDefault();renderPerson(a.dataset.qp)});
+ document.querySelectorAll("[data-qans]").forEach(b=>b.onclick=async()=>{const id=+b.dataset.qans;const n=($("#qn_"+id)||{}).value||"";b.disabled=true;const{data,error}=await BHC.client().rpc("answer_question",{p_id:id,p_note:n.trim()||null});b.disabled=false;if(error){toast("Could not save: "+error.message);return}BHC.log("question_answered",String(id));await loadQuestions();toast(data?"Marked answered":"Already marked answered");after()});
+ document.querySelectorAll("[data-qreopen]").forEach(a=>a.onclick=async e=>{e.preventDefault();const{error}=await BHC.client().rpc("reopen_question",{p_id:+a.dataset.qreopen});if(error){toast("Could not reopen: "+error.message);return}await loadQuestions();toast("Reopened");after()})}
+function renderQuestions(){const open=openQs(),done=QUESTIONS.filter(q=>q.answered_at);
+ let h=nav("questions")+`<h1>Caregiver questions</h1><p class="lead">Questions caregivers type in a training. You and Ms. Mashburn get an email when a new one comes in; replying to that email goes straight to the caregiver. Mark each one answered here so the list stays current. Families do not see this page.</p>`;
+ h+=open.length?open.map(q=>qCard(q,true)).join(""):`<div class="card muted">No unanswered questions right now.</div>`;
+ if(done.length)h+=`<details style="margin-top:14px"><summary><b>Answered (${done.length})</b></summary>${done.map(q=>qCard(q,true)).join("")}</details>`;
+ $("#view").innerHTML=h;wireNav();wireQs(renderQuestions)}
 async function loadApproved(){const{data,error}=await BHC.client().from("approved_people").select("*").order("home_label");if(error)throw error;APPROVED=data||[]}
 let pFilter="",pShowOff=false;
 function renderPeople(){
@@ -639,7 +657,7 @@ async function start(u){
  $("#who").textContent=(p.full_name||p._email);$("#hdrOut").classList.remove("hidden");$("#hdrOut").onclick=async()=>{await BHC.signOut();location.reload()};
  if(!(can("view_training")||can("manage_families"))){$("#view").innerHTML=`<div class="card"><h1>This page is for Benevolent House staff</h1><p>You are signed in as ${esc(p.full_name||p._email)}. Your own trainings and certificates are on the <a href="../">portal home</a>.</p><p><button class="btn ghost sm" id="so">Sign out</button></p></div>`;$("#so").onclick=async()=>{await BHC.signOut();location.reload()};return}
  idle();try{BHC.visit()}catch(e){}$("#view").innerHTML=`<div class="card">Loading…</div>`;
- try{await Promise.all([can("view_training")?load():Promise.resolve(),loadApproved()])}catch(e){$("#view").innerHTML=`<div class="card">Could not load records: ${esc(e.message||e)}</div>`;return}
+ try{await Promise.all([can("view_training")?load():Promise.resolve(),loadApproved(),loadQuestions()])}catch(e){$("#view").innerHTML=`<div class="card">Could not load records: ${esc(e.message||e)}</div>`;return}
  BHC.log("open_admin","");renderToday()}
 
 (async function(){
