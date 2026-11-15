@@ -135,7 +135,7 @@ input[type=checkbox]{width:20px!important;height:20px;flex:0 0 20px;accent-color
 </head>
 <body>
 <header class="top"><div class="wrap topbar"><img src="../bh-logo.png" alt="Benevolent House"><div class="brand">Benevolent House<small>Staff Dashboard</small></div><span class="spacer"></span><span class="who"><span class="chip" id="who">Not signed in</span><button class="signout noprint hidden" id="hdrOut">Sign out</button></span><a class="btn ghost sm noprint" href="../">Portal home</a></div></header>
-<main class="wrap"><section id="view"></section></main>
+<main class="wrap"><section id="view"></section><p id="actNotice" class="small muted noprint" hidden style="text-align:center;margin:28px 0 12px">Activity in the Staff Dashboard, including sign-ins, time in use and changes to records, is recorded.</p></main>
 <div class="toast" id="toast" role="status" aria-live="polite"></div>
 <script src="../catalog.js"></script>
 <script src="certs.js"></script>
@@ -747,7 +747,7 @@ async function start(u){
  if(!(can("view_training")||can("manage_families"))){$("#view").innerHTML=`<div class="card"><h1>This page is for Benevolent House staff</h1><p>You are signed in as ${esc(p.full_name||p._email)}. Your own trainings and certificates are on the <a href="../">portal home</a>.</p><p><button class="btn ghost sm" id="so">Sign out</button></p></div>`;$("#so").onclick=async()=>{await BHC.signOut();location.reload()};return}
  idle();try{BHC.visit()}catch(e){}$("#view").innerHTML=`<div class="card">Loading…</div>`;
  try{await Promise.all([can("view_training")?load():Promise.resolve(),loadApproved(),loadQuestions()])}catch(e){$("#view").innerHTML=`<div class="card">Could not load records: ${esc(e.message||e)}</div>`;return}
- BHC.log("open_admin","");startBeats();renderToday()}
+ BHC.log("open_admin","");startBeats();const an=$("#actNotice");if(an)an.hidden=false;renderToday()}
 
 (async function(){
  if(!window.BHC||!BHC.available()){$("#view").innerHTML=`<div class="card">The admin page needs an internet connection. Please check your connection and refresh.</div>`;return}
