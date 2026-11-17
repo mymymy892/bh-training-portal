@@ -311,7 +311,7 @@ function certHtml(r,p){const cc=CAT.find(x=>x.code===r.course_code)||{};const I=
  return `<div class="cert"><div class="ct-frame"><img src="../bh-logo.png" alt="" class="ct-wm"><div class="ct-in">
  <img src="../bh-logo.png" alt="" class="ct-logo"><div class="ct-org">BENEVOLENT HOUSE</div><div class="ct-tag">Licensed Child-Placing Agency &bull; Red Oak, Texas</div>
  <div class="ct-title">Certificate of Completion</div><div class="ct-small"><i>This certifies that</i></div>
- <div class="ct-name">${esc(p.full_name)}</div><div class="ct-lab">${staffish?"Staff member":"Caregiver name"}</div>
+ <div class="ct-name">${esc(p.full_name)}</div><div class="ct-lab">${staffish?"Staff member":/^Contracted/.test((ap&&ap.caregiver_type)||p.caregiver_type||"")?"Contracted provider"+((ap&&ap.home_label)||p.home_label?" · "+esc((ap&&ap.home_label)||p.home_label):""):"Caregiver name"}</div>
  <div class="ct-has">has successfully completed ${esc(certHrs(r.hours))} of ${esc(I.kind)}</div>
  <div class="ct-head">${esc(I.head)}</div>${I.sub?`<div class="ct-sub">${esc(I.sub)}</div>`:""}${I.by?`<div class="ct-by">${esc(I.by)}</div>`:""}
  <div class="ct-on">${online?"completed on":"delivered on"} <b>${esc(ds)}</b></div>
