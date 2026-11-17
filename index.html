@@ -345,7 +345,7 @@ const T3C_CORE = {
   <p><button class="btn ghost sm" onclick="window.print()">Print this page</button></p>`},
  {k:"Knowledge Check", ref:"Section 6", h:"Ready for the Knowledge Check",
   html:`<p>You have completed the instruction. Next is the 10-question Knowledge Check. You need <b>8 of 10</b> to pass. If you score below 8, you will see which items you missed, review them, and take the check again.</p>
-  <p>After you pass, you will sign the Acknowledgment and your certificate will be ready to print or save. Benevolent House receives your completion record automatically.</p>`}
+  <p>After you pass, you will sign the Acknowledgment and your training is complete. Benevolent House receives your completion record automatically and keeps your certificate on file.</p>`}
  ],
  quiz:[
   {q:"Under T3C, the Treatment Model Benevolent House uses for every child is:", a:["A level system with points","Trauma Systems Therapy for Foster Care","Chosen by each foster home"], k:1, ref:"T3C-2"},
@@ -597,13 +597,11 @@ async function logToForms(r){const fd=new FormData();fd.append("formID",JOTFORM_
 
 /* ---------- certificate ---------- */
 function renderCert(name,now,sig,ok){
- $("#view-cert").innerHTML=`<p class="noprint">${ok?"Your completion record has been sent to Benevolent House.":"Your record is saved on this device and will be sent when you are back online. Please also tell your case manager you finished."} <b>Print or save this certificate for your records.</b></p>
- <div id="cert"><img src="bh-logo.png" alt="" onerror="this.style.display='none'"><div style="font-weight:700;color:var(--brown);font-size:1.2rem">Benevolent House</div><div class="small">Foster Care and Adoption</div>
- <h1>Certificate of Completion</h1><p>This certifies that</p><div class="name">${esc(name)}</div><p>${esc(S.user.role)}${S.user.home?" · "+esc(S.user.home):""}</p>
- <p>has completed</p><p style="font-size:1.25rem;font-weight:700;color:var(--brown)">${esc(M.title)}</p><p>Training code ${esc(M.code)} · ${M.hours} training hour${M.hours==1?"":"s"} · Knowledge Check ${M.result.score} of ${M.quiz.length}<br>${fmtDate(now)}</p>
- <div class="sigs"><div><img src="${sig}" alt=""><b>${esc(name)}</b><br>Participant</div><div style="padding-top:56px"><b>${esc(M.trainer)}</b><br>Trainer of Record (electronic record on file)</div></div>
- <p class="small" style="margin-top:26px">Knowledge Check and signed Acknowledgment on file with Benevolent House.</p></div>
- <p class="noprint" style="text-align:center"><button class="btn" onclick="window.print()">Print or save as PDF</button> <button class="btn ghost" onclick="renderHome()">Back to all trainings</button></p>`;show("cert")}
+ /* certificates are printed by Benevolent House only; the trainee sees a completion confirmation */
+ $("#view-cert").innerHTML=`<div class="card" style="text-align:center;padding:28px 18px"><div style="font-size:2.6rem;line-height:1;color:var(--green-dk)" aria-hidden="true">&#10003;</div><h2 style="margin:.4rem 0">Training complete</h2>
+ <p style="font-size:1.15rem;font-weight:700;color:var(--brown);margin:.3rem 0">${esc(M.title)}</p><p>Completed ${fmtDate(now)} · ${M.hours} training hour${M.hours==1?"":"s"}</p>
+ <p>${ok?"Your completion record has been sent to Benevolent House.":"Your record is saved on this device and will be sent when you are back online. Please also tell your case manager you finished."} Benevolent House keeps your certificate on file.</p></div>
+ <p class="noprint" style="text-align:center"><button class="btn" onclick="renderHome()">Back to all trainings</button></p>`;show("cert")}
 
 /* ---------- init ---------- */
 $("#homeBtn").addEventListener("click",()=>{if(M&&!$("#view-module").classList.contains("hidden")){S.progress[M.key]=idx;saveStore(S)}renderHome()});
