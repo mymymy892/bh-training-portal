@@ -6,6 +6,10 @@ window.CATALOG=[
   blurb:"The procedures staff carry out: referrals, reviews and confirmations, documenting engagement, aftercare, credentialing homes, and CQI data."},
  {code:"TST-8", renew:0, aud:"both", title:"Trauma Systems Therapy for Foster Care (TST-FC) Pre-Service", hours:8, who:"All caregivers and staff", freq:"Once, before serving a child under T3C", status:"record", group:"T3C Credential", req:true,
   blurb:"Benevolent House's Treatment Model. Four modules: The Alarm System, Find the Pattern, In the Moment, Safe and Responsive."},
+ {code:"TST-OV", renew:12, aud:"billing", title:"TST-FC Overview for Contracted Billing Staff", hours:1, who:"Contracted billing staff (Back Office)", freq:"Before billing a T3C Service Package, then every 12 months", status:"record", group:"T3C Credential", req:true,
+  blurb:"A one-hour overview of Trauma Systems Therapy for Foster Care, the Benevolent House Treatment Model, for the contracted staff who bill T3C Service Packages."},
+ {code:"T3C-PP-B", renew:12, aud:"billing", title:"T3C Policy and Procedure Training (Billing Portion)", hours:1, who:"Contracted billing staff (Back Office)", freq:"Before billing a T3C Service Package; then the annual refresher", status:"record", group:"T3C Credential", req:true,
+  blurb:"The billing portion of the T3C Policy and Procedure Training: T3C daily rates, Add-On Service billing, the foster family pass-through, and paid Intermittent Alternate Care."},
  {code:"TST-Q", renew:3, cycle:"quarter", window:45, aud:"both", title:"TST-FC Ongoing Training (Quarterly Sessions)", hours:1, who:"All caregivers and staff", freq:"Four 1-hour sessions a year, one each quarter", status:"soon", group:"T3C Credential", req:true,
   blurb:"Q1 The Alarm System · Q2 Find the Pattern · Q3 In the Moment · Q4 Safe and Responsive. One session each quarter."},
  {code:"CWB", renew:3, cycle:"quarter", window:45, aud:"caregiver", link:"https://form.jotform.com/252847200087052", linkNote:"Fill it out any time during the quarter, by the last day of March, June, September or December.", linkLabel:"Open the check-in", title:"Quarterly Caregiver Well-Being and Support Check-In", hours:0, who:"All caregivers", freq:"Once each quarter, same cycle for every family", status:"record", group:"T3C Credential", req:true,
@@ -77,8 +81,8 @@ window.BH_DUE=function(c,iso,now){now=now||new Date();
  if(!c||!iso)return null;const m=+c.renew||0;if(!m)return null;const t=new Date(iso);if(isNaN(t))return null;const n=new Date(t);n.setMonth(n.getMonth()+m);return n};
 /* Which trainings a person sees: caregivers see caregiver trainings, staff see staff trainings,
    contracted providers see their orientation and the T3C core session. */
-window.BH_GROUP=function(type){if(!type)return "all";if(type==="Staff")return "staff";if(type==="Contracted Provider")return "provider";return "caregiver"};
-window.BH_FOR=function(c,type){const g=window.BH_GROUP(type);if(g==="all")return true;if(g==="provider")return c.aud==="provider"||c.code==="T3C-PP";return c.aud==="both"||c.aud===g};
+window.BH_GROUP=function(type){if(!type)return "all";if(type==="Staff")return "staff";if(type==="Contracted Provider")return "provider";if(type==="Contracted Billing")return "billing";return "caregiver"};
+window.BH_FOR=function(c,type){const g=window.BH_GROUP(type);if(c.aud==="billing"||g==="billing")return c.aud==="billing"&&g==="billing";if(g==="all")return true;if(g==="provider")return c.aud==="provider"||c.code==="T3C-PP";return c.aud==="both"||c.aud===g};
 /* Cover picture for each training tile, and the order groups appear in for families */
 window.BH_COVER=function(c){return "covers/"+String(c.code).toLowerCase()+".jpg"};
 window.BH_GROUPS=[["Pre-Service","Complete before your first placement."],["T3C Credential","Required for Benevolent House's T3C credential."],["Required Annual","Completed every year to keep your home current."],["DFPS Online (record)","Taken on the DFPS or partner website. Record your completion here."],["Outside Certificates","Hands-on certifications from an outside provider."]];
